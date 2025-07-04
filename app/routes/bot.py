@@ -22,7 +22,7 @@ bot = APIRouter(
 )
 
 
-@bot.post("")
+@bot.post("/webhook", tags=["bot"])
 async def webhook(payload: WebhookPayload):
     try:
         session = SessionManager()
