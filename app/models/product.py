@@ -5,15 +5,14 @@ from sqlalchemy import Numeric, Interval
 from sqlalchemy.orm import Mapped, mapped_column
 from app.db.db import db
 
+
 class Products(db.Model):
     __tablename__ = "products"
     __table_args__ = {"schema": "finance"}
 
     id: Mapped[int] = mapped_column(primary_key=True)
     description: Mapped[str] = mapped_column(db.String(30), nullable=False)
-    value_operation: Mapped[Numeric] = mapped_column(
-        db.Numeric(2, 10), default=0.00
-    )
+    value_operation: Mapped[Numeric] = mapped_column(db.Numeric(2, 10), default=0.00)
     time_to_spend: Mapped[Interval] = mapped_column(Interval, nullable=False)
     commission: Mapped[float] = mapped_column(db.Float, nullable=False)
     category: Mapped[str] = mapped_column(db.String(20), nullable=False)

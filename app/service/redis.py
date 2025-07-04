@@ -4,10 +4,11 @@ import os
 
 import redis
 
-HOST_REDIS = os.getenv("HOST_REDIS") 
-PORT_REDIS = os.getenv("PORT_REDIS") 
+HOST_REDIS = os.getenv("HOST_REDIS")
+PORT_REDIS = os.getenv("PORT_REDIS")
 DB_REDIS = os.getenv("DB_REDIS")
-SOCKE_CONNECT_TIMEOUT = os.getenv("SOCKET_CONNECT_TIMEOUT") 
+SOCKE_CONNECT_TIMEOUT = os.getenv("SOCKET_CONNECT_TIMEOUT")
+
 
 class SessionManager:
     def __init__(self):
@@ -37,9 +38,7 @@ class SessionManager:
         for pattern in ["session:*", "msg:*", "rate:*"]:
             cursor = "0"
             while cursor != 0:
-                cursor, keys = self.client.scan(
-                    cursor=cursor, match=pattern, count=100
-                )
+                cursor, keys = self.client.scan(cursor=cursor, match=pattern, count=100)
                 if keys:
                     self.client.delete(*keys)
 

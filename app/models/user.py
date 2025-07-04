@@ -1,7 +1,7 @@
 # app/models/user.py
 
 from datetime import datetime
-from sqlalchemy import func 
+from sqlalchemy import func
 from sqlalchemy.orm import Mapped, mapped_column
 from app.db.db import db
 
