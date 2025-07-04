@@ -4,10 +4,10 @@ import os
 
 import redis
 
-HOST_REDIS = os.getenv("HOST_REDIS")
-PORT_REDIS = os.getenv("PORT_REDIS")
-DB_REDIS = os.getenv("DB_REDIS")
-SOCKE_CONNECT_TIMEOUT = os.getenv("SOCKET_CONNECT_TIMEOUT")
+HOST_REDIS = os.getenv("HOST_REDIS", "localhost")
+PORT_REDIS = int(os.getenv("PORT_REDIS", "6379"))
+DB_REDIS = int(os.getenv("DB_REDIS", "0"))
+SOCKE_CONNECT_TIMEOUT = int(os.getenv("SOCKET_CONNECT_TIMEOUT", "5"))
 
 
 class SessionManager:
