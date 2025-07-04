@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-app = FastAPI(title="build chatbot manager")
+app = FastAPI(title="Fastapp build chatbot manager", version="1.0.0")
 
 
 if __name__ == "__main__":

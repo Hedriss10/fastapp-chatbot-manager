@@ -1,25 +1,24 @@
 # app/core/user.py
 
 from sqlalchemy import select
-from app.models.user import User
-from typing import List
-from app.db.db import Base as db
+from sqlalchemy.orm import Session
 
-class UserCore:
-    def __init__(self, *args, **kwargs):
-        self.user = User
-    
-    def create_user(self, username: str, lastname: str, phone: str) -> User:
-        return
-    
-    def read_user(self) -> List:
-        try:
-            stmt = select(
-                self.user.username,
-                self.user.lastname,
-                self.user.phone
-            )
-            db.session.execute(stmt)
-            
-        except Exception as e:
-            print("""Error list read users: {e}""")
+from app.core.base import BaseCore
+from app.models.user import User
+from app.schemas.user import UserCreate
+
+
+class UserCore(BaseCore[User, UserCreate]):
+    def __init__(self, db: Session):
+        super().__init__(db, User)
+
+    def get_by_phone(self, phone: str):
+        query = select(User.username, User.lastname).where(User.phone == phone)
+        result = self.db.execute(query)
+        return [{"username": r[0], "phone": r[1]} for r in result]
+
+
+# if __name__ == "__main__":
+#     with SessionLocal() as db:
+#         user = UserCore(db).get_by_phone(phone="556194261245")
+#         print("User coletado", user)

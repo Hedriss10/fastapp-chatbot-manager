@@ -1,6 +1,7 @@
 # app/db/depency.py
 
 from sqlalchemy.orm import Session
+
 from app.db.db import SessionLocal
 
 

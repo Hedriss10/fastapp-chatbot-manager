@@ -38,7 +38,9 @@ class SessionManager:
         for pattern in ["session:*", "msg:*", "rate:*"]:
             cursor = "0"
             while cursor != 0:
-                cursor, keys = self.client.scan(cursor=cursor, match=pattern, count=100)
+                cursor, keys = self.client.scan(
+                    cursor=cursor, match=pattern, count=100
+                )
                 if keys:
                     self.client.delete(*keys)
 
