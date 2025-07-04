@@ -4,8 +4,11 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.base import BaseCore
+from app.logs.log import setup_logger
 from app.models.user import User
 from app.schemas.user import UserCreate
+
+logger = setup_logger()
 
 
 class UserCore(BaseCore[User, UserCreate]):
@@ -17,8 +20,14 @@ class UserCore(BaseCore[User, UserCreate]):
         result = self.db.execute(query)
         return [{"username": r[0], "phone": r[1]} for r in result]
 
-
-# if __name__ == "__main__":
-#     with SessionLocal() as db:
-#         user = UserCore(db).get_by_phone(phone="556194261245")
-#         print("User coletado", user)
+    def add_user(self, data: dict):
+        try:
+            user = User(**data)
+            self.db.add(user)
+            self.db.commit()
+            self.db.refresh(user)
+            return [{"message": "user_created_successfully"}]
+        except Exception as e:
+            self.db.rollback()
+            logger.error(f"Error creating user: {e}")
+            return [{"message": str(e)}]
