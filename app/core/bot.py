@@ -4,6 +4,7 @@ import os
 import httpx
 from dotenv import load_dotenv
 
+from app.core.messages import MessagesCore
 from app.logs.log import setup_logger
 from app.service.redis import SessionManager
 
@@ -16,13 +17,14 @@ logs = setup_logger()
 
 
 class BotCore:
-    def __init__(self, message: str, sender_number: str, push_name: str):
+    def __init__(self, message: str, sender_number: str, push_name: str, *args, **kwargs):
         self.message = message
         self.sender_number = sender_number
         self.push_name = push_name
         self.base_url = URL_INSTANCE_EVOLUTION
         self.apikey = EVOLUTION_APIKEY
         self.session = SessionManager()
+        self.message = MessagesCore()
 
 
     def _reset_session(self) -> str:
@@ -49,14 +51,15 @@ class BotCore:
     def _handle_state_flow(self, state: str) -> str:
         """Gerencia o fluxo baseado no estado atual do usuário"""
         state_handlers = {
-            "undefined": self._handle_registration,
-            "awaiting_cancel_id": self._handle_cancellation,
-            "awaiting_period_selection": self._handle_period_selection,
-            "awaiting_time_slot": self._handle_time_slot_selection,
-            "awaiting_employee": self.scheduler.handle_schedule,
-            "awaiting_product": self.scheduler.handle_schedule,
-            "awaiting_period": self._handle_period_selection,
-            "awaiting_slot": self.scheduler.handle_schedule,
+            "welcome": self.send_welcome,
+            # "undefined": self._handle_registration,
+            # "awaiting_cancel_id": self._handle_cancellation,
+            # "awaiting_period_selection": self._handle_period_selection,
+            # "awaiting_time_slot": self._handle_time_slot_selection,
+            # "awaiting_employee": self.scheduler.handle_schedule,
+            # "awaiting_product": self.scheduler.handle_schedule,
+            # "awaiting_period": self._handle_period_selection,
+            # "awaiting_slot": self.scheduler.handle_schedule,
         }
         for handler_state, handler in state_handlers.items():
             if state == handler_state or state.startswith(handler_state + ":"):
