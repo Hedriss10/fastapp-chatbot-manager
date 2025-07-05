@@ -23,7 +23,7 @@ class WelcomeCore:
                 SummaryMessage.message,
             ).where(
                 SummaryMessage.ticket == WELCOME_SUMMARY,
-                SummaryMessage.is_deleted == False,
+                ~SummaryMessage.is_deleted,
             )
             result = self.db.execute(stmt).first()
             if result:

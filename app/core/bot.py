@@ -12,8 +12,9 @@ load_dotenv()
 URL_INSTANCE_EVOLUTION = os.getenv("URL_INSTANCE_EVOLUTION")
 EVOLUTION_APIKEY = os.getenv("EVOLUTION_APIKEY")
 
-
 logs = setup_logger()
+
+STATUS_CODE = 201
 
 
 class BotCore:
@@ -104,11 +105,14 @@ class BotCore:
                 url=self.base_url, json=payload, headers=headers, timeout=5
             )
             print(
-                f"DEBUG: Sent message to {self.sender_number}: {response.status_code}, {response.text}"
+                f"DEBUG: Sent message to \
+                {self.sender_number}: {response.status_code}, {response.text}"
             )
-            if response.status_code != 201:
+            if response.status_code != STATUS_CODE:
                 print(
-                    f"ERROR: Failed to send message to {self.sender_number}: {response.status_code}, {response.text}"
+                    f"ERROR: Failed to send message to \
+                    {self.sender_number}: \
+                    {response.status_code}, {response.text}"
                 )
             return response
         except Exception as e:
