@@ -12,7 +12,9 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.db.db import Base
+
 
 class SummaryMessage(Base):
     __tablename__ = "summary_message"

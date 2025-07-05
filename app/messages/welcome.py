@@ -1,11 +1,15 @@
 # app/core/welcome.py
-import json
-from sqlalchemy.orm import Session
-from app.models.messages import SummaryMessage, MessageFlow
 from sqlalchemy import select
+from sqlalchemy.orm import Session
+
 from app.logs.log import setup_logger
+from app.models.messages import SummaryMessage
 
 log = setup_logger()
+
+
+WELCOME_SUMMARY = "welcome_summary"
+
 
 class WelcomeCore:
     def __init__(self, db: Session):
@@ -16,28 +20,16 @@ class WelcomeCore:
             stmt = select(
                 SummaryMessage.id,
                 SummaryMessage.ticket,
-                SummaryMessage.message
+                SummaryMessage.message,
             ).where(
-                SummaryMessage.is_deleted == False
+                SummaryMessage.ticket == WELCOME_SUMMARY,
+                SummaryMessage.is_deleted == False,
             )
-            result = self.db.execute(stmt)
-            record = result.first()
-            if record:
-                id, ticket, message = record
-                return {
-                    "id": id,
-                    "ticket": ticket,
-                    "message": message
-                }
-            return None
+            result = self.db.execute(stmt).first()
+            if result:
+                _, _, message = result
+                return message["text"]
+
         except Exception as e:
             log.error(f"Error flow_welcome: {e}")
             return None
-
-
-# if __name__ == "__main__":
-#     from app.db.db import SessionLocal
-
-#     with SessionLocal() as session:
-#         core = WelcomeCore(db=session)
-#         print(core.flow_welcome())
