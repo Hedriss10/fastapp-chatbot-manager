@@ -2,7 +2,6 @@
 
 from datetime import datetime
 
-from db.db import Base
 from sqlalchemy import (
     JSON,
     Boolean,
@@ -13,7 +12,7 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
+from app.db.db import Base
 
 class SummaryMessage(Base):
     __tablename__ = "summary_message"
