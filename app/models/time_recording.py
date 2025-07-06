@@ -3,13 +3,13 @@ from datetime import datetime
 
 from sqlalchemy import (
     Boolean,
-    DateTime,
-    Integer,
     CheckConstraint,
-    String,
+    DateTime,
     ForeignKey,
-    text,
+    Integer,
+    String,
     Time,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 

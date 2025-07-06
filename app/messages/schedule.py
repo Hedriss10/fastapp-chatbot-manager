@@ -1,9 +1,8 @@
 # app/messages/schedule.py
 
-from app.models.employee import Employee
-from app.models.schedule import ScheduleService, ScheduleBlock
 from app.logs.log import setup_logger
-
+from app.models.employee import Employee
+from app.models.schedule import ScheduleBlock, ScheduleService
 
 log = setup_logger()
 
@@ -22,7 +21,7 @@ class ScheduleCore:
     def add_schedule(self):
         try:
             stmt = ...
-            
+
         except Exception as e:
             log.error(f"Error add schedule: {e}")
             return None

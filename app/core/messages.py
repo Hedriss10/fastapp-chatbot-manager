@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.db.db import SessionLocal
 from app.logs.log import setup_logger
+from app.messages.employee import EmployeeCore
 from app.messages.welcome import WelcomeCore
 
 log = setup_logger()
@@ -23,7 +24,6 @@ class MessagesCore:
         self.message = message
         self.sender_number = sender_number
         self.push_name = push_name
-        self.welcome = WelcomeCore(db=db)
 
     def send_welcome(self):
         """
@@ -36,7 +36,16 @@ class MessagesCore:
         try:
             with SessionLocal() as session_local:
                 stmt = WelcomeCore(db=session_local).flow_welcome()
-                print("COLETANDO O STMT", stmt)
                 return stmt
         except Exception as e:
             log.error(f"Error in processing send welcome {e}")
+
+    def send_list_employee(self):
+        try:
+            with SessionLocal() as session_local:
+                stmt = EmployeeCore(
+                    push_name=self.push_name, db=session_local
+                ).list_employee()
+                return stmt
+        except Exception as e:
+            log.error(f"Error messages core list employee {e}")
