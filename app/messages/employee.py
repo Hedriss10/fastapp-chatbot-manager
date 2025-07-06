@@ -1,8 +1,5 @@
 # app/messages/employee.py
 
-# TODO - criar o mecanismo da agenda
-# TODO - criar a listagem de funcionarios
-
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
