@@ -84,3 +84,44 @@ class MessagesCore:
                 f"Error messages core \
                 list avaliable days {e}"
             )
+
+    def send_resume_scheduling(self):
+        try:
+            with SessionLocal() as session_local:
+                stmt = ScheduleCore(
+                    message=self.message,
+                    sender_number=self.sender_number,
+                    push_name=self.push_name,
+                    db=session_local,
+                ).resume_scheduling(
+                    profissional_escolhido="Douglas Santos",
+                    servico_escolhido="Corte + Barba",
+                    data_escolhida="13/07",
+                    horario_escolhido="14:30",
+                )
+                return stmt
+        except Exception as e:
+            log.error(
+                f"Error messages core \
+                list avaliable days {e}"
+            )
+
+    def send_check_service_employee(self):
+        try:
+            with SessionLocal() as session_local:
+                stmt = ScheduleCore(
+                    message=self.message,
+                    sender_number=self.sender_number,
+                    push_name=self.push_name,
+                    db=session_local,
+                ).check_service_employee(
+                    profissional_escolhido="Douglas Santos",
+                    data_escolhida="13/07",
+                    horario_escolhido="14:30",
+                )
+                return stmt
+        except Exception as e:
+            log.error(
+                f"Error messages core \
+                list avaliable days {e}"
+            )

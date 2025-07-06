@@ -78,20 +78,19 @@ class BotCore:
 
             if self.message_text == "1":
                 # list emploes
-                # self.message_handler.send_list_employee()
+                self.message_handler.send_list_employee()
 
-                # list products, mas temos que repassar o id
-                # self.message_handler.send_list_products_id()
+                # list products, mas temos que repassar o id TEM QUE PEGAR O ID
+                # self.message_handler.send_list_products_id(employee_id=??)
 
                 # list de dias disponiveis
-                return self.message_handler.send_available_days()
+                # self.message_handler.send_available_days()
 
-                # return self.message_handler.send_list_products_id(
-                #     employee_id=29
-                # )
-                # return self.message_handler.send_list_employee()
-
-            return self.message_handler.send_welcome()
+                # resuming scheduling
+                # self.message_handler.send_resume_scheduling()
+                
+                # check schedule APOS O BARBEIRO ACEITA TEM QUE ENIVAR PARA O USUÁRIO
+                # self.message_handler.send_check_service_employee()
         except Exception as e:
             print(f"ERROR: Failed to generate response: {e}")
             return self._reset_session()

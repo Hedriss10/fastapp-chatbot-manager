@@ -13,7 +13,8 @@ from app.models.schedule import ScheduleBlock, ScheduleService
 log = setup_logger()
 
 LIST_DATE = "list_dates"
-
+RESUME_SCHEDULING = "resume_scheduling"
+CHECK_SERVICE_EMPLOYEE = "check_service_employee"
 
 class ScheduleCore:
     def __init__(
@@ -71,3 +72,69 @@ class ScheduleCore:
     def list_schedule(self): ...
 
     def delete_schedule(self): ...
+
+    def resume_scheduling(
+        self,
+        profissional_escolhido: str,
+        servico_escolhido: str,
+        data_escolhida: str,
+        horario_escolhido: str,
+    ) -> str:
+        try:
+            # Buscar template do banco
+            stmt = select(self.message.message).where(
+                self.message.ticket == RESUME_SCHEDULING
+            )
+            result_message = self.db.execute(stmt).fetchone()
+
+            if not result_message:
+                return "⚠️ Nenhuma mensagem configurada para resumo do agendamento."
+
+            template_dict = result_message[0]
+            template_text = template_dict["text"]
+
+            mensagem_formatada = template_text.format(
+                nome_cliente=self.push_name,
+                profissional_escolhido=profissional_escolhido,
+                servico_escolhido=servico_escolhido,
+                data_escolhida=data_escolhida,
+                horario_escolhido=horario_escolhido,
+            )
+
+            return mensagem_formatada
+
+        except Exception as e:
+            log.error(f"Logger: Error in resume_scheduling: {e}")
+            return "⚠️ Erro ao montar resumo do agendamento. Tente novamente mais tarde."
+
+    def check_service_employee(
+        self,
+        profissional_escolhido: str,
+        data_escolhida: str,
+        horario_escolhido: str
+    ) -> str:
+        try:
+            # Buscar template no banco
+            stmt = select(self.message.message).where(
+                self.message.ticket == CHECK_SERVICE_EMPLOYEE
+            )
+            result_message = self.db.execute(stmt).fetchone()
+
+            if not result_message:
+                return "⚠️ Nenhuma mensagem configurada para confirmação do agendamento."
+
+            template_dict = result_message[0]
+            template_text = template_dict["text"]
+
+            mensagem_formatada = template_text.format(
+                profissional_escolhido=profissional_escolhido,
+                data_escolhida=data_escolhida,
+                horario_escolhido=horario_escolhido
+            )
+
+            return mensagem_formatada
+
+        except Exception as e:
+            log.error(f"Logger: Error in check_service_employee: {e}")
+            return "⚠️ Erro ao gerar mensagem de confirmação."
+
