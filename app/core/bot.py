@@ -77,7 +77,14 @@ class BotCore:
             self.message_handler.send_welcome()
 
             if self.message_text == "1":
-                return self.message_handler.send_list_employee()
+                print(
+                    "coletando o id do barbeiro e nome",
+                    self.message_handler.send_list_employee(),
+                )
+                return self.message_handler.send_list_products_id(
+                    employee_id=29
+                )
+                # return self.message_handler.send_list_employee()
 
             return self.message_handler.send_welcome()
         except Exception as e:

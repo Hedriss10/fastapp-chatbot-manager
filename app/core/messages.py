@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.db.db import SessionLocal
 from app.logs.log import setup_logger
 from app.messages.employee import EmployeeCore
+from app.messages.products import ProductsCore
 from app.messages.welcome import WelcomeCore
 
 log = setup_logger()
@@ -49,3 +50,20 @@ class MessagesCore:
                 return stmt
         except Exception as e:
             log.error(f"Error messages core list employee {e}")
+
+    def send_list_products_id(self, employee_id: int):
+        try:
+            with SessionLocal() as session_local:
+                stmt = ProductsCore(
+                    push_name=self.push_name,
+                    message=self.message,
+                    sender_number=self.sender_number,
+                    db=session_local,
+                ).list_products(employee_id=employee_id)
+                return stmt
+
+        except Exception as e:
+            log.error(
+                f"Error messages core \
+                list products filter by id employee {e}"
+            )
