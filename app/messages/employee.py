@@ -33,7 +33,9 @@ class EmployeeCore:
             result_employees = self.db.execute(employees_stmt).fetchall()
 
             options_employee = ""
-            for idx, (id, username) in enumerate(result_employees, start=1):
+            for idx, (emp_id, username) in enumerate(
+                result_employees, start=1
+            ):
                 options_employee += f"{idx}️⃣ {username}  \n"
 
             message_stmt = select(self.message_summary.message).where(
@@ -42,13 +44,7 @@ class EmployeeCore:
 
             result_message = self.db.execute(message_stmt).fetchone()
 
-            if not result_message:
-                return "⚠️ Nenhuma mensagem configurada."
-
-            template_dict = result_message[0]
-            template_text = template_dict["text"]
-
-            message_format = template_text.format(
+            message_format = result_message[0]["text"].format(
                 nome_cliente=self.push_name,
                 opcoes_funcionarios=options_employee.strip(),
             )
