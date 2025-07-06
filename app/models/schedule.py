@@ -35,21 +35,21 @@ class ScheduleBlock(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    star_time: Mapped[datetime.datetime | None] = mapped_column(DateTime)
-    end_time: Mapped[datetime.datetime | None] = mapped_column(DateTime)
+    star_time: Mapped[datetime] = mapped_column(DateTime)
+    end_time: Mapped[datetime] = mapped_column(DateTime)
 
-    employee_id: Mapped[int | None] = mapped_column(
+    employee_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("public.employee.id")
     )
 
-    created_at: Mapped[datetime.datetime] = mapped_column(
+    created_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, server_default=text("now()")
     )
 
-    updated_at: Mapped[datetime.datetime | None] = mapped_column(DateTime)
-    updated_by: Mapped[int | None] = mapped_column(Integer)
-    deleted_at: Mapped[datetime.datetime | None] = mapped_column(DateTime)
-    deleted_by: Mapped[int | None] = mapped_column(Integer)
+    updated_at: Mapped[datetime] = mapped_column(DateTime)
+    updated_by: Mapped[int] = mapped_column(Integer)
+    deleted_at: Mapped[datetime] = mapped_column(DateTime)
+    deleted_by: Mapped[int] = mapped_column(Integer)
 
     is_block: Mapped[bool] = mapped_column(
         Boolean, server_default=text("false"), nullable=False

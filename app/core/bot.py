@@ -77,13 +77,18 @@ class BotCore:
             self.message_handler.send_welcome()
 
             if self.message_text == "1":
-                print(
-                    "coletando o id do barbeiro e nome",
-                    self.message_handler.send_list_employee(),
-                )
-                return self.message_handler.send_list_products_id(
-                    employee_id=29
-                )
+                # list emploes
+                # self.message_handler.send_list_employee()
+
+                # list products, mas temos que repassar o id
+                # self.message_handler.send_list_products_id()
+
+                # list de dias disponiveis
+                return self.message_handler.send_available_days()
+
+                # return self.message_handler.send_list_products_id(
+                #     employee_id=29
+                # )
                 # return self.message_handler.send_list_employee()
 
             return self.message_handler.send_welcome()

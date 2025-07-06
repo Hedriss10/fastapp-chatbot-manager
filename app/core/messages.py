@@ -6,6 +6,7 @@ from app.db.db import SessionLocal
 from app.logs.log import setup_logger
 from app.messages.employee import EmployeeCore
 from app.messages.products import ProductsCore
+from app.messages.schedule import ScheduleCore
 from app.messages.welcome import WelcomeCore
 
 log = setup_logger()
@@ -66,4 +67,20 @@ class MessagesCore:
             log.error(
                 f"Error messages core \
                 list products filter by id employee {e}"
+            )
+
+    def send_available_days(self):
+        try:
+            with SessionLocal() as session_local:
+                stmt = ScheduleCore(
+                    message=self.message,
+                    sender_number=self.sender_number,
+                    push_name=self.push_name,
+                    db=session_local,
+                ).list_available_days()
+                return stmt
+        except Exception as e:
+            log.error(
+                f"Error messages core \
+                list avaliable days {e}"
             )
