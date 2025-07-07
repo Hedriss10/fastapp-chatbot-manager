@@ -42,47 +42,76 @@ class MessagesCore:
         except Exception as e:
             log.error(f"Error in processing send welcome {e}")
 
-    def send_list_employee(self):
+    def send_list_employee(self) -> tuple[str, list[dict]]:
         try:
             with SessionLocal() as session_local:
-                stmt = EmployeeCore(
+                message, employees = EmployeeCore(
                     push_name=self.push_name, db=session_local
                 ).list_employee()
-                return stmt
+                return message, employees
         except Exception as e:
             log.error(f"Error messages core list employee {e}")
+            return (
+                "⚠️ Erro ao listar funcionários. Tente novamente mais tarde.",
+                [],
+            )
 
     def send_list_products_id(self, employee_id: int):
         try:
             with SessionLocal() as session_local:
-                stmt = ProductsCore(
+                message, products = ProductsCore(
                     push_name=self.push_name,
                     message=self.message,
                     sender_number=self.sender_number,
                     db=session_local,
                 ).list_products(employee_id=employee_id)
-                return stmt
+                return message, products
 
         except Exception as e:
             log.error(
                 f"Error messages core \
                 list products filter by id employee {e}"
             )
+            return (
+                "⚠️ Erro ao listar produtos.Tente novamente mais tarde.",
+                [],
+            )
 
     def send_available_days(self):
         try:
             with SessionLocal() as session_local:
-                stmt = ScheduleCore(
+                list_days_available, days = ScheduleCore(
                     message=self.message,
                     sender_number=self.sender_number,
                     push_name=self.push_name,
                     db=session_local,
                 ).list_available_days()
-                return stmt
+                return list_days_available, days
         except Exception as e:
-            log.error(
-                f"Error messages core \
-                list avaliable days {e}"
+            log.error(f"Error messages core list available days {e}")
+            return "⚠️ Erro ao listar datas. Tente novamente mais tarde.", []
+
+    def send_available_slots(
+        self, employee_id: int, data_escolhida: str, product_id: int
+    ):
+        try:
+            with SessionLocal() as session_local:
+                message, slots = ScheduleCore(
+                    db=session_local,
+                    message=self.message,
+                    sender_number=self.sender_number,
+                    push_name=self.push_name,
+                ).get_available_slots(
+                    employee_id=employee_id,
+                    select_date=data_escolhida,
+                    product_id=product_id,
+                )
+                return message, slots
+        except Exception as e:
+            log.error(f"Error in send_available_slots: {e}")
+            return (
+                "⚠️ Erro ao buscar horários disponíveis. Tente novamente mais tarde.",
+                [],
             )
 
     def send_resume_scheduling(self):

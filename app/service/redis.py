@@ -1,6 +1,8 @@
 # src/service/redis.py
 
+import json
 import os
+from typing import Any
 
 import redis
 
@@ -14,35 +16,69 @@ class SessionManager:
     def __init__(self):
         self.client = redis.Redis(
             host=HOST_REDIS,
-            port=int(PORT_REDIS),
+            port=PORT_REDIS,
             db=DB_REDIS,
             decode_responses=True,
-            socket_connect_timeout=int(SOCKE_CONNECT_TIMEOUT),
+            socket_connect_timeout=SOCKE_CONNECT_TIMEOUT,
         )
 
-    def get(self, phone: str) -> str | None:
-        return self.client.get(f"session:{phone}")
+    # Para estado principal da sessão
+    def get_state(self, phone: str) -> str | None:
+        try:
+            return self.client.get(f"session:{phone}")
+        except Exception as e:
+            print(f"Redis get_state error: {e}")
+            return None
 
-    def set(self, phone: str, state: str, expire_seconds: int = 600) -> None:
-        self.client.set(f"session:{phone}", state, ex=expire_seconds)
+    def set_state(
+        self, phone: str, state: str, expire_seconds: int = 600
+    ) -> None:
+        try:
+            self.client.set(f"session:{phone}", state, ex=expire_seconds)
+        except Exception as e:
+            print(f"Redis set_state error: {e}")
 
     def clear(self, phone: str) -> None:
-        self.client.delete(f"session:{phone}")
+        try:
+            self.client.delete(f"session:{phone}")
+        except Exception as e:
+            print(f"Redis clear error: {e}")
 
-    def reset_to_default(self, key: str, RESPONSE_DICTIONARY: dict) -> str:
-        self.clear(key)
-        return RESPONSE_DICTIONARY["default"]
+    def reset_to_default(self, phone: str, RESPONSE_DICTIONARY: dict) -> str:
+        self.clear(phone)
+        return RESPONSE_DICTIONARY.get("default", "Algo deu errado...")
+
+    # Para qualquer chave genérica (employee list, products, etc)
+    def set_key(self, key: str, value: Any, expire_seconds: int = 600) -> None:
+        try:
+            self.client.set(key, json.dumps(value), ex=expire_seconds)
+        except Exception as e:
+            print(f"Redis set_key error: {e}")
+
+    def get_key(self, key: str) -> Any:
+        try:
+            data = self.client.get(key)
+            if data:
+                return json.loads(data)
+        except Exception as e:
+            print(f"Redis get_key error: {e}")
+        return None
+
+    def delete(self, key: str) -> None:
+        try:
+            self.client.delete(key)
+        except Exception as e:
+            print(f"Redis delete error: {e}")
 
     def clear_all(self) -> None:
         """Clear all session, message deduplication, and rate limiting keys."""
         for pattern in ["session:*", "msg:*", "rate:*"]:
-            cursor = "0"
-            while cursor != 0:
+            cursor = 0
+            while True:
                 cursor, keys = self.client.scan(
                     cursor=cursor, match=pattern, count=100
                 )
                 if keys:
                     self.client.delete(*keys)
-
-    def delete(self, key: str) -> None:
-        self.client.delete(key)
+                if cursor == 0:
+                    break

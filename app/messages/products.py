@@ -31,7 +31,7 @@ class ProductsCore:
         self.db = db
         self.message = SummaryMessage
 
-    def list_products(self, employee_id: int):
+    def list_products(self, employee_id: int) -> tuple[str, list[dict]]:
         try:
             stmt = (
                 select(
@@ -54,13 +54,17 @@ class ProductsCore:
                 return "⚠️ Nenhum serviço disponível para esse profissional."
 
             # Formatar opções de produtos
+            produts_list = []
             options_product = ""
             for idx, (prod_id, description, value) in enumerate(
                 result, start=1
             ):
-                valor_formatado = f"R${value:.2f}".replace(".", ",")
+                value_formatted = f"R${value:.2f}".replace(".", ",")
+                produts_list.append(
+                    {"id": prod_id, "description": description}
+                )
                 options_product += (
-                    f"{idx}️⃣ {description} – {valor_formatado}  \n"
+                    f"{idx}️⃣ {description} – {value_formatted}  \n"
                 )
 
             # Buscar template do banco
@@ -78,7 +82,7 @@ class ProductsCore:
                 opcoes_produtos=options_product.strip(),
             )
 
-            return message_format
+            return message_format, produts_list
 
         except Exception as e:
             log.error(f"Logger: error list product {e}")
