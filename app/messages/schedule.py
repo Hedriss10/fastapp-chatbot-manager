@@ -71,25 +71,20 @@ class ScheduleCore:
             log.error(f"Logger: error list available days {e}")
         return "⚠️ Erro ao listar datas. Tente novamente mais tarde.", []
 
-    def parse_date_ddmm_to_date(self, date_str: str) -> date:
-        try:
-            today = datetime.today()
-            parsed_date = datetime.strptime(date_str, "%d/%m")
-            return date(today.year, parsed_date.month, parsed_date.day)
-        except Exception as e:
-            raise ValueError(f"Erro ao converter data '{date_str}': {e}")
-
-    def gerar_intervalos(
-        inicio: datetime, fim: datetime, delta_minutos: int = 20
+    def generator_interval(
+        self, start: datetime, finish: datetime, delta_minutes: int = 20
     ) -> List[Tuple[datetime, datetime]]:
         """Gera lista de intervalos de tempo entre início e fim com delta_minutos de duração."""
-        intervalos = []
-        cursor = inicio
-        delta = timedelta(minutes=delta_minutos)
-        while cursor + delta <= fim:
-            intervalos.append((cursor, cursor + delta))
+        interval = []
+        cursor = start
+        try:
+            delta = timedelta(minutes=delta_minutes)
+        except Exception:
+            raise
+        while cursor + delta <= finish:
+            interval.append((cursor, cursor + delta))
             cursor += delta
-        return intervalos
+        return interval
 
     def get_available_slots(
         self,
@@ -97,14 +92,10 @@ class ScheduleCore:
         select_date: Union[str, date],
         product_id: int,
     ) -> List[Tuple[datetime, datetime]]:
-        print("FUNCINARIO ID", employee_id)
-        print("DATA SELECIONADA", select_date)
-        print("PRODUTO ID", product_id)
         if isinstance(select_date, str):
             try:
                 select_date = datetime.strptime(select_date, "%Y-%m-%d").date()
-            except Exception as e:
-                log.error(f"❌ Data inválida recebida: {select_date} - {e}")
+            except Exception:
                 return []
 
         weekday_map = {
@@ -140,29 +131,31 @@ class ScheduleCore:
             lunch_end_dt = datetime.combine(
                 select_date, schedule_emp.lunch_end
             )
-            intervals_before_lunch = self.gerar_intervalos(
-                dt_start, lunch_start_dt
+            intervals_before_lunch = self.generator_interval(
+                start=dt_start, finish=lunch_start_dt
             )
-            intervals_after_lunch = self.gerar_intervalos(lunch_end_dt, dt_end)
+            intervals_after_lunch = self.generator_interval(
+                start=lunch_end_dt, finish=dt_end
+            )
             work_intervals = intervals_before_lunch + intervals_after_lunch
         else:
-            work_intervals = self.gerar_intervalos(dt_start, dt_end)
+            work_intervals = self.generator_interval(dt_start, dt_end)
 
-        bloqueios: List[ScheduleBlock] = (
+        block_schedule: List[ScheduleBlock] = (
             self.db.query(ScheduleBlock)
             .filter(
                 ScheduleBlock.employee_id == employee_id,
                 ScheduleBlock.is_block == True,
                 ScheduleBlock.is_deleted == False,
-                ScheduleBlock.star_time
+                ScheduleBlock.start_time
                 >= datetime.combine(select_date, time.min),
-                ScheduleBlock.star_time
+                ScheduleBlock.start_time
                 < datetime.combine(select_date + timedelta(days=1), time.min),
             )
             .all()
         )
 
-        servicos_agendados: List[ScheduleService] = (
+        schedule_services: List[ScheduleService] = (
             self.db.query(ScheduleService)
             .filter(
                 ScheduleService.employee_id == employee_id,
@@ -174,8 +167,7 @@ class ScheduleCore:
             )
             .all()
         )
-
-        produto: Products = (
+        prodcuts: Products = (
             self.db.query(Products)
             .filter(
                 Products.id == product_id,
@@ -183,55 +175,46 @@ class ScheduleCore:
             )
             .first()
         )
-        if not produto:
+        if not prodcuts:
             return []
 
-        # duração do produto em minutos (produto.time_to_spend é timedelta)
-        duracao_em_minutos = produto.time_to_spend / 60
+        duration_of_minutes = prodcuts.time_to_spend.total_seconds() / 60
 
-        # calcula quantos slots de 20 minutos são necessários para o serviço
-        qtd_slots_necessarios = int(duracao_em_minutos // 20)
-        if duracao_em_minutos % 20 > 0:
-            qtd_slots_necessarios += 1
+        qtd_slots = int(duration_of_minutes // 20)
+        if duration_of_minutes % 20 > 0:
+            qtd_slots += 1
 
-        slots_disponiveis = []
-        print(f"slot_start: {slot_start} ({type(slot_start)})")
-        print(
-            f"qtd_slots_necessarios: {qtd_slots_necessarios} ({type(qtd_slots_necessarios)})"
-        )
-        print(
-            f"20 * qtd_slots_necessarios: {20 * qtd_slots_necessarios} ({type(20 * qtd_slots_necessarios)})"
-        )
+        slots_confirmedd = []
 
-        for inicio_slot, fim_slot in work_intervals:
-            slot_start = inicio_slot
-            slot_end = slot_start + produto.time_to_spend  # ✅ timedelta somado a datetime
+        for start_slot, fim_slot in work_intervals:
+            slot_start = start_slot
+            slot_end = slot_start + prodcuts.time_to_spend
 
             if slot_end > dt_end:
                 continue
 
-            bloqueio_conflito = any(
-                not (slot_end <= b.star_time or slot_start >= b.end_time)
-                for b in bloqueios
-            )
-            if bloqueio_conflito:
-                continue
-
-            conflito_agendamento = any(
+            conflict_schedule = any(
                 not (
                     slot_end <= s.time_register
-                    or slot_start >= s.time_register + produto.time_to_spend
+                    or slot_start >= s.time_register + prodcuts.time_to_spend
                 )
-                for s in servicos_agendados
+                for s in schedule_services
             )
-            if conflito_agendamento:
+            has_block = any(
+                not (slot_end <= b.start_time or slot_start >= b.end_time)
+                for b in block_schedule
+            )
+            if has_block:
                 continue
 
-            slots_disponiveis.append((slot_start, slot_end))
+            if conflict_schedule:
+                continue
 
-        return slots_disponiveis
+            slots_confirmedd.append((slot_start, slot_end))
+        return slots_confirmedd
 
     def add_schedule(self):
+        # TODO - add schedule
         try:
             stmt = ...
 
@@ -263,7 +246,7 @@ class ScheduleCore:
             template_dict = result_message[0]
             template_text = template_dict["text"]
 
-            mensagem_formatada = template_text.format(
+            message_formated = template_text.format(
                 nome_cliente=self.push_name,
                 profissional_escolhido=profissional_escolhido,
                 servico_escolhido=servico_escolhido,
@@ -271,7 +254,7 @@ class ScheduleCore:
                 horario_escolhido=horario_escolhido,
             )
 
-            return mensagem_formatada
+            return message_formated
 
         except Exception as e:
             log.error(f"Logger: Error in resume_scheduling: {e}")
@@ -296,13 +279,13 @@ class ScheduleCore:
             template_dict = result_message[0]
             template_text = template_dict["text"]
 
-            mensagem_formatada = template_text.format(
+            message_format = template_text.format(
                 profissional_escolhido=profissional_escolhido,
                 data_escolhida=data_escolhida,
                 horario_escolhido=horario_escolhido,
             )
 
-            return mensagem_formatada
+            return message_format
 
         except Exception as e:
             log.error(f"Logger: Error in check_service_employee: {e}")

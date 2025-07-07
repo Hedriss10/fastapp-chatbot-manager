@@ -96,7 +96,7 @@ class MessagesCore:
     ):
         try:
             with SessionLocal() as session_local:
-                message, slots = ScheduleCore(
+                raw_slots = ScheduleCore(
                     db=session_local,
                     message=self.message,
                     sender_number=self.sender_number,
@@ -106,7 +106,22 @@ class MessagesCore:
                     select_date=data_escolhida,
                     product_id=product_id,
                 )
-                return message, slots
+                if raw_slots:
+                    formatted_slots = [
+                        slot[0].strftime("%H:%M") for slot in raw_slots
+                    ]
+
+                    slots_list_text = "\n".join(
+                        [f"⏰ {h}" for h in formatted_slots]
+                    )
+
+                    finish_message = (
+                        f"✅ Horários disponíveis:\n\n{slots_list_text}"
+                    )
+                else:
+                    finish_message = "🗓️ Não há horários disponíveis para este dia. Tente outro dia."
+
+                return finish_message, raw_slots
         except Exception as e:
             log.error(f"Error in send_available_slots: {e}")
             return (

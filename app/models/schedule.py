@@ -9,8 +9,8 @@ from app.db.db import Base
 
 
 class ScheduleService(Base):
-    __tablename__ = "schedule_service"
-    __table_args__ = {"schema": "shedule.service"}
+    __tablename__ = "service"
+    __table_args__ = {"schema": "schedule"}
 
     id: Mapped[int] = mapped_column(primary_key=True)
     time_register: Mapped[datetime] = mapped_column(DateTime, nullable=False)
@@ -35,7 +35,7 @@ class ScheduleBlock(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    star_time: Mapped[datetime] = mapped_column(DateTime)
+    start_time: Mapped[datetime] = mapped_column(DateTime)
     end_time: Mapped[datetime] = mapped_column(DateTime)
 
     employee_id: Mapped[int] = mapped_column(
