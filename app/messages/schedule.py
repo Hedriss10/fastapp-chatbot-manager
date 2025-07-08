@@ -228,10 +228,10 @@ class ScheduleCore:
 
     def resume_scheduling(
         self,
-        profissional_escolhido: str,
-        servico_escolhido: str,
-        data_escolhida: str,
-        horario_escolhido: str,
+        employee: str,
+        select_service: str,
+        date_select: str,
+        hour_select: str,
     ) -> str:
         try:
             # Buscar template do banco
@@ -243,15 +243,12 @@ class ScheduleCore:
             if not result_message:
                 return "⚠️ Nenhuma mensagem configurada para resumo do agendamento."
 
-            template_dict = result_message[0]
-            template_text = template_dict["text"]
-
-            message_formated = template_text.format(
+            message_formated = result_message[0]["text"].format(
                 nome_cliente=self.push_name,
-                profissional_escolhido=profissional_escolhido,
-                servico_escolhido=servico_escolhido,
-                data_escolhida=data_escolhida,
-                horario_escolhido=horario_escolhido,
+                profissional_escolhido=employee,
+                servico_escolhido=select_service,
+                data_escolhida=date_select,
+                horario_escolhido=hour_select,
             )
 
             return message_formated
