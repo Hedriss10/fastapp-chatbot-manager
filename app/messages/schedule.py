@@ -259,9 +259,9 @@ class ScheduleCore:
 
     def check_service_employee(
         self,
-        profissional_escolhido: str,
-        data_escolhida: str,
-        horario_escolhido: str,
+        employee_select: str,
+        date_select: str,
+        hour_select: str,
     ) -> str:
         try:
             # Buscar template no banco
@@ -277,9 +277,9 @@ class ScheduleCore:
             template_text = template_dict["text"]
 
             message_format = template_text.format(
-                profissional_escolhido=profissional_escolhido,
-                data_escolhida=data_escolhida,
-                horario_escolhido=horario_escolhido,
+                profissional_escolhido=employee_select,
+                data_escolhida=date_select,
+                horario_escolhido=hour_select,
             )
 
             return message_format

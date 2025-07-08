@@ -129,7 +129,13 @@ class MessagesCore:
                 [],
             )
 
-    def send_resume_scheduling(self, employe: str, select_service: str, date_select: str, hour_select: str):
+    def send_resume_scheduling(
+        self,
+        employe: str,
+        select_service: str,
+        date_select: str,
+        hour_select: str,
+    ):
         try:
             with SessionLocal() as session_local:
                 stmt = ScheduleCore(
@@ -141,7 +147,7 @@ class MessagesCore:
                     employee=employe,
                     select_service=select_service,
                     date_select=date_select,
-                    hour_select=hour_select
+                    hour_select=hour_select,
                 )
                 return stmt
         except Exception as e:
@@ -159,9 +165,9 @@ class MessagesCore:
                     push_name=self.push_name,
                     db=session_local,
                 ).check_service_employee(
-                    profissional_escolhido="Douglas Santos",
-                    data_escolhida="13/07",
-                    horario_escolhido="14:30",
+                    employee_select="Douglas Santos",
+                    date_select="13/07",
+                    hour_select="14:30",
                 )
                 return stmt
         except Exception as e:
