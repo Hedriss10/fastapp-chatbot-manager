@@ -41,7 +41,7 @@ class ScheduleCore:
 
     def list_available_days(self) -> tuple[str, list[str]]:
         try:
-            base_date = datetime.now().date() + timedelta(days=7)
+            base_date = datetime.now().date() + timedelta(days=1)
 
             days_available = []
             options_day = ""
