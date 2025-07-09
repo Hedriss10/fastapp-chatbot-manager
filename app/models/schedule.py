@@ -1,11 +1,15 @@
 # app/models/schedule.py
 
 from datetime import datetime
+from typing import Optional
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, Session, mapped_column
 
 from app.db.db import Base
+from app.logs.log import setup_logger
+
+log = setup_logger()
 
 
 class ScheduleService(Base):
@@ -27,6 +31,34 @@ class ScheduleService(Base):
 
     def __repr__(self):
         return f"""{self.id} created successfully"""
+
+    @classmethod
+    def add_schedule(
+        cls,
+        db: Session,
+        time_register: datetime,
+        product_id: int,
+        employee_id: int,
+        user_id: int,
+        is_check: bool = False,
+        is_awayalone: bool = False,
+    ) -> Optional["ScheduleService"]:
+        try:
+            schedule = cls(
+                time_register=time_register,
+                product_id=product_id,
+                employee_id=employee_id,
+                user_id=user_id,
+                is_check=is_check,
+                is_awayalone=is_awayalone,
+                is_deleted=False,
+                updated_at=datetime.now(),
+            )
+            db.add(schedule)
+            return schedule
+        except Exception as e:
+            log.error(f"Logger: Error add_schedule: {e}")
+            return None
 
 
 class ScheduleBlock(Base):

@@ -17,6 +17,9 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.db import Base
+from app.logs.log import setup_logger
+
+log = setup_logger()
 
 
 class Employee(Base):
@@ -42,7 +45,7 @@ class Employee(Base):
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False)
 
     def __repr__(self):
-        return f"""{self.username} created employeesuccessfully"""
+        return f"""{self.username} created employee_successfully"""
 
 
 class ScheduleEmployee(Base):

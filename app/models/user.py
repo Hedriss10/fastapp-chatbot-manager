@@ -1,11 +1,15 @@
 # app/models/user.py
 
 from datetime import datetime
+from typing import Optional
 
 from sqlalchemy import Boolean, DateTime, String, Text, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, Session, mapped_column
 
 from app.db.db import Base
+from app.logs.log import setup_logger
+
+log = setup_logger()
 
 
 class User(Base):
@@ -25,3 +29,12 @@ class User(Base):
 
     def __repr__(self):
         return f"""{self.username} created successfully"""
+
+    @classmethod
+    def get_by_id_user(cls, send_number: int, db: Session) -> Optional[int]:
+        try:
+            user_id = db.query(cls.id).filter(cls.phone == send_number)
+            return user_id.id if user_id else None
+        except Exception as e:
+            log.error(f"Logger: error in colect ID user{e}")
+            return None

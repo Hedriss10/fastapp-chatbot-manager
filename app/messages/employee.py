@@ -58,3 +58,5 @@ class EmployeeCore:
                 "⚠️ Erro ao listar funcionários. Tente novamente mais tarde.",
                 [],
             )
+
+    def aproved_service(self): ...

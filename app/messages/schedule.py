@@ -12,12 +12,14 @@ from app.models.messages import SummaryMessage
 from app.models.product import Products
 from app.models.schedule import ScheduleBlock, ScheduleService
 from app.models.time_recording import ScheduleEmployee
+from app.models.user import User
 
 log = setup_logger()
 
 LIST_DATE = "list_dates"
 RESUME_SCHEDULING = "resume_scheduling"
 CHECK_SERVICE_EMPLOYEE = "check_service_employee"
+CONFIRM_SCHEDULE_EMPLOYEE = "confirm_schedule_employee"
 
 
 class ScheduleCore:
@@ -37,6 +39,7 @@ class ScheduleCore:
         self.employee = Employee
         self.block = ScheduleBlock
         self.message = SummaryMessage
+        self.user = User
         self.db = db
 
     def list_available_days(self) -> tuple[str, list[str]]:
@@ -213,28 +216,26 @@ class ScheduleCore:
             slots_confirmedd.append((slot_start, slot_end))
         return slots_confirmedd
 
-    def add_schedule(self):
-        # TODO - add schedule
-        try:
-            stmt = ...
-
-        except Exception as e:
-            log.error(f"Error add schedule: {e}")
-            return None
-
-    def list_schedule(self): ...
-
-    def delete_schedule(self): ...
-
     def resume_scheduling(
         self,
-        employee: str,
-        select_service: str,
-        date_select: str,
-        hour_select: str,
+        product_id: int,
+        employee_id: int,
+        date_selected: str,
+        hour_selected: str,
     ) -> str:
         try:
-            # Buscar template do banco
+            product = (
+                self.db.query(Products.description)
+                .filter(Products.id == product_id)
+                .scalar()
+            )
+
+            employee = (
+                self.db.query(Employee.username)
+                .filter(Employee.id == employee_id)
+                .scalar()
+            )
+
             stmt = select(self.message.message).where(
                 self.message.ticket == RESUME_SCHEDULING
             )
@@ -246,9 +247,9 @@ class ScheduleCore:
             message_formated = result_message[0]["text"].format(
                 nome_cliente=self.push_name,
                 profissional_escolhido=employee,
-                servico_escolhido=select_service,
-                data_escolhida=date_select,
-                horario_escolhido=hour_select,
+                servico_escolhido=product,
+                data_escolhida=date_selected,
+                horario_escolhido=hour_selected,
             )
 
             return message_formated
@@ -257,33 +258,100 @@ class ScheduleCore:
             log.error(f"Logger: Error in resume_scheduling: {e}")
             return "⚠️ Erro ao montar resumo do agendamento. Tente novamente mais tarde."
 
+    def send_check_employee(
+        self,
+        employee_id: int,
+        product_id: int,
+        date_selected: str,
+        hour_selected: str,
+    ):
+        try:
+            phone_employee = (
+                self.db.query(Employee.phone)
+                .filter(Employee.id == employee_id)
+                .scalar()
+            )
+
+            product = (
+                self.db.query(Products.description)
+                .filter(Products.id == product_id)
+                .scalar()
+            )
+
+            # tem que enviar uma mensagem para o employee
+            send_check = select(self.message.message).where(
+                self.message.ticket == CONFIRM_SCHEDULE_EMPLOYEE
+            )
+
+            # mensagem formatada enviada para o funcionario
+            send_check_formated = send_check[0]["text"].format(
+                nome_cliente=self.push_name,
+                servidor_escolhido=product,
+                data_escolhida=date_selected,
+                horario_escolhido=hour_selected,
+            )
+
+            return phone_employee, send_check_formated
+
+        except Exception as e:
+            log.error(f"Logger: error: send check employee: {e}")
+            return None
+
     def check_service_employee(
         self,
-        employee_select: str,
-        date_select: str,
-        hour_select: str,
+        employee_id: int,
+        date_selected: str,
+        hour_selected: str,
     ) -> str:
         try:
-            # Buscar template no banco
+            # TODO - precisa de um refinamento
+            employee = (
+                self.db.query(Employee.username)
+                .filter(Employee.id == employee_id)
+                .scalar()
+            )
+
             stmt = select(self.message.message).where(
                 self.message.ticket == CHECK_SERVICE_EMPLOYEE
             )
-            result_message = self.db.execute(stmt).fetchone()
 
-            if not result_message:
+            # result_message = self.db.execute(stmt).fetchone()
+            print("RESULTADO", stmt)
+
+            if not stmt:
                 return "⚠️ Nenhuma mensagem configurada para confirmação do agendamento."
 
-            template_dict = result_message[0]
-            template_text = template_dict["text"]
-
-            message_format = template_text.format(
-                profissional_escolhido=employee_select,
-                data_escolhida=date_select,
-                horario_escolhido=hour_select,
+            message_format = stmt[0]["text"].format(  # AQUI FOI CORRIGIDO
+                profissional_escolhido=employee,
+                data_escolhida=date_selected,
+                horario_escolhido=hour_selected,
             )
 
+            print("MESSAGEM FORMATADA NESSA DESGRAÇA", message_format)
             return message_format
 
         except Exception as e:
+            print("ERRRO COLETADO NESSA DESGRAÇA", e)
             log.error(f"Logger: Error in check_service_employee: {e}")
             return "⚠️ Erro ao gerar mensagem de confirmação."
+
+
+# todo debuggers schedule in core
+# if __name__ == "__main__":
+#     from app.db.db import SessionLocal
+
+#     with SessionLocal() as session_local:
+#         a = ScheduleCore(
+#             message="Ola",
+#             sender_number="556194261245",
+#             push_name="Hedris Pereira",
+#             db=session_local
+#         )
+#         # 29
+#         # 2025-07-09
+#         # 09:00
+#         a.check_service_employee(
+#             employee_id=29,
+#             date_selected="2025-07-09",
+#             hour_selected="09:00"
+#         )

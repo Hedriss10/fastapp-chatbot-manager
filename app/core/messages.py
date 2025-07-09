@@ -1,5 +1,6 @@
 # app/core/messages.py
 
+
 from sqlalchemy.orm import Session
 
 from app.db.db import SessionLocal
@@ -8,6 +9,7 @@ from app.messages.employee import EmployeeCore
 from app.messages.products import ProductsCore
 from app.messages.schedule import ScheduleCore
 from app.messages.welcome import WelcomeCore
+from app.utils.slots import get_emoji_number
 
 log = setup_logger()
 
@@ -106,18 +108,16 @@ class MessagesCore:
                     select_date=data_escolhida,
                     product_id=product_id,
                 )
+
                 if raw_slots:
                     formatted_slots = [
-                        slot[0].strftime("%H:%M") for slot in raw_slots
+                        f"{get_emoji_number(i + 1)} {slot[0].strftime('%H:%M')}"
+                        for i, slot in enumerate(raw_slots)
                     ]
 
-                    slots_list_text = "\n".join(
-                        [f"⏰ {h}" for h in formatted_slots]
-                    )
+                    slots_list_text = "\n".join(formatted_slots)
 
-                    finish_message = (
-                        f"✅ Horários disponíveis:\n\n{slots_list_text}"
-                    )
+                    finish_message = f"✅ Horários disponíveis:\n\n{slots_list_text}\n\nDigite o número do horário que deseja escolher 👇"
                 else:
                     finish_message = "🗓️ Não há horários disponíveis para este dia. Tente outro dia."
 
@@ -131,10 +131,60 @@ class MessagesCore:
 
     def send_resume_scheduling(
         self,
-        employe: str,
-        select_service: str,
-        date_select: str,
-        hour_select: str,
+        employee_id: int,
+        date_selected: str,
+        hour_selected: str,
+        product_id: int,
+    ):
+        try:
+            with SessionLocal() as session_local:
+                message_formated = ScheduleCore(
+                    message=self.message,
+                    sender_number=self.sender_number,
+                    push_name=self.push_name,
+                    db=session_local,
+                ).resume_scheduling(
+                    employee_id=employee_id,
+                    date_selected=date_selected,
+                    hour_selected=hour_selected,
+                    product_id=product_id,
+                )
+                return message_formated
+        except Exception as e:
+            log.error(
+                f"Error messages core \
+                list avaliable days {e}"
+            )
+
+    def approved_service(
+        self,
+        employee_id: int,
+        product_id: int,
+        date_selected: str,
+        hour_selected: str,
+    ):
+        try:
+            with SessionLocal() as session_local:
+                phone_employee, stmt = ScheduleCore(
+                    message=self.message,
+                    sender_number=self.sender_number,
+                    push_name=self.push_name,
+                    db=session_local,
+                ).send_check_employee(
+                    employee_id=employee_id,
+                    product_id=product_id,
+                    date_selected=date_selected,
+                    hour_selected=hour_selected,
+                )
+                return phone_employee, stmt
+        except Exception as e:
+            log.error(
+                f"Error messages core \
+                list avaliable days {e}"
+            )
+
+    def send_check_service_employee(
+        self, employee_id: int, date_selected: str, hour_selected: str
     ):
         try:
             with SessionLocal() as session_local:
@@ -143,11 +193,10 @@ class MessagesCore:
                     sender_number=self.sender_number,
                     push_name=self.push_name,
                     db=session_local,
-                ).resume_scheduling(
-                    employee=employe,
-                    select_service=select_service,
-                    date_select=date_select,
-                    hour_select=hour_select,
+                ).check_service_employee(
+                    employee_id=employee_id,
+                    date_selected=date_selected,
+                    hour_selected=hour_selected,
                 )
                 return stmt
         except Exception as e:
@@ -156,22 +205,42 @@ class MessagesCore:
                 list avaliable days {e}"
             )
 
-    def send_check_service_employee(self):
-        try:
-            with SessionLocal() as session_local:
-                stmt = ScheduleCore(
-                    message=self.message,
-                    sender_number=self.sender_number,
-                    push_name=self.push_name,
-                    db=session_local,
-                ).check_service_employee(
-                    employee_select="Douglas Santos",
-                    date_select="13/07",
-                    hour_select="14:30",
-                )
-                return stmt
-        except Exception as e:
-            log.error(
-                f"Error messages core \
-                list avaliable days {e}"
-            )
+    # def confirmar_agendamento(
+    #     self,
+    #     employee_id: int,
+    #     product_id: int,
+    #     slot: Tuple[datetime, datetime],
+    #     data: str,
+    # ) -> Tuple[bool, str]:
+    #     try:
+    #         with SessionLocal() as db:
+    #             user_id = User.get_by_id_user(db=db, phone=self.sender_number)
+    #             if not user_id:
+    #                 return False, "⚠️ Não conseguimos identificar seu cadastro."
+
+    #             agendamento = ScheduleService.add_schedule(
+    #                 db=db,
+    #                 time_register=slot[0],
+    #                 product_id=product_id,
+    #                 employee_id=employee_id,
+    #                 user_id=user_id,
+    #             )
+
+    #             if not agendamento:
+    #                 return False, "⚠️ Erro ao registrar agendamento."
+
+    #             db.commit()
+
+    #             horario = slot[0].strftime("%H:%M")
+    #             return True, (
+    #                 f"🔔 *Agendamento confirmado!*\n\n"
+    #                 f"O profissional já está ciente do seu atendimento 👍\n"
+    #                 f"Te esperamos no dia {data}, às {horario} ⏰\n\n"
+    #                 f"Qualquer imprevisto, é só falar com a gente aqui mesmo! Valeu 💈"
+    #             )
+    #     except Exception as e:
+    #         log.error(f"Error confirmar_agendamento: {e}")
+    #         return (
+    #             False,
+    #             "⚠️ Falha ao confirmar seu agendamento. Tente novamente.",
+    #         )

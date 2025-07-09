@@ -83,17 +83,18 @@ class BotCore:
 
     def get_response(self) -> str:
         try:
-            msg = self.message_text
+            msg = self.message_text.strip()
 
             # Reset manual
             if msg.lower() in ["reset", "reiniciar"]:
                 return self._reset_session()
 
             state = self.session.get_key(f"{self.sender_number}_state")
+            # state = self.session.get_state(self.sender_number)
 
             if state is None:
                 self.session.set_key(
-                    f"{self.sender_number}_state", "INICIO", expire_seconds=300
+                    f"{self.sender_number}_state", "INICIO", 300
                 )
                 return self.message_handler.send_welcome()
 
@@ -113,8 +114,7 @@ class BotCore:
                         300,
                     )
                     return message
-                else:
-                    return "Por favor, digite 1 para iniciar o agendamento."
+                return "Por favor, digite 1 para iniciar o agendamento."
 
             elif state == "ESCOLHER_FUNCIONARIO":
                 employees = self.session.get_key(
@@ -205,8 +205,15 @@ class BotCore:
                         if not slots:
                             return message
 
+                        # Serializa slots com datetime
+                        serializable_slots = [
+                            (s[0].strftime("%H:%M"), s[1].strftime("%H:%M"))
+                            for s in slots
+                        ]
                         self.session.set_key(
-                            f"{self.sender_number}_available_slots", slots, 300
+                            f"{self.sender_number}_available_slots",
+                            serializable_slots,
+                            300,
                         )
                         self.session.set_key(
                             f"{self.sender_number}_state",
@@ -234,20 +241,130 @@ class BotCore:
                             "CONFIRMAR_AGENDAMENTO",
                             300,
                         )
-                        return f"⏰ Ótimo! Você escolheu o horário {selected_slot[0].strftime('%H:%M')} até {selected_slot[1].strftime('%H:%M')}. Deseja confirmar o agendamento? (sim/não)"
+                        return f"⏰ Ótimo! Você escolheu o horário {selected_slot[0]} até {selected_slot[1]}. Deseja confirmar o agendamento? (sim/não)"
                 return self._fallback_response(msg)
 
-            return self.message_handler.send_welcome()
+            elif state == "CONFIRMAR_AGENDAMENTO":
+                # TODO - aguardando o agendamento do barbeiro
+                if msg.lower() in ["sim", "s"]:
+                    selected_slot = self.session.get_key(
+                        f"{self.sender_number}_selected_slot"
+                    )
+                    employee_id = self.session.get_key(
+                        f"{self.sender_number}_selected_employee_id"
+                    )
+                    product_id = self.session.get_key(
+                        f"{self.sender_number}_selected_product_id"
+                    )
+                    selected_date = self.session.get_key(
+                        f"{self.sender_number}_selected_day"
+                    )
+                    if all(
+                        [selected_slot, employee_id, product_id, selected_date]
+                    ):
+                        message_formated = (
+                            self.message_handler.send_resume_scheduling(
+                                employee_id=employee_id,
+                                date_selected=selected_date,
+                                hour_selected=selected_slot[0],
+                                product_id=product_id,
+                            )
+                        )
+                        self.session.set_key(
+                            f"{self.sender_number}_state",
+                            "CONFIRMACAO_FUNCIONARIO",
+                            300,
+                        )
+                        return message_formated
+                    return "⚠️ Informações incompletas para confirmar o agendamento. Tente novamente."
+                else:
+                    # Se a pessoa responder "não"
+                    self.session.set_key(
+                        f"{self.sender_number}_state", "ESCOLHER_HORARIO", 300
+                    )
+                    return "🔁 Beleza! Escolha outro horário da lista abaixo ou envie o número do novo horário:"
 
+            elif state == "CONFIRMACAO_FUNCIONARIO":
+                print("ENTRANDO AQUI*************************")
+                employee_id = self.session.get_key(
+                    f"{self.sender_number}_selected_employee_id"
+                )
+                product_id = self.session.get_key(
+                    f"{self.sender_number}_selected_product_id"
+                )
+                selected_date = self.session.get_key(
+                    f"{self.sender_number}_selected_day"
+                )
+                selected_slot = self.session.get_key(
+                    f"{self.sender_number}_selected_slot"
+                )
+                print(employee_id)
+                print(product_id)
+                print(selected_date)
+                print(selected_slot)
+                # if not all(
+                #     [employee_id, product_id, selected_date, selected_slot]
+                # ):
+                #     return "⚠️ Não foi possível recuperar os dados do agendamento. Tente novamente."
+
+                phone_employee, msg_employee = (
+                    self.message_handler.approved_service(
+                        employee_id=employee_id,
+                        product_id=product_id,
+                        date_selected=selected_date,
+                        hour_selected=selected_slot[0],
+                    )
+                )
+                print("TELEFONE DO FUNCIONARIO", phone_employee)
+                if not phone_employee:
+                    return "⚠️ Funcionário não encontrado para confirmar o atendimento."
+
+                enviado = self.send_message_employee(
+                    number=phone_employee, response_text=msg_employee
+                )
+
+                if enviado:
+                    return self.message_handler.send_check_service_employee(
+                        employee_id=employee_id,
+                        date_selected=selected_date,
+                        hour_selected=selected_slot[0],
+                    )
+                else:
+                    return "⚠️ Infelizmente o profissional não pôde ser notificado no momento. Tente novamente mais tarde."
+
+            return self.message_handler.send_welcome()
         except Exception as e:
             print(f"ERROR: Failed to generate response: {e}")
             return self._reset_session()
+
+    def send_message_employee(self, number: str, response_text: str) -> bool:
+        try:
+            print("TELEFONE REPASSADO **********", number)
+            payload = {
+                "number": number,
+                "text": response_text,
+                "delay": 2000,
+            }
+            headers = {
+                "apikey": self.apikey,
+                "Content-Type": "application/json",
+            }
+            response = httpx.post(
+                url=self.base_url, json=payload, headers=headers, timeout=5
+            )
+            print(
+                f"DEBUG: Enviando para {number} | status={response.status_code} | resp={response.text}"
+            )
+            return response.status_code == 201
+        except Exception as e:
+            print(f"ERROR: Falha no envio da mensagem para funcionário: {e}")
+            return False
 
     def send_message(self):
         try:
             response_text = self.get_response()
 
-            print("DEBUG: RESPONSE TEXT gerado:", response_text)
+            # print("DEBUG: RESPONSE TEXT gerado:", response_text)
 
             payload = {
                 "number": self.sender_number,
@@ -259,18 +376,18 @@ class BotCore:
                 "Content-Type": "application/json",
             }
 
-            print(f"DEBUG: Sending payload to {self.sender_number}: {payload}")
+            # print(f"DEBUG: Sending payload to {self.sender_number}: {payload}")
             response = httpx.post(
                 url=self.base_url, json=payload, headers=headers, timeout=5
             )
-            print(
-                f"DEBUG: Sent message to {self.sender_number}: {response.status_code}, {response.text}"
-            )
+            # print(
+            #     f"DEBUG: Sent message to {self.sender_number}: {response.status_code}, {response.text}"
+            # )
 
-            if response.status_code != STATUS_CODE:
-                print(
-                    f"ERROR: Failed to send message to {self.sender_number}: {response.status_code}, {response.text}"
-                )
+            # if response.status_code != STATUS_CODE:
+            #     print(
+            #         f"ERROR: Failed to send message to {self.sender_number}: {response.status_code}, {response.text}"
+            #     )
 
             return response
 
