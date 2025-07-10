@@ -71,24 +71,21 @@ class ScheduleCore:
         except Exception as e:
             log.error(f"Logger: Error in add schedule: {e}")
             self.db.rollback()
-    
+
     def update_schedule(self, send_number: str) -> str:
         try:
             user_id = self.user.get_by_id_user(
                 send_number=send_number, db=self.db
             )
-            
+
             update = self.schedule.update_is_check(
-                db=self.db,
-                is_check=True,
-                user_id=user_id
+                db=self.db, is_check=True, user_id=user_id
             )
             return update
         except Exception as e:
             log.error(f"Logger: Error in add schedule: {e}")
             self.db.rollback()
-    
-    
+
     def list_available_days(self) -> tuple[str, list[str]]:
         try:
             base_date = datetime.now().date() + timedelta(days=1)

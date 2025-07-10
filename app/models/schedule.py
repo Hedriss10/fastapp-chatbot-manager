@@ -66,20 +66,24 @@ class ScheduleService(Base):
         cls, db: Session, is_check: bool, user_id: int
     ) -> Optional["ScheduleService"]:
         try:
-            schedule = db.query(cls).where(
-                cls.is_deleted == False,
-                cls.is_check == False,
-                cls.user_id == user_id
-            ).first()
+            schedule = (
+                db.query(cls)
+                .where(
+                    cls.is_deleted == False,
+                    cls.is_check == False,
+                    cls.user_id == user_id,
+                )
+                .first()
+            )
             if not schedule:
-                log.warning(f"Logger: not_found_user_in_schedule")
-            
+                log.warning("Logger: not_found_user_in_schedule")
+
             schedule.is_check = is_check
             schedule.updated_at = datetime.now()
-            
+
             db.commit()
             db.refresh(schedule)
-            
+
             return schedule
         except Exception as e:
             db.rollback()

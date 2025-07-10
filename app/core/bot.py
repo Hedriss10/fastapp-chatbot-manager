@@ -107,7 +107,6 @@ class BotCore:
                 "time": scheduling_data["selected_slot"][0],
                 "product_id": scheduling_data["selected_product_id"],
             }
-
             self.session.set_key(
                 f"pending_confirmation:{phone_employee}",
                 pending_data,
@@ -157,6 +156,9 @@ class BotCore:
             )
             self._send_message_to_number(
                 scheduling_data["client_phone"], client_response
+            )
+            self.message_handler.send_update_schedule(
+                send_number=scheduling_data["client_phone"]
             )
             self.session.delete(f"pending_confirmation:{self.sender_number}")
             self._reset_session(scheduling_data["client_phone"])
@@ -364,7 +366,6 @@ class BotCore:
             elif state == "CONFIRMAR_AGENDAMENTO":
                 if msg in ["sim", "s"]:
                     valid, data = self._validate_scheduling_data()
-                    print("Valid and data", valid, data)
                     if not valid:
                         return "⚠️ Dados incompletos. Reinicie o agendamento."
 
@@ -382,6 +383,14 @@ class BotCore:
                         "AGENDAMENTO_CONCLUIDO",
                         1800,
                     )
+                    print(valid, data)
+                    self.message_handler.send_add_schedule(
+                        send_number=self.sender_number,
+                        employee_id=data["selected_employee_id"],
+                        date=data["selected_day"],
+                        time=data["selected_slot"][0],
+                        product_id=data["selected_product_id"],
+                    )
                     return self.message_handler.send_resume_scheduling(
                         employee_id=data["selected_employee_id"],
                         date_selected=data["selected_day"],
@@ -395,7 +404,6 @@ class BotCore:
                     return "🔁 Escolha outro horário:"
 
             elif state == "AGENDAMENTO_CONCLUIDO":
-                # todo retuning check
                 return "✅ Agendamento confirmado! Obrigado."
 
             return self._reset_session()

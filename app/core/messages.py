@@ -205,7 +205,14 @@ class MessagesCore:
                 list avaliable days {e}"
             )
 
-    def send_add_schedule(self, send_number: str, employee_id: int, date: str, time: str, product_id: int):
+    def send_add_schedule(
+        self,
+        send_number: str,
+        employee_id: int,
+        date: str,
+        time: str,
+        product_id: int,
+    ):
         try:
             with SessionLocal() as session_local:
                 stmt = ScheduleCore(
@@ -221,13 +228,13 @@ class MessagesCore:
                     product_id=product_id,
                 )
                 return stmt
-        
+
         except Exception as e:
             log.error(
                 f"Error messages core \
                 add schedule {e}"
             )
-        
+
     def send_update_schedule(self, send_number: str) -> str:
         try:
             with SessionLocal() as session_local:
@@ -240,7 +247,7 @@ class MessagesCore:
                     send_number=send_number,
                 )
                 return stmt
-        
+
         except Exception as e:
             log.error(
                 f"Error messages core \
