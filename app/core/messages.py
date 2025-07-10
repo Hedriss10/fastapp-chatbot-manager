@@ -205,42 +205,44 @@ class MessagesCore:
                 list avaliable days {e}"
             )
 
-    # def confirmar_agendamento(
-    #     self,
-    #     employee_id: int,
-    #     product_id: int,
-    #     slot: Tuple[datetime, datetime],
-    #     data: str,
-    # ) -> Tuple[bool, str]:
-    #     try:
-    #         with SessionLocal() as db:
-    #             user_id = User.get_by_id_user(db=db, phone=self.sender_number)
-    #             if not user_id:
-    #                 return False, "⚠️ Não conseguimos identificar seu cadastro."
-
-    #             agendamento = ScheduleService.add_schedule(
-    #                 db=db,
-    #                 time_register=slot[0],
-    #                 product_id=product_id,
-    #                 employee_id=employee_id,
-    #                 user_id=user_id,
-    #             )
-
-    #             if not agendamento:
-    #                 return False, "⚠️ Erro ao registrar agendamento."
-
-    #             db.commit()
-
-    #             horario = slot[0].strftime("%H:%M")
-    #             return True, (
-    #                 f"🔔 *Agendamento confirmado!*\n\n"
-    #                 f"O profissional já está ciente do seu atendimento 👍\n"
-    #                 f"Te esperamos no dia {data}, às {horario} ⏰\n\n"
-    #                 f"Qualquer imprevisto, é só falar com a gente aqui mesmo! Valeu 💈"
-    #             )
-    #     except Exception as e:
-    #         log.error(f"Error confirmar_agendamento: {e}")
-    #         return (
-    #             False,
-    #             "⚠️ Falha ao confirmar seu agendamento. Tente novamente.",
-    #         )
+    def send_add_schedule(self, send_number: str, employee_id: int, date: str, time: str, product_id: int):
+        try:
+            with SessionLocal() as session_local:
+                stmt = ScheduleCore(
+                    message=self.message,
+                    sender_number=self.sender_number,
+                    push_name=self.push_name,
+                    db=session_local,
+                ).add_schedule(
+                    send_number=send_number,
+                    employee_id=employee_id,
+                    date=date,
+                    time=time,
+                    product_id=product_id,
+                )
+                return stmt
+        
+        except Exception as e:
+            log.error(
+                f"Error messages core \
+                add schedule {e}"
+            )
+        
+    def send_update_schedule(self, send_number: str) -> str:
+        try:
+            with SessionLocal() as session_local:
+                stmt = ScheduleCore(
+                    message=self.message,
+                    sender_number=self.sender_number,
+                    push_name=self.push_name,
+                    db=session_local,
+                ).update_schedule(
+                    send_number=send_number,
+                )
+                return stmt
+        
+        except Exception as e:
+            log.error(
+                f"Error messages core \
+                add update {e}"
+            )
