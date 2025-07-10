@@ -1,6 +1,5 @@
-# app/core/bot.py
-
 import os
+from typing import Dict, Optional, Tuple
 
 import httpx
 from dotenv import load_dotenv
@@ -10,26 +9,6 @@ from app.logs.log import setup_logger
 from app.service.redis import SessionManager
 
 load_dotenv()
-URL_INSTANCE_EVOLUTION = os.getenv("URL_INSTANCE_EVOLUTION")
-EVOLUTION_APIKEY = os.getenv("EVOLUTION_APIKEY")
-
-log = setup_logger()
-STATUS_CODE = 201
-import os
-
-import httpx
-from dotenv import load_dotenv
-
-from app.core.messages import MessagesCore
-from app.logs.log import setup_logger
-from app.service.redis import SessionManager
-
-load_dotenv()
-URL_INSTANCE_EVOLUTION = os.getenv("URL_INSTANCE_EVOLUTION")
-EVOLUTION_APIKEY = os.getenv("EVOLUTION_APIKEY")
-
-log = setup_logger()
-STATUS_CODE = 201
 
 
 class BotCore:
@@ -39,9 +18,10 @@ class BotCore:
         self.message_text = message.strip()
         self.sender_number = sender_number
         self.push_name = push_name
-        self.base_url = URL_INSTANCE_EVOLUTION
-        self.apikey = EVOLUTION_APIKEY
+        self.base_url = os.getenv("URL_INSTANCE_EVOLUTION")
+        self.apikey = os.getenv("EVOLUTION_APIKEY")
         self.session = SessionManager()
+        self.log = setup_logger()
 
         self.message_handler = MessagesCore(
             message=self.message_text,
@@ -49,69 +29,208 @@ class BotCore:
             push_name=self.push_name,
         )
 
-    def _reset_session(self) -> str:
+    def _reset_session(self, phone: str = None) -> str:
+        """Reseta completamente a sessão do usuário"""
+        phone = phone or self.sender_number
         try:
-            keys_to_clear = [
-                f"session:{self.sender_number}",
-                f"{self.sender_number}_welcome",
-                f"{self.sender_number}_employees_list",
-                f"{self.sender_number}_products_list",
-                f"{self.sender_number}_available_days",
-                f"{self.sender_number}_selected_employee_id",
-                f"{self.sender_number}_selected_product_id",
-                f"{self.sender_number}_selected_day",
-                f"{self.sender_number}_available_slots",
-                f"{self.sender_number}_selected_slot",
-                f"{self.sender_number}_state",
-            ]
-            for key in keys_to_clear:
-                try:
-                    self.session.delete(key)
-                except Exception as ex:
-                    print(f"WARNING: Could not delete key {key}: {ex}")
+            keys = self.session.client.keys(f"*{phone}*")
+            if keys:
+                self.session.client.delete(*keys)
+            return "⚠️ Sua sessão foi reiniciada. Envie qualquer mensagem para começar novamente. 👋"
+        except Exception as e:
+            self.log.error(f"Error resetting session: {e}")
+            return "⚠️ Ocorreu um erro ao reiniciar sua sessão."
 
-            return (
-                "⚠️ Sua sessão foi reiniciada.\n"
-                "Envie qualquer mensagem para começar novamente. 👋"
+    def _validate_scheduling_data(self) -> Tuple[bool, Optional[Dict]]:
+        """Valida e retorna todos os dados do agendamento"""
+        keys = [
+            "selected_employee_id",
+            "selected_product_id",
+            "selected_day",
+            "selected_slot",
+        ]
+        data = {}
+
+        for key in keys:
+            value = self.session.get_key(f"{self.sender_number}_{key}")
+            if value is None:
+                return False, None
+            data[key] = value
+
+        return True, data
+
+    def _send_message_to_number(self, number: str, message: str) -> bool:
+        """Envia mensagem para qualquer número"""
+        try:
+            payload = {"number": number, "text": message, "delay": 2000}
+            headers = {
+                "apikey": self.apikey,
+                "Content-Type": "application/json",
+            }
+            response = httpx.post(
+                self.base_url, json=payload, headers=headers, timeout=10
             )
-        except Exception:
-            return "⚠️ Ocorreu um erro ao reiniciar sua sessão. Tente novamente mais tarde."
+            return response.status_code == 201
+        except Exception as e:
+            self.log.error(f"Error sending message to {number}: {str(e)}")
+            return False
 
-    def _fallback_response(self, msg: str) -> str:
-        print(f"DEBUG: Sessão inconsistente com msg '{msg}', resetando...")
-        return self._reset_session()
+    def _notify_employee(
+        self, employee_id: str, scheduling_data: Dict
+    ) -> bool:
+        """Notifica o barbeiro e registra confirmação pendente"""
+        try:
+            # Obtém telefone e mensagem para o barbeiro
+            phone_employee, msg_employee = (
+                self.message_handler.approved_service(
+                    employee_id=employee_id,
+                    product_id=scheduling_data["selected_product_id"],
+                    date_selected=scheduling_data["selected_day"],
+                    hour_selected=scheduling_data["selected_slot"][0],
+                )
+            )
+
+            if not phone_employee:
+                self.log.error(
+                    f"Employee phone not found for ID: {employee_id}"
+                )
+                return False
+
+            # Registrar o número como barbeiro
+            self.session.client.sadd("employees:phones", phone_employee)
+
+            # Registrar a confirmação pendente
+            pending_data = {
+                "client_phone": self.sender_number,
+                "employee_id": employee_id,
+                "date": scheduling_data["selected_day"],
+                "time": scheduling_data["selected_slot"][0],
+                "product_id": scheduling_data["selected_product_id"],
+            }
+
+            self.session.set_key(
+                f"pending_confirmation:{phone_employee}",
+                pending_data,
+                3600,  # Expira em 1 hora
+            )
+
+            # Enviar a mensagem
+            return self._send_message_to_number(phone_employee, msg_employee)
+        except Exception as e:
+            self.log.error(f"Error in notify_employee: {str(e)}")
+            return False
+
+    def _handle_employee_response(self, msg: str) -> Optional[str]:
+        """Trata mensagens recebidas de barbeiros"""
+        if not self.session.is_employee(self.sender_number):
+            return None
+
+        # Verifica se é uma resposta a uma confirmação pendente
+        pending = self.session.get_pending_confirmation(self.sender_number)
+
+        if not pending:
+            return "ℹ️ Você é um barbeiro, mas não há agendamentos pendentes para confirmar."
+
+        # Processa comandos do barbeiro
+        clean_msg = msg.lower().strip()
+        if clean_msg in ["confirmar", "sim", "s", "ok", "1"]:
+            return self._confirm_scheduling(pending)
+        elif clean_msg in ["recusar", "não", "nao", "n", "2"]:
+            return self._reject_scheduling(pending)
+        else:
+            return (
+                "⚠️ Comando não reconhecido. Por favor responda com:\n\n"
+                "1 - Para CONFIRMAR este agendamento\n"
+                "2 - Para RECUSAR este agendamento\n\n"
+                f"Detalhes do agendamento:\n"
+                f"Cliente: {pending.get('client_phone', 'N/A')}\n"
+                f"Data: {pending.get('date', 'N/A')} às {pending.get('time', 'N/A')}"
+            )
+
+    def _confirm_scheduling(self, scheduling_data: dict) -> str:
+        """Confirma o agendamento pelo barbeiro"""
+        try:
+            client_response = self.message_handler.send_check_service_employee(
+                employee_id=scheduling_data.get("employee_id"),
+                date_selected=scheduling_data.get("date"),
+                hour_selected=scheduling_data.get("time"),
+            )
+            self._send_message_to_number(
+                scheduling_data["client_phone"], client_response
+            )
+            self.session.delete(f"pending_confirmation:{self.sender_number}")
+
+            self._reset_session(scheduling_data["client_phone"])
+
+            return "✅ Agendamento confirmado com sucesso! O cliente foi notificado."
+
+        except Exception as e:
+            self.log.error(f"Error confirming scheduling: {str(e)}")
+            return "⚠️ Erro ao confirmar agendamento. Tente novamente."
+
+    def _reject_scheduling(self, scheduling_data: dict) -> str:
+        """Recusa o agendamento pelo barbeiro"""
+        try:
+            # 1. Atualiza o status no banco de dados
+
+            # 2. Notifica o cliente com opções alternativas
+            client_response = (
+                "⚠️ O barbeiro não pode atender no horário agendado.\n\n"
+                "Por favor, inicie um novo agendamento enviando uma mensagem."
+            )
+            self._send_message_to_number(
+                scheduling_data["client_phone"], client_response
+            )
+
+            # 3. Limpa o estado pendente
+            self.session.delete(f"pending_confirmation:{self.sender_number}")
+
+            # 4. Reseta completamente a sessão do cliente
+            self._reset_session(scheduling_data["client_phone"])
+
+            return "⚠️ Agendamento recusado. O cliente foi notificado e pode tentar um novo horário."
+        except Exception as e:
+            self.log.error(f"Logger: reject scheduling: {e}")
+            return None
 
     def get_response(self) -> str:
+        """Lida com o fluxo principal de mensagens"""
         try:
-            msg = self.message_text.strip()
+            msg = self.message_text.lower().strip()
 
-            # Reset manual
-            if msg.lower() in ["reset", "reiniciar"]:
+            # Primeiro verifica se é uma resposta de barbeiro
+            employee_response = self._handle_employee_response(msg)
+            if employee_response is not None:
+                return employee_response
+            # Comandos especiais
+            if msg in ["reset", "reiniciar"]:
                 return self._reset_session()
 
             state = self.session.get_key(f"{self.sender_number}_state")
-            # state = self.session.get_state(self.sender_number)
 
+            # Fluxo inicial
             if state is None:
                 self.session.set_key(
-                    f"{self.sender_number}_state", "INICIO", 300
+                    f"{self.sender_number}_state", "INICIO", 1800
                 )
                 return self.message_handler.send_welcome()
 
+            # Máquina de estados principal
             if state == "INICIO":
                 if msg == "1":
                     message, employees = (
                         self.message_handler.send_list_employee()
                     )
                     if not employees:
-                        return "⚠️ Nenhum profissional disponível no momento."
+                        return "⚠️ Nenhum profissional disponível."
+
                     self.session.set_key(
-                        f"{self.sender_number}_employees_list", employees, 300
+                        f"{self.sender_number}_employees_list", employees, 1800
                     )
                     self.session.set_key(
                         f"{self.sender_number}_state",
                         "ESCOLHER_FUNCIONARIO",
-                        300,
+                        1800,
                     )
                     return message
                 return "Por favor, digite 1 para iniciar o agendamento."
@@ -123,31 +242,33 @@ class BotCore:
                 if employees and msg.isdigit():
                     idx = int(msg) - 1
                     if 0 <= idx < len(employees):
-                        selected_employee = employees[idx]
+                        employee = employees[idx]
                         self.session.set_key(
                             f"{self.sender_number}_selected_employee_id",
-                            selected_employee["id"],
-                            300,
+                            employee["id"],
+                            1800,
                         )
+
                         message, products = (
                             self.message_handler.send_list_products_id(
-                                employee_id=selected_employee["id"]
+                                employee["id"]
                             )
                         )
                         if not products:
-                            return "⚠️ Nenhum produto disponível para este profissional."
+                            return "⚠️ Nenhum serviço disponível."
+
                         self.session.set_key(
                             f"{self.sender_number}_products_list",
                             products,
-                            300,
+                            1800,
                         )
                         self.session.set_key(
                             f"{self.sender_number}_state",
                             "ESCOLHER_PRODUTO",
-                            300,
+                            1800,
                         )
                         return message
-                return self._fallback_response(msg)
+                return self._reset_session()
 
             elif state == "ESCOLHER_PRODUTO":
                 products = self.session.get_key(
@@ -156,38 +277,38 @@ class BotCore:
                 if products and msg.isdigit():
                     idx = int(msg) - 1
                     if 0 <= idx < len(products):
-                        selected_product = products[idx]
+                        product = products[idx]
                         self.session.set_key(
                             f"{self.sender_number}_selected_product_id",
-                            selected_product["id"],
-                            300,
+                            product["id"],
+                            1800,
                         )
+
                         message, days = (
                             self.message_handler.send_available_days()
                         )
                         if not days:
-                            return "⚠️ Nenhum dia disponível no momento."
+                            return "⚠️ Nenhuma data disponível."
+
                         self.session.set_key(
-                            f"{self.sender_number}_available_days", days, 300
+                            f"{self.sender_number}_available_days", days, 1800
                         )
                         self.session.set_key(
-                            f"{self.sender_number}_state", "ESCOLHER_DIA", 300
+                            f"{self.sender_number}_state", "ESCOLHER_DIA", 1800
                         )
                         return message
-                return self._fallback_response(msg)
+                return self._reset_session()
 
             elif state == "ESCOLHER_DIA":
-                available_days = self.session.get_key(
+                days = self.session.get_key(
                     f"{self.sender_number}_available_days"
                 )
-                if available_days and msg.isdigit():
+                if days and msg.isdigit():
                     idx = int(msg) - 1
-                    if 0 <= idx < len(available_days):
-                        selected_day = available_days[idx]
+                    if 0 <= idx < len(days):
+                        day = days[idx]
                         self.session.set_key(
-                            f"{self.sender_number}_selected_day",
-                            selected_day,
-                            300,
+                            f"{self.sender_number}_selected_day", day, 1800
                         )
 
                         employee_id = self.session.get_key(
@@ -199,172 +320,94 @@ class BotCore:
 
                         message, slots = (
                             self.message_handler.send_available_slots(
-                                employee_id, selected_day, product_id
+                                employee_id, day, product_id
                             )
                         )
                         if not slots:
                             return message
 
-                        # Serializa slots com datetime
-                        serializable_slots = [
+                        serialized_slots = [
                             (s[0].strftime("%H:%M"), s[1].strftime("%H:%M"))
                             for s in slots
                         ]
                         self.session.set_key(
                             f"{self.sender_number}_available_slots",
-                            serializable_slots,
-                            300,
+                            serialized_slots,
+                            1800,
                         )
                         self.session.set_key(
                             f"{self.sender_number}_state",
                             "ESCOLHER_HORARIO",
-                            300,
+                            1800,
                         )
                         return message
-                return self._fallback_response(msg)
+                return self._reset_session()
 
             elif state == "ESCOLHER_HORARIO":
-                available_slots = self.session.get_key(
+                slots = self.session.get_key(
                     f"{self.sender_number}_available_slots"
                 )
-                if available_slots and msg.isdigit():
+                if slots and msg.isdigit():
                     idx = int(msg) - 1
-                    if 0 <= idx < len(available_slots):
-                        selected_slot = available_slots[idx]
+                    if 0 <= idx < len(slots):
+                        slot = slots[idx]
                         self.session.set_key(
-                            f"{self.sender_number}_selected_slot",
-                            selected_slot,
-                            300,
+                            f"{self.sender_number}_selected_slot", slot, 1800
                         )
                         self.session.set_key(
                             f"{self.sender_number}_state",
                             "CONFIRMAR_AGENDAMENTO",
-                            300,
+                            1800,
                         )
-                        return f"⏰ Ótimo! Você escolheu o horário {selected_slot[0]} até {selected_slot[1]}. Deseja confirmar o agendamento? (sim/não)"
-                return self._fallback_response(msg)
+                        return f"⏰ Horário: {slot[0]} às {slot[1]}. Confirmar agendamento? (sim/não)"
+                return self._reset_session()
 
             elif state == "CONFIRMAR_AGENDAMENTO":
-                # TODO - aguardando o agendamento do barbeiro
-                if msg.lower() in ["sim", "s"]:
-                    selected_slot = self.session.get_key(
-                        f"{self.sender_number}_selected_slot"
-                    )
-                    employee_id = self.session.get_key(
-                        f"{self.sender_number}_selected_employee_id"
-                    )
-                    product_id = self.session.get_key(
-                        f"{self.sender_number}_selected_product_id"
-                    )
-                    selected_date = self.session.get_key(
-                        f"{self.sender_number}_selected_day"
-                    )
-                    if all(
-                        [selected_slot, employee_id, product_id, selected_date]
+                if msg in ["sim", "s"]:
+                    valid, data = self._validate_scheduling_data()
+                    print("Valid and data", valid, data)
+                    if not valid:
+                        return "⚠️ Dados incompletos. Reinicie o agendamento."
+
+                    # Notifica o barbeiro primeiro
+                    if not self._notify_employee(
+                        data["selected_employee_id"], data
                     ):
-                        message_formated = (
-                            self.message_handler.send_resume_scheduling(
-                                employee_id=employee_id,
-                                date_selected=selected_date,
-                                hour_selected=selected_slot[0],
-                                product_id=product_id,
-                            )
+                        return (
+                            "⚠️ Erro ao notificar o barbeiro. Tente novamente."
                         )
-                        self.session.set_key(
-                            f"{self.sender_number}_state",
-                            "CONFIRMACAO_FUNCIONARIO",
-                            300,
-                        )
-                        return message_formated
-                    return "⚠️ Informações incompletas para confirmar o agendamento. Tente novamente."
-                else:
-                    # Se a pessoa responder "não"
+
+                    # Mostra confirmação ao cliente
                     self.session.set_key(
-                        f"{self.sender_number}_state", "ESCOLHER_HORARIO", 300
+                        f"{self.sender_number}_state",
+                        "AGENDAMENTO_CONCLUIDO",
+                        1800,
                     )
-                    return "🔁 Beleza! Escolha outro horário da lista abaixo ou envie o número do novo horário:"
-
-            elif state == "CONFIRMACAO_FUNCIONARIO":
-                print("ENTRANDO AQUI*************************")
-                employee_id = self.session.get_key(
-                    f"{self.sender_number}_selected_employee_id"
-                )
-                product_id = self.session.get_key(
-                    f"{self.sender_number}_selected_product_id"
-                )
-                selected_date = self.session.get_key(
-                    f"{self.sender_number}_selected_day"
-                )
-                selected_slot = self.session.get_key(
-                    f"{self.sender_number}_selected_slot"
-                )
-                print(employee_id)
-                print(product_id)
-                print(selected_date)
-                print(selected_slot)
-                # if not all(
-                #     [employee_id, product_id, selected_date, selected_slot]
-                # ):
-                #     return "⚠️ Não foi possível recuperar os dados do agendamento. Tente novamente."
-
-                phone_employee, msg_employee = (
-                    self.message_handler.approved_service(
-                        employee_id=employee_id,
-                        product_id=product_id,
-                        date_selected=selected_date,
-                        hour_selected=selected_slot[0],
-                    )
-                )
-                print("TELEFONE DO FUNCIONARIO", phone_employee)
-                if not phone_employee:
-                    return "⚠️ Funcionário não encontrado para confirmar o atendimento."
-
-                enviado = self.send_message_employee(
-                    number=phone_employee, response_text=msg_employee
-                )
-
-                if enviado:
-                    return self.message_handler.send_check_service_employee(
-                        employee_id=employee_id,
-                        date_selected=selected_date,
-                        hour_selected=selected_slot[0],
+                    return self.message_handler.send_resume_scheduling(
+                        employee_id=data["selected_employee_id"],
+                        date_selected=data["selected_day"],
+                        hour_selected=data["selected_slot"][0],
+                        product_id=data["selected_product_id"],
                     )
                 else:
-                    return "⚠️ Infelizmente o profissional não pôde ser notificado no momento. Tente novamente mais tarde."
+                    self.session.set_key(
+                        f"{self.sender_number}_state", "ESCOLHER_HORARIO", 1800
+                    )
+                    return "🔁 Escolha outro horário:"
 
-            return self.message_handler.send_welcome()
-        except Exception as e:
-            print(f"ERROR: Failed to generate response: {e}")
+            elif state == "AGENDAMENTO_CONCLUIDO":
+                # todo retuning check
+                return "✅ Agendamento confirmado! Obrigado."
+
             return self._reset_session()
 
-    def send_message_employee(self, number: str, response_text: str) -> bool:
-        try:
-            print("TELEFONE REPASSADO **********", number)
-            payload = {
-                "number": number,
-                "text": response_text,
-                "delay": 2000,
-            }
-            headers = {
-                "apikey": self.apikey,
-                "Content-Type": "application/json",
-            }
-            response = httpx.post(
-                url=self.base_url, json=payload, headers=headers, timeout=5
-            )
-            print(
-                f"DEBUG: Enviando para {number} | status={response.status_code} | resp={response.text}"
-            )
-            return response.status_code == 201
         except Exception as e:
-            print(f"ERROR: Falha no envio da mensagem para funcionário: {e}")
-            return False
+            self.log.error(f"Error in get_response: {str(e)}")
+            return self._reset_session()
 
-    def send_message(self):
+    def send_message(self) -> Optional[httpx.Response]:
         try:
             response_text = self.get_response()
-
-            # print("DEBUG: RESPONSE TEXT gerado:", response_text)
 
             payload = {
                 "number": self.sender_number,
@@ -376,21 +419,10 @@ class BotCore:
                 "Content-Type": "application/json",
             }
 
-            # print(f"DEBUG: Sending payload to {self.sender_number}: {payload}")
-            response = httpx.post(
-                url=self.base_url, json=payload, headers=headers, timeout=5
+            return httpx.post(
+                self.base_url, json=payload, headers=headers, timeout=10
             )
-            # print(
-            #     f"DEBUG: Sent message to {self.sender_number}: {response.status_code}, {response.text}"
-            # )
-
-            # if response.status_code != STATUS_CODE:
-            #     print(
-            #         f"ERROR: Failed to send message to {self.sender_number}: {response.status_code}, {response.text}"
-            #     )
-
-            return response
 
         except Exception as e:
-            print(f"ERROR: Failed to send message: {e}")
+            self.log.error(f"Error sending message: {str(e)}")
             return None

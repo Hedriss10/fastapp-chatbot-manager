@@ -1,4 +1,5 @@
 # app/messages/schedule.py
+# TODO - falta implementar o add schedule, update no is_check
 
 from datetime import date, datetime, time, timedelta
 from typing import List, Tuple, Union
@@ -283,14 +284,15 @@ class ScheduleCore:
                 self.message.ticket == CONFIRM_SCHEDULE_EMPLOYEE
             )
 
+            result = self.db.execute(send_check).fetchone()
+
             # mensagem formatada enviada para o funcionario
-            send_check_formated = send_check[0]["text"].format(
+            send_check_formated = result[0]["text"].format(
                 nome_cliente=self.push_name,
-                servidor_escolhido=product,
+                servico_escolhido=product,
                 data_escolhida=date_selected,
                 horario_escolhido=hour_selected,
             )
-
             return phone_employee, send_check_formated
 
         except Exception as e:
@@ -304,7 +306,6 @@ class ScheduleCore:
         hour_selected: str,
     ) -> str:
         try:
-            # TODO - precisa de um refinamento
             employee = (
                 self.db.query(Employee.username)
                 .filter(Employee.id == employee_id)
@@ -314,29 +315,23 @@ class ScheduleCore:
             stmt = select(self.message.message).where(
                 self.message.ticket == CHECK_SERVICE_EMPLOYEE
             )
+            result = self.db.execute(stmt).fetchone()
 
-            # result_message = self.db.execute(stmt).fetchone()
-            print("RESULTADO", stmt)
-
-            if not stmt:
+            if not result:
                 return "⚠️ Nenhuma mensagem configurada para confirmação do agendamento."
 
-            message_format = stmt[0]["text"].format(  # AQUI FOI CORRIGIDO
+            message_format = result[0]["text"].format(
                 profissional_escolhido=employee,
                 data_escolhida=date_selected,
                 horario_escolhido=hour_selected,
             )
-
-            print("MESSAGEM FORMATADA NESSA DESGRAÇA", message_format)
             return message_format
 
         except Exception as e:
-            print("ERRRO COLETADO NESSA DESGRAÇA", e)
             log.error(f"Logger: Error in check_service_employee: {e}")
             return "⚠️ Erro ao gerar mensagem de confirmação."
 
 
-# todo debuggers schedule in core
 # if __name__ == "__main__":
 #     from app.db.db import SessionLocal
 
@@ -350,8 +345,9 @@ class ScheduleCore:
 #         # 29
 #         # 2025-07-09
 #         # 09:00
-#         a.check_service_employee(
+#         a.send_check_employee(
 #             employee_id=29,
 #             date_selected="2025-07-09",
-#             hour_selected="09:00"
+#             hour_selected="09:00",
+#             product_id=12
 #         )

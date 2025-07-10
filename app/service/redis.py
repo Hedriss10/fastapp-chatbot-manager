@@ -2,7 +2,7 @@
 
 import json
 import os
-from typing import Any
+from typing import Any, Optional
 
 import redis
 
@@ -21,6 +21,24 @@ class SessionManager:
             decode_responses=True,
             socket_connect_timeout=SOCKE_CONNECT_TIMEOUT,
         )
+
+    # No seu SessionManager (src/service/redis.py)
+    def is_employee(self, phone: str) -> bool:
+        """Verifica se o número pertence a um barbeiro"""
+        try:
+            return self.client.sismember("employees:phones", phone)
+        except Exception as e:
+            print(f"Redis is_employee error: {e}")
+            return False
+
+    def get_pending_confirmation(self, employee_phone: str) -> Optional[dict]:
+        """Obtém agendamento pendente de confirmação"""
+        try:
+            data = self.client.get(f"pending_confirmation:{employee_phone}")
+            return json.loads(data) if data else None
+        except Exception as e:
+            print(f"Redis get_pending_confirmation error: {e}")
+            return None
 
     # Para estado principal da sessão
     def get_state(self, phone: str) -> str | None:
