@@ -18,6 +18,7 @@ class ScheduleService(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     time_register: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     updated_by: Mapped[int] = mapped_column(Integer, nullable=True)
     deleted_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
@@ -52,12 +53,37 @@ class ScheduleService(Base):
                 is_check=is_check,
                 is_awayalone=is_awayalone,
                 is_deleted=False,
-                updated_at=datetime.now(),
+                created_at=datetime.now(),
             )
             db.add(schedule)
             return schedule
         except Exception as e:
             log.error(f"Logger: Error add_schedule: {e}")
+            return None
+
+    @classmethod
+    def update_is_check(
+        cls, db: Session, is_check: bool, user_id: int
+    ) -> Optional["ScheduleService"]:
+        try:
+            schedule = db.query(cls).where(
+                cls.is_deleted == False,
+                cls.is_check == False,
+                cls.user_id == user_id
+            ).first()
+            if not schedule:
+                log.warning(f"Logger: not_found_user_in_schedule")
+            
+            schedule.is_check = is_check
+            schedule.updated_at = datetime.now()
+            
+            db.commit()
+            db.refresh(schedule)
+            
+            return schedule
+        except Exception as e:
+            db.rollback()
+            log.error(f"Logger: Error update_schedule: {e}")
             return None
 
 

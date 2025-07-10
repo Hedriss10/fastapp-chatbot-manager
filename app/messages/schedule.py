@@ -43,6 +43,52 @@ class ScheduleCore:
         self.user = User
         self.db = db
 
+    def add_schedule(
+        self,
+        send_number: str,
+        employee_id: int,
+        date: str,
+        time: str,
+        product_id: int,
+    ):
+        try:
+            user_id = self.user.get_by_id_user(
+                send_number=send_number, db=self.db
+            )
+
+            datetime_str = f"{date} {time}"
+            time_register = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
+
+            schedule = self.schedule.add_schedule(
+                db=self.db,
+                time_register=time_register,
+                product_id=product_id,
+                employee_id=employee_id,
+                user_id=user_id,
+            )
+            self.db.commit()
+            return schedule
+        except Exception as e:
+            log.error(f"Logger: Error in add schedule: {e}")
+            self.db.rollback()
+    
+    def update_schedule(self, send_number: str) -> str:
+        try:
+            user_id = self.user.get_by_id_user(
+                send_number=send_number, db=self.db
+            )
+            
+            update = self.schedule.update_is_check(
+                db=self.db,
+                is_check=True,
+                user_id=user_id
+            )
+            return update
+        except Exception as e:
+            log.error(f"Logger: Error in add schedule: {e}")
+            self.db.rollback()
+    
+    
     def list_available_days(self) -> tuple[str, list[str]]:
         try:
             base_date = datetime.now().date() + timedelta(days=1)
@@ -333,6 +379,7 @@ class ScheduleCore:
 
 
 # if __name__ == "__main__":
+#     # Coletando o dict {'client_phone': '556194261245', 'employee_id': 29, 'date': '2025-07-10', 'time': '09:00', 'product_id': 12}
 #     from app.db.db import SessionLocal
 
 #     with SessionLocal() as session_local:
@@ -340,14 +387,15 @@ class ScheduleCore:
 #             message="Ola",
 #             sender_number="556194261245",
 #             push_name="Hedris Pereira",
-#             db=session_local
+#             db=session_local,
 #         )
-#         # 29
-#         # 2025-07-09
-#         # 09:00
-#         a.send_check_employee(
-#             employee_id=29,
-#             date_selected="2025-07-09",
-#             hour_selected="09:00",
-#             product_id=12
+#         # a.add_schedule(
+#         #     send_number="556194261245",
+#         #     employee_id=29,
+#         #     date="2025-07-10",
+#         #     time="09:00",
+#         #     product_id=12,
+#         # )
+#         a.update_schedule(
+#             send_number="556194261245"
 #         )

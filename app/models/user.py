@@ -33,7 +33,7 @@ class User(Base):
     @classmethod
     def get_by_id_user(cls, send_number: int, db: Session) -> Optional[int]:
         try:
-            user_id = db.query(cls.id).filter(cls.phone == send_number)
+            user_id = db.query(cls.id).filter(cls.phone == send_number).first()
             return user_id.id if user_id else None
         except Exception as e:
             log.error(f"Logger: error in colect ID user{e}")

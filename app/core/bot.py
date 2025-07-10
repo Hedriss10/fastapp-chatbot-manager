@@ -159,7 +159,6 @@ class BotCore:
                 scheduling_data["client_phone"], client_response
             )
             self.session.delete(f"pending_confirmation:{self.sender_number}")
-
             self._reset_session(scheduling_data["client_phone"])
 
             return "✅ Agendamento confirmado com sucesso! O cliente foi notificado."
