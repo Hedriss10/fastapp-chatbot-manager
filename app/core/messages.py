@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.db.db import SessionLocal
 from app.logs.log import setup_logger
 from app.messages.employee import EmployeeCore
+from app.messages.opening_hours import OpeningHoursCore
 from app.messages.products import ProductsCore
 from app.messages.schedule import ScheduleCore
 from app.messages.welcome import WelcomeCore
@@ -253,3 +254,17 @@ class MessagesCore:
                 f"Error messages core \
                 add update {e}"
             )
+
+    def send_opening_hours(self) -> str:
+        try:
+            with SessionLocal() as session_local:
+                stmt = OpeningHoursCore(
+                    message=self.message,
+                    sender_number=self.sender_number,
+                    push_name=self.push_name,
+                    db=session_local,
+                ).flow_opening_hours()
+                return stmt
+        except Exception as e:
+            log.error(f"Error messages core opening hours {e}")
+            return "⚠️ Erro ao listar horários de funcionamento. Tente novamente mais tarde."

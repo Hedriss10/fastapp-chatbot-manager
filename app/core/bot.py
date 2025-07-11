@@ -234,6 +234,15 @@ class BotCore:
                         1800,
                     )
                     return message
+
+                if msg == "2":
+                    message = self.message_handler.send_opening_hours()
+
+                    if not message:
+                        return "⚠️ Horários de funcionamento não disponíveis."
+
+                    return message
+
                 return "Por favor, digite 1 para iniciar o agendamento."
 
             elif state == "ESCOLHER_FUNCIONARIO":
