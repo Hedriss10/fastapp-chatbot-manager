@@ -11,8 +11,19 @@ EMOJI_NUMBERS = {
     8: "8️⃣",
     9: "9️⃣",
     10: "🔟",
+    0: "0️⃣",
 }
 
 
-def get_emoji_number(i: int) -> str:
-    return EMOJI_NUMBERS.get(i, f"{i}️⃣")
+def get_emoji_number(number: int) -> str:
+    if 1 <= number <= 10:
+        return EMOJI_NUMBERS[number]
+    else:
+        # For numbers greater than 10, combine emojis
+        tens = number // 10
+        units = number % 10
+        
+        tens_emoji = EMOJI_NUMBERS.get(tens, "")  # Get tens emoji or empty string
+        units_emoji = EMOJI_NUMBERS.get(units, "")  # Get units emoji or empty string
+
+        return f"{tens_emoji}{units_emoji}"

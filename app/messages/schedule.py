@@ -1,5 +1,4 @@
 # app/messages/schedule.py
-# TODO - falta implementar o add schedule, update no is_check
 
 from datetime import date, datetime, time, timedelta
 from typing import List, Tuple, Union
@@ -111,7 +110,6 @@ class ScheduleCore:
             message_format = result_message[0]["text"].format(
                 datas=options_day.strip()
             )
-
             return message_format, days_available
 
         except Exception as e:
@@ -258,6 +256,7 @@ class ScheduleCore:
                 continue
 
             slots_confirmedd.append((slot_start, slot_end))
+        print("Slots disponíveis:", slots_confirmedd)
         return slots_confirmedd
 
     def resume_scheduling(

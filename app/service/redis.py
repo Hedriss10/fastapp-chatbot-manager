@@ -1,4 +1,4 @@
-# src/service/redis.py
+# app/service/redis.py
 
 import json
 import os
@@ -22,7 +22,6 @@ class SessionManager:
             socket_connect_timeout=SOCKE_CONNECT_TIMEOUT,
         )
 
-    # No seu SessionManager (src/service/redis.py)
     def is_employee(self, phone: str) -> bool:
         """Verifica se o número pertence a um barbeiro"""
         try:
@@ -40,7 +39,6 @@ class SessionManager:
             print(f"Redis get_pending_confirmation error: {e}")
             return None
 
-    # Para estado principal da sessão
     def get_state(self, phone: str) -> str | None:
         try:
             return self.client.get(f"session:{phone}")

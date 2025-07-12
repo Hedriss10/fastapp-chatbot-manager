@@ -393,7 +393,7 @@ class BotCore:
                             "CONFIRMAR_AGENDAMENTO",
                             1800,
                         )
-                        return f"⏰ Horário: {slot[0]} às {slot[1]}. Confirmar agendamento? (sim/não)"
+                        return f"⏰ Horário: {slot[0]}. Confirmar agendamento? (sim/não)"
                 return self._reset_session()
 
             elif state == "CONFIRMAR_AGENDAMENTO":
@@ -474,8 +474,10 @@ class BotCore:
                             self.log.error(
                                 f"Error get connecting to barber info: {e}"
                             )
+                            self._reset_session()
                             return "⚠️ Erro ao conectar com o barbeiro. Tente novamente."
                     else:
+                        self._reset_session()
                         return "⚠️ Opção inválida. Escolha um número da lista de barbeiros."
                 else:
                     return "⚠️ Por favor, digite o número do barbeiro desejado."
