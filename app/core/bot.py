@@ -286,6 +286,16 @@ class BotCore:
 
                 return "Por favor, digite alguma opção valida."
 
+            elif state == "WAITING_FOR_NAME":
+                lastname = self.message_text
+                self.message_handler.send_add_user(
+                    lastname=lastname,
+                )
+                self.session.set_key(
+                    f"{self.sender_number}_state", "INICIO", 1800
+                )
+                return self.message_handler.send_welcome()
+
             elif state == "ESCOLHER_FUNCIONARIO":
                 employees = self.session.get_key(
                     f"{self.sender_number}_employees_list"

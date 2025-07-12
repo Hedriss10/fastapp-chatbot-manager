@@ -87,7 +87,8 @@ class ScheduleCore:
 
     def list_available_days(self) -> tuple[str, list[str]]:
         try:
-            base_date = datetime.now().date() + timedelta(days=1)
+            # base_date = datetime.now().date() + timedelta(days=1)
+            base_date = datetime.now().date()
 
             days_available = []
             options_day = ""
@@ -256,7 +257,6 @@ class ScheduleCore:
                 continue
 
             slots_confirmedd.append((slot_start, slot_end))
-        print("Slots disponíveis:", slots_confirmedd)
         return slots_confirmedd
 
     def resume_scheduling(

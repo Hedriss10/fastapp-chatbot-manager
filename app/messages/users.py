@@ -30,7 +30,6 @@ class UsersCore:
                 username=self.push_name,
                 lastname=lastname,
                 phone=self.sender_number,
-                push_name=self.push_name,
             )
             self.db.execute(stmt)
             self.db.commit()
