@@ -10,6 +10,7 @@ from app.messages.barber import BarberCore
 from app.messages.employee import EmployeeCore
 from app.messages.opening_hours import OpeningHoursCore
 from app.messages.products import ProductsCore
+from app.messages.raflle_promo import RafflePromoCore
 from app.messages.schedule import ScheduleCore
 from app.messages.welcome import WelcomeCore
 from app.utils.slots import get_emoji_number
@@ -336,3 +337,18 @@ class MessagesCore:
             log.error(f"Error messages core forward to barber {e}")
             return "⚠️ Erro ao encaminhar para o barbeiro. Tente novamente mais tarde."
         return "Erro desconhecido ao encaminhar para o barbeiro."
+
+    def send_raffle_promo_info(self) -> str:
+        try:
+            with SessionLocal() as session_local:
+                stmt = RafflePromoCore(
+                    message=self.message,
+                    sender_number=self.sender_number,
+                    push_name=self.push_name,
+                    db=session_local,
+                ).get_raffle_promo_info()
+                return stmt
+        except Exception as e:
+            log.error(f"Error messages core raffle promo info {e}")
+            return "⚠️ Erro ao obter informações da promoção. Tente novamente mais tarde."
+        return "Erro desconhecido ao obter informações da promoção."

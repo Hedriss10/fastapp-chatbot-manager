@@ -250,7 +250,7 @@ class BotCore:
 
                     if not message:
                         return "⚠️ Falar com atendente não está disponível."
-                    
+
                     self.session.set_key(
                         f"{self.sender_number}_state", "ASK_WHICH_BARBER", 1800
                     )
@@ -261,7 +261,13 @@ class BotCore:
                     )
                     return employees
 
-                return "Por favor, digite 1 para iniciar o agendamento."
+                if msg == "4":
+                    message = self.message_handler.send_raffle_promo_info()
+                    if not message:
+                        return "⚠️ Promoção de Raffle não está disponível no momento."
+                    return message
+
+                return "Por favor, digite alguma opção valida."
 
             elif state == "ESCOLHER_FUNCIONARIO":
                 employees = self.session.get_key(
