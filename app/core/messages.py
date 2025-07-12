@@ -1,10 +1,12 @@
 # app/core/messages.py
 
+from typing import Optional
 
 from sqlalchemy.orm import Session
 
 from app.db.db import SessionLocal
 from app.logs.log import setup_logger
+from app.messages.barber import BarberCore
 from app.messages.employee import EmployeeCore
 from app.messages.opening_hours import OpeningHoursCore
 from app.messages.products import ProductsCore
@@ -268,3 +270,69 @@ class MessagesCore:
         except Exception as e:
             log.error(f"Error messages core opening hours {e}")
             return "⚠️ Erro ao listar horários de funcionamento. Tente novamente mais tarde."
+
+    def send_barber_info(self) -> tuple[str, list[dict]]:
+        try:
+            with SessionLocal() as session_local:
+                message, employees = BarberCore(
+                    message=self.message,
+                    sender_number=self.sender_number,
+                    push_name=self.push_name,
+                    db=session_local,
+                ).get_barber_info()
+                return message, employees
+        except Exception as e:
+            log.error(f"Error messages core barber info {e}")
+            return (
+                "⚠️ Erro ao obter informações do barbeiro. Tente novamente mais tarde.",
+                [],
+            )
+
+    def send_ask_subject(self) -> str:
+        try:
+            with SessionLocal() as session_local:
+                stmt = BarberCore(
+                    message=self.message,
+                    sender_number=self.sender_number,
+                    push_name=self.push_name,
+                    db=session_local,
+                ).get_aks_subject_barber_info()
+                return stmt
+        except Exception as e:
+            log.error(f"Error messages core ask subject {e}")
+            return "⚠️ Erro ao obter informações do assunto. Tente novamente mais tarde."
+        return "Erro desconhecido ao obter informações do assunto."
+
+    def send_connecting_to_barber(self, employee_id: int) -> Optional[int]:
+        try:
+            with SessionLocal() as session_local:
+                stmt = BarberCore(
+                    message=self.message,
+                    sender_number=self.sender_number,
+                    push_name=self.push_name,
+                    db=session_local,
+                ).get_connecting_to_barber_info(employee_id=employee_id)
+                return stmt
+        except Exception as e:
+            log.error(f"Error messages core ask subject {e}")
+            return "⚠️ Erro ao obter informações do assunto. Tente novamente mais tarde."
+        return "Erro desconhecido ao obter informações do assunto."
+
+    def send_forward_to_barber(
+        self, type_schedule: str, employee_id: int
+    ) -> Optional[str]:
+        try:
+            with SessionLocal() as session_local:
+                stmt, emploee_phone = BarberCore(
+                    message=self.message,
+                    sender_number=self.sender_number,
+                    push_name=self.push_name,
+                    db=session_local,
+                ).get_forward_to_barber_info(
+                    type_schedule=type_schedule, employee_id=employee_id
+                )
+                return stmt, emploee_phone
+        except Exception as e:
+            log.error(f"Error messages core forward to barber {e}")
+            return "⚠️ Erro ao encaminhar para o barbeiro. Tente novamente mais tarde."
+        return "Erro desconhecido ao encaminhar para o barbeiro."

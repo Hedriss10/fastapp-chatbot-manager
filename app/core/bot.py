@@ -63,6 +63,7 @@ class BotCore:
         """Envia mensagem para qualquer número"""
         try:
             payload = {"number": number, "text": message, "delay": 2000}
+            print(f"Payload: {payload}")
             headers = {
                 "apikey": self.apikey,
                 "Content-Type": "application/json",
@@ -240,8 +241,25 @@ class BotCore:
 
                     if not message:
                         return "⚠️ Horários de funcionamento não disponíveis."
-
                     return message
+
+                if msg == "3":
+                    employees, message = (
+                        self.message_handler.send_barber_info()
+                    )
+
+                    if not message:
+                        return "⚠️ Falar com atendente não está disponível."
+                    
+                    self.session.set_key(
+                        f"{self.sender_number}_state", "ASK_WHICH_BARBER", 1800
+                    )
+                    self.session.set_key(
+                        f"{self.sender_number}_ask_which_barber_employee_id",
+                        message,
+                        1800,
+                    )
+                    return employees
 
                 return "Por favor, digite 1 para iniciar o agendamento."
 
@@ -414,6 +432,74 @@ class BotCore:
 
             elif state == "AGENDAMENTO_CONCLUIDO":
                 return "✅ Agendamento confirmado! Obrigado."
+
+            elif state == "AGENDAMENTO_CONCLUIDO":
+                return "✅ Agendamento confirmado! Obrigado."
+
+            elif state == "ASK_WHICH_BARBER":
+                employees = self.session.get_key(
+                    f"{self.sender_number}_ask_which_barber_employee_id"
+                )
+                if employees and msg.isdigit():
+                    idx = int(msg) - 1
+                    if 0 <= idx < len(employees):
+                        employee = employees[idx]
+                        employee_id = employee["id"]
+                        self.session.set_key(
+                            f"{self.sender_number}_selected_employee_id",
+                            employee_id,
+                            1800,
+                        )
+                        # Direto para o estado de conexão
+                        self.session.set_key(
+                            f"{self.sender_number}_state",
+                            "FORWARD_TO_BARBER",
+                            1800,
+                        )
+                        # Construir a mensagem de conexão
+                        try:
+                            connecting_message = (
+                                self.message_handler.send_connecting_to_barber(
+                                    employee_id=employee_id
+                                )
+                            )
+                            return connecting_message
+                        except Exception as e:
+                            self.log.error(
+                                f"Error get connecting to barber info: {e}"
+                            )
+                            return "⚠️ Erro ao conectar com o barbeiro. Tente novamente."
+                    else:
+                        return "⚠️ Opção inválida. Escolha um número da lista de barbeiros."
+                else:
+                    return "⚠️ Por favor, digite o número do barbeiro desejado."
+
+            elif state == "FORWARD_TO_BARBER":
+                employee_id = self.session.get_key(
+                    f"{self.sender_number}_selected_employee_id"
+                )
+                if employee_id:
+                    try:
+                        response, employee_phone = (
+                            self.message_handler.send_forward_to_barber(
+                                employee_id=employee_id,
+                                type_schedule="padrao",  # Definindo o type_schedule como "padrao"
+                            )
+                        )
+                        if response:
+                            # Envia a mensagem para o barbeiro
+                            if self._send_message_to_number(
+                                employee_phone, response
+                            ):
+                                return "✅ Mensagem enviada ao barbeiro."
+                            else:
+                                return "⚠️ Erro ao enviar mensagem ao barbeiro."
+                        else:
+                            return "⚠️ Erro ao obter informações do barbeiro."
+                    except Exception as e:
+                        self.log.error(f"Error forwarding to barber: {e}")
+                        return "⚠️ Erro ao encaminhar para o barbeiro."
+                return "⚠️ Barbeiro não selecionado. Inicie novamente."
 
             return self._reset_session()
 
