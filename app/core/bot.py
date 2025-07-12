@@ -210,6 +210,11 @@ class BotCore:
 
             state = self.session.get_key(f"{self.sender_number}_state")
 
+            # Command to return to the main menu
+            if msg == "menu":
+                self._reset_session()
+                return self.message_handler.send_welcome()
+
             # Fluxo inicial
             if state is None:
                 self.session.set_key(
@@ -220,21 +225,33 @@ class BotCore:
             # Máquina de estados principal
             if state == "INICIO":
                 if msg == "1":
-                    message, employees = (
-                        self.message_handler.send_list_employee()
-                    )
-                    if not employees:
-                        return "⚠️ Nenhum profissional disponível."
+                    if self.message_handler.send_check_existing_user():
+                        message, employees = (
+                            self.message_handler.send_list_employee()
+                        )
+                        if not employees:
+                            return "⚠️ Nenhum profissional disponível."
 
-                    self.session.set_key(
-                        f"{self.sender_number}_employees_list", employees, 1800
-                    )
-                    self.session.set_key(
-                        f"{self.sender_number}_state",
-                        "ESCOLHER_FUNCIONARIO",
-                        1800,
-                    )
-                    return message
+                        self.session.set_key(
+                            f"{self.sender_number}_employees_list",
+                            employees,
+                            1800,
+                        )
+                        self.session.set_key(
+                            f"{self.sender_number}_state",
+                            "ESCOLHER_FUNCIONARIO",
+                            1800,
+                        )
+                        return message
+
+                    else:
+                        message = "👥 Por favor, envie seu nome completo *(nome e sobrenome)*"
+                        self.session.set_key(
+                            f"{self.sender_number}_state",
+                            "WAITING_FOR_NAME",
+                            1800,
+                        )
+                        return "👥 Por favor, envie seu nome completo *(nome e sobrenome)*.\n\nDigite 'menu' para voltar ao início."
 
                 if msg == "2":
                     message = self.message_handler.send_opening_hours()

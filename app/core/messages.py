@@ -12,6 +12,7 @@ from app.messages.opening_hours import OpeningHoursCore
 from app.messages.products import ProductsCore
 from app.messages.raflle_promo import RafflePromoCore
 from app.messages.schedule import ScheduleCore
+from app.messages.users import UsersCore
 from app.messages.welcome import WelcomeCore
 from app.utils.slots import get_emoji_number
 
@@ -352,3 +353,31 @@ class MessagesCore:
             log.error(f"Error messages core raffle promo info {e}")
             return "⚠️ Erro ao obter informações da promoção. Tente novamente mais tarde."
         return "Erro desconhecido ao obter informações da promoção."
+
+    def send_check_existing_user(self) -> bool:
+        try:
+            with SessionLocal() as session_local:
+                user_id = UsersCore(
+                    message=self.message,
+                    sender_number=self.sender_number,
+                    push_name=self.push_name,
+                    db=session_local,
+                ).check_user_exists()
+                return user_id
+        except Exception as e:
+            log.error(f"Error messages core check existing user {e}")
+            return None
+
+    def send_add_user(self, lastname: str) -> str:
+        try:
+            with SessionLocal() as session_local:
+                stmt = UsersCore(
+                    message=self.message,
+                    sender_number=self.sender_number,
+                    push_name=self.push_name,
+                    db=session_local,
+                ).add_users(lastname=lastname)
+                return stmt
+        except Exception as e:
+            log.error(f"Error messages core add user {e}")
+            return "⚠️ Erro ao adicionar usuário. Tente novamente mais tarde."
