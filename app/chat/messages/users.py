@@ -4,7 +4,7 @@ from sqlalchemy import insert
 from sqlalchemy.orm import Session
 
 from app.logs.log import setup_logger
-from app.models.users.user import User
+from app.models.users.users import User
 
 log = setup_logger()
 

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.base import BaseCore
 from app.logs.log import setup_logger
-from app.models.users.user import User
+from app.models.users.users import User
 from app.schemas.user import UserCreate
 
 logger = setup_logger()

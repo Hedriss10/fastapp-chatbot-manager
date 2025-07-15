@@ -12,7 +12,7 @@ from app.models.messages import SummaryMessage
 from app.models.product import Products
 from app.models.schedule import ScheduleBlock, ScheduleService
 from app.models.time_recording import ScheduleEmployee
-from app.models.users.user import User
+from app.models.users.users import User
 
 log = setup_logger()
 
