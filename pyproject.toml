@@ -1,27 +1,25 @@
-name = "fastapp build chatbot manager"
+[project]
+name = "fastapp-build-chatbot-manager"
 version = "1.0.0"
-description = "Fastapp build chatbot manager with whatsapp"
+description = "Fastapp build chatbot manager with WhatsApp"
 authors = [
-    {name = "Hedris Pereira", email = "hedrisgts@gmail.com"}
+    { name = "Hedris Pereira", email = "hedrisgts@gmail.com" }
 ]
 readme = "README.md"
 requires-python = ">=3.12,<4.0"
 
 [tool.ruff]
-# Define o comprimento máximo da linha como 79.
 line-length = 79
 
 [tool.ruff.lint]
-# Adiciona a regra `line-too-long` (E501) explicitamente.
 extend-select = ["E501"]
-# Seleciona as regras para linting.
 select = ["I", "F", "E", "W", "PL", "PT"]
-# Ignora as regras especificadas.
 ignore = ["E402", "F811"]
 
 [tool.pytest.ini_options] # para gerar o html --cov-report=html
+pythonpath = ["."]
 testpaths = ["tests"]
-asyncio_mode = "auto"
 python_files = "test_*.py"
 python_functions = "test_*"
-addopts = "--verbose --cov=src"
+addopts = "--verbose --cov=app"
+# asyncio_mode removido pois não é mais suportado aqui

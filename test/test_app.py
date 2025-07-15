@@ -1,10 +1,8 @@
-# test/test_app.py
+from fastapi.testclient import TestClient
+from app.main import app
 
+client = TestClient(app)
 
-from fastapi import testclient
-
-@testclient
-def test_read_main(client: testclient.TestClient) -> None:
+def test_read_main():
     response = client.get("/heartcheck")
     assert response.status_code == 200
-    
