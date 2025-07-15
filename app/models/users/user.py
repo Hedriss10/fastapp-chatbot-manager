@@ -38,6 +38,15 @@ class User(Base):
         except Exception as e:
             log.error(f"Logger: error in colect ID user{e}")
             return None
-        
+
     @classmethod
     def add_users(cls): ...
+
+    @classmethod
+    def list_users(cls): ...
+
+    @classmethod
+    def update_users(cls): ...
+
+    @classmethod
+    def delete_users(self): ...

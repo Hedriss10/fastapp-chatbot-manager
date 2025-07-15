@@ -2,6 +2,7 @@
 
 
 from fastapi import APIRouter, HTTPException
+
 from app.logs.log import setup_logger
 
 log = setup_logger()
@@ -15,5 +16,3 @@ async def get_healtcheck():
         return {"status": "ok"}
     except HTTPException as e:
         raise e
-
-

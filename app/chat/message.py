@@ -4,8 +4,6 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from app.db.db import SessionLocal
-from app.logs.log import setup_logger
 from app.chat.messages.barber import BarberCore
 from app.chat.messages.employee import EmployeeCore
 from app.chat.messages.opening_hours import OpeningHoursCore
@@ -14,6 +12,8 @@ from app.chat.messages.raflle_promo import RafflePromoCore
 from app.chat.messages.schedule import ScheduleCore
 from app.chat.messages.users import UsersCore
 from app.chat.messages.welcome import WelcomeCore
+from app.db.db import SessionLocal
+from app.logs.log import setup_logger
 from app.utils.slots import get_emoji_number
 
 log = setup_logger()
