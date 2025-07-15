@@ -98,9 +98,7 @@ async def webhook(payload: WebhookPayload):
         return {"status": "success"}
 
     except HTTPException as e:
-        print("COLETANDO O ERRO DE RETORNO", e)
         raise e
     except Exception as e:
-        print("Coletando o errr", e)
         log.error(f"Error in webhook: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
