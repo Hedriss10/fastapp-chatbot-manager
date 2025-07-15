@@ -12,6 +12,12 @@ from app.logs.log import setup_logger
 log = setup_logger()
 
 
+USER_FIELDS = [
+    "username",
+    "lastname",
+    "phone",
+]
+
 class User(Base):
     __tablename__ = "user"
     __table_args__ = {"schema": "public"}
