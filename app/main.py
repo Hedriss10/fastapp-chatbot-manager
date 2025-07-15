@@ -1,9 +1,11 @@
 from fastapi import FastAPI
 
 from app.routes.bot import bot
+from app.routes.healtchek import heartcheck
 
-app = FastAPI(title="Fastapp build chatbot manager", version="0.0.1")
+app = FastAPI(title="Fastapp build platform manager", version="1.0.0")
 app.include_router(bot)
+app.include_router(heartcheck)
 
 
 if __name__ == "__main__":
