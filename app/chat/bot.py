@@ -4,7 +4,7 @@ from typing import Dict, Optional, Tuple
 import httpx
 from dotenv import load_dotenv
 
-from app.core.messages import MessagesCore
+from app.chat.message import MessagesCore
 from app.logs.log import setup_logger
 from app.service.redis import SessionManager
 

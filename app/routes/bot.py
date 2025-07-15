@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 
-from app.core.bot import BotCore
+from app.chat.bot import BotCore
 from app.logs.log import setup_logger
 from app.schemas.webhook import WebhookPayload
 from app.service.redis import SessionManager

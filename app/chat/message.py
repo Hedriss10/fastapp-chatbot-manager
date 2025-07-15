@@ -6,14 +6,14 @@ from sqlalchemy.orm import Session
 
 from app.db.db import SessionLocal
 from app.logs.log import setup_logger
-from app.messages.barber import BarberCore
-from app.messages.employee import EmployeeCore
-from app.messages.opening_hours import OpeningHoursCore
-from app.messages.products import ProductsCore
-from app.messages.raflle_promo import RafflePromoCore
-from app.messages.schedule import ScheduleCore
-from app.messages.users import UsersCore
-from app.messages.welcome import WelcomeCore
+from app.chat.messages.barber import BarberCore
+from app.chat.messages.employee import EmployeeCore
+from app.chat.messages.opening_hours import OpeningHoursCore
+from app.chat.messages.products import ProductsCore
+from app.chat.messages.raflle_promo import RafflePromoCore
+from app.chat.messages.schedule import ScheduleCore
+from app.chat.messages.users import UsersCore
+from app.chat.messages.welcome import WelcomeCore
 from app.utils.slots import get_emoji_number
 
 log = setup_logger()
