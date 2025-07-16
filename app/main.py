@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 
-from app.routes.users import users
 from app.routes.bot import bot
 from app.routes.healtchek import heartcheck
+from app.routes.users import users
 
 app = FastAPI(title="Fastapp build platform manager", version="1.0.0")
 app.include_router(users)

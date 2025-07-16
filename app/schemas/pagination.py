@@ -1,16 +1,18 @@
 # app/schemas/pagination.py
 
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from pydantic import BaseModel, Field
+
 
 class PaginationParams(BaseModel):
     current_page: int = Field(1, ge=1)
     rows_per_page: int = Field(10, ge=1, le=100)
-    order_by: Optional[str] = "id"
-    sort_by: Optional[str] = "asc"
+    order_by: Optional[str] = None
+    sort_by: Optional[str] = None
     filter_by: Optional[str] = None
-    
-    
+
+
 class BuildMetadata(BaseModel):
     total_count: int
     current_page: int
@@ -18,7 +20,7 @@ class BuildMetadata(BaseModel):
     total_pages: int
 
     def build_metadata(
-        self, total_count: int, params: PaginationParams
+        total_count: int, params: PaginationParams
     ) -> Dict[str, Any]:
         """Build metadata for the response."""
         return {

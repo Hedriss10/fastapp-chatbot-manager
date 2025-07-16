@@ -8,6 +8,7 @@ from sqlalchemy.orm import Mapped, Session, mapped_column
 
 from app.db.db import Base
 from app.logs.log import setup_logger
+from app.schemas.pagination import BuildMetadata
 from app.utils.metadata import Metadata
 
 log = setup_logger()
@@ -18,6 +19,7 @@ USER_FIELDS = [
     "lastname",
     "phone",
 ]
+
 
 class User(Base):
     __tablename__ = "user"
@@ -108,14 +110,11 @@ class User(Base):
                 (pagination_params.current_page - 1)
                 * pagination_params.rows_per_page
             ).limit(pagination_params.rows_per_page)
-            
+
             result = db.execute(paginated_stmt).fetchall()
-            metadata = cls.build_metadata(total_count, pagination_params)
-            return (
-                Metadata(result).model_to_list(),
-                metadata
-            ) # todo - adjust metdata
-            
+            metadata = BuildMetadata(total_count, pagination_params)
+            return (Metadata(result).model_to_list(), metadata)
+
         except Exception as e:
             log.error(f"Logger: Error list_users: {e}")
             raise
