@@ -23,8 +23,8 @@ log = setup_logger()
 
 
 class Employee(Base):
-    __tablename__ = "employee"
-    __table_args__ = {"schema": "public"}
+    __tablename__ = "employees"
+    __table_args__ = {"schema": "employee"}
 
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(String(120), nullable=False)

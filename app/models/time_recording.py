@@ -33,7 +33,7 @@ class ScheduleEmployee(Base):
 
     employee_id: Mapped[int] = mapped_column(
         Integer,
-        ForeignKey("public.employee.id", ondelete="CASCADE"),
+        ForeignKey("employee.employees.id", ondelete="CASCADE"),
         nullable=False,
     )
 

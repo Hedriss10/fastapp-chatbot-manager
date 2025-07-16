@@ -101,7 +101,7 @@ class ScheduleBlock(Base):
     end_time: Mapped[datetime] = mapped_column(DateTime)
 
     employee_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("public.employee.id")
+        Integer, ForeignKey("employee.employees.id")
     )
 
     created_at: Mapped[datetime] = mapped_column(
