@@ -36,7 +36,8 @@ class BotCore:
             keys = self.session.client.keys(f"*{phone}*")
             if keys:
                 self.session.client.delete(*keys)
-            return "⚠️ Sua sessão foi reiniciada. Envie qualquer mensagem para começar novamente. 👋"
+            return "⚠️ Sua sessão foi reiniciada. \
+            Envie qualquer mensagem para começar novamente. 👋"
         except Exception as e:
             self.log.error(f"Error resetting session: {e}")
             return "⚠️ Ocorreu um erro ao reiniciar sua sessão."
