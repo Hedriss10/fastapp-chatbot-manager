@@ -35,13 +35,6 @@ class MessagesCore:
         self.push_name = push_name
 
     def send_welcome(self):
-        """
-            _send_welcome_
-            Messenger function of sending the welcome.
-            Also responsible for giving up the summary with the option.
-        Returns:
-            _type_: _summary_
-        """
         try:
             with SessionLocal() as session_local:
                 stmt = WelcomeCore(db=session_local).flow_welcome()

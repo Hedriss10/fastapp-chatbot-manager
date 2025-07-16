@@ -22,4 +22,3 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 python_functions = "test_*"
 addopts = "--verbose --cov=app"
-# asyncio_mode removido pois não é mais suportado aqui

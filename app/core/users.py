@@ -1,4 +1,4 @@
-# core/user_core.py
+# app/core/users.py
 
 from sqlalchemy.orm import Session
 

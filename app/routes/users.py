@@ -10,7 +10,7 @@ from app.schemas.pagination import PaginationParams
 users = APIRouter(prefix="/users", tags=["users"])
 
 
-@users.get("/", description="List all users")
+@users.get("", description="List all users")
 async def list_users(
     pagination: PaginationParams = Depends(), db: Session = Depends(get_db)
 ):
