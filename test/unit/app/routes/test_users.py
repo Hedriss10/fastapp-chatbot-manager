@@ -1,6 +1,7 @@
 # test/unit/app/routes/test_users.py
 
 from fastapi.testclient import TestClient
+
 from app.main import app
 
 client = TestClient(app)

@@ -2,8 +2,9 @@
 
 from collections import namedtuple
 from unittest.mock import MagicMock
-from app.schemas.pagination import PaginationParams
+
 from app.models.users.users import User
+from app.schemas.pagination import PaginationParams
 
 
 def test_list_users_mocked():

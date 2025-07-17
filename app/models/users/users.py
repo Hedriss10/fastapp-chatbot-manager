@@ -1,14 +1,29 @@
 # app/models/user.py
 
 from datetime import datetime
-from typing import Optional
+from typing import Any, Dict, List, Optional, Tuple
 
-from typing import Dict, Tuple, Union, List, Any
-from sqlalchemy import Boolean, DateTime, String, Text, func, insert, select
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    String,
+    Text,
+    func,
+    insert,
+    select,
+    update,
+)
 from sqlalchemy.orm import Mapped, Session, mapped_column
 
 from app.db.db import Base
 from app.logs.log import setup_logger
+from app.schemas.user import (
+    UserCreate,
+    UserOut,
+    UserUpdateOut,
+    UserUpdate,
+    UserDeleteOut,
+)
 from app.schemas.pagination import BuildMetadata, PaginationParams
 from app.utils.metadata import Metadata
 
@@ -47,12 +62,14 @@ class User(Base):
             return user_id.id if user_id else None
         except Exception as e:
             log.error(f"Logger: error in colect ID user{e}")
-            return None
+            raise
 
     @classmethod
     def get_user(cls, id: int, db: Session):
         try:
-            stmt = select(cls).where(cls.id == id)
+            stmt = select(
+                cls.id, cls.username, cls.lastname, cls.session_token
+            ).where(cls.id == id, cls.is_deleted == False)
             result = db.execute(stmt).fetchall()
             return Metadata(result).model_to_list()
         except Exception as e:
@@ -60,16 +77,26 @@ class User(Base):
             raise
 
     @classmethod
-    def add_users(cls, data: dict, db: Session):
+    def add_users(cls, data: UserCreate, db: Session):
         try:
-            stmt = insert(cls).values(
-                username=data.get("username"),
-                lastname=data.get("lastname"),
-                phone=data.get("phone"),
+            stmt = (
+                insert(cls)
+                .values(
+                    username=data.username,
+                    lastname=data.lastname,
+                    phone=data.phone,
+                )
+                .returning(cls.id)
             )
-            db.execute(stmt)
+            result = db.execute(stmt)
             db.commit()
-            return stmt
+            user_id = result.scalar_one()
+            return UserOut(
+                id=user_id,
+                username=data.username,
+                lastname=data.lastname,
+                phone=data.phone,
+            )
         except Exception as e:
             log.error(f"Logger: Error add_users: {e}")
             raise
@@ -143,7 +170,32 @@ class User(Base):
             raise
 
     @classmethod
-    def update_users(cls): ...
+    def update_users(cls, id: int, data: UserUpdate, db: Session):
+        try:
+            user = db.query(cls).filter(cls.id == id).first()
+
+            update_key = {}
+            for key, value in data:
+                if value is not None and key in USER_FIELDS:
+                    if hasattr(user, key):
+                        setattr(user, key, value)
+                        update_key[key] = value
+
+            stmt = update(cls).where(cls.id == id).values(update_key)
+            db.execute(stmt)
+            db.commit()
+            return UserUpdateOut(message_id="user_updated_successfully")
+        except Exception as e:
+            log.error(f"Logger: Error update_users: {e}")
+            raise
 
     @classmethod
-    def delete_users(self): ...
+    def delete_users(cls, id: int, db: Session):
+        try:
+            users = db.query(cls).filter(cls.id == id).first()
+            users.is_deleted = True
+            db.commit()
+            return UserDeleteOut(message_id="user_deleted_successfully")
+        except Exception as e:
+            log.error(f"Logger: Error delete_users: {e}")
+            raise
