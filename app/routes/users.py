@@ -1,18 +1,19 @@
 # app/routes/users.py
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-from pydantic import ValidationError
 from fastapi.exceptions import HTTPException
+from pydantic import ValidationError
+from sqlalchemy.orm import Session
+
 from app.core.users import UserCore
 from app.db.depency import get_db
 from app.schemas.pagination import PaginationParams
 from app.schemas.user import (
     UserCreate,
-    UserUpdate,
-    UserOut,
-    UserUpdateOut,
     UserDeleteOut,
+    UserOut,
+    UserUpdate,
+    UserUpdateOut,
 )
 
 users = APIRouter(prefix="/users", tags=["users"])
@@ -24,7 +25,7 @@ async def add_users(data: UserCreate, db: Session = Depends(get_db)):
         return UserCore.add_users(data, db)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=500,
             detail="Something went wrong while creating the user.",
@@ -38,7 +39,7 @@ async def list_users(
     try:
         users, metadata = UserCore.list_users(pagination, db)
         return {"data": users, "metadata": metadata}
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=500,
             detail="Something went wrong while getting the users.",
@@ -49,7 +50,7 @@ async def list_users(
 async def get_user(id: int, db: Session = Depends(get_db)):
     try:
         return UserCore.get_user(id, db)
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=500,
             detail="Something went wrong while getting the user.",
@@ -64,7 +65,7 @@ async def update_user(
 ):
     try:
         return UserCore.update_users(id, data, db)
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=500,
             detail="Something went wrong while updating the user.",
@@ -77,7 +78,7 @@ async def update_user(
 async def delete_user(id: int, db: Session = Depends(get_db)):
     try:
         return UserCore.delete_users(id, db)
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=500,
             detail="Something went wrong while deleting the user.",

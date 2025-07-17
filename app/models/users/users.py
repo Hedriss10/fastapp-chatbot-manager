@@ -17,14 +17,14 @@ from sqlalchemy.orm import Mapped, Session, mapped_column
 
 from app.db.db import Base
 from app.logs.log import setup_logger
+from app.schemas.pagination import BuildMetadata, PaginationParams
 from app.schemas.user import (
     UserCreate,
-    UserOut,
-    UserUpdateOut,
-    UserUpdate,
     UserDeleteOut,
+    UserOut,
+    UserUpdate,
+    UserUpdateOut,
 )
-from app.schemas.pagination import BuildMetadata, PaginationParams
 from app.utils.metadata import Metadata
 
 log = setup_logger()
