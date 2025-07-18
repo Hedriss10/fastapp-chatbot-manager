@@ -22,7 +22,6 @@ def test_list_users_route(client):
 
 @patch("app.routes.users.UserCore.add_users")
 def test_create_user_success(mock_add_users):
-    # Define o retorno esperado do mock
     mock_add_users.return_value = {
         "id": 1,
         "username": "john",

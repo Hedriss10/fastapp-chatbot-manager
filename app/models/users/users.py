@@ -25,7 +25,9 @@ from app.schemas.user import (
     UserUpdate,
     UserUpdateOut,
 )
+from app.schemas.login import LoginUser, LoginUserOut
 from app.utils.metadata import Metadata
+from app.auth.auth import create_access_token
 
 log = setup_logger()
 
@@ -62,6 +64,32 @@ class User(Base):
             return user_id.id if user_id else None
         except Exception as e:
             log.error(f"Logger: error in colect ID user{e}")
+            raise
+
+    @classmethod
+    def get_login(cls, data: LoginUser, db: Session):
+        try:
+            user = db.query(cls).filter(cls.phone == data.phone).first()
+            if user:
+                access_token = create_access_token({"sub": str(user.id)})
+
+                return LoginUserOut(
+                    user={
+                        "id": user.id,
+                        "username": user.username,
+                        "lastname": user.lastname,
+                        "phone": user.phone
+                    },
+                    metadata={
+                        "access_token": access_token
+                    },
+                    message_id="user_logged_successfully"
+                )
+            # if login:
+            #     return LoginUserOut(message_id="user_logged_successfully")
+            return None
+        except Exception as e:
+            log.error(f"Logger: Error get_login: {e}")
             raise
 
     @classmethod

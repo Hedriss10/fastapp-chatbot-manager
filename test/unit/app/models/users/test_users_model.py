@@ -21,5 +21,4 @@ def test_list_users_mocked():
     )
 
     users, metadata = User.list_users(pagination, db_mock)
-    print(users)
     assert users[0]["col_1"] == "Carlos"
