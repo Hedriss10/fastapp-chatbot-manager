@@ -72,7 +72,6 @@ class User(Base):
             user = db.query(cls).filter(cls.phone == data.phone).first()
             if user:
                 access_token = create_access_token({"sub": str(user.id)})
-
                 return LoginUserOut(
                     user={
                         "id": user.id,
@@ -80,18 +79,14 @@ class User(Base):
                         "lastname": user.lastname,
                         "phone": user.phone
                     },
-                    metadata={
-                        "access_token": access_token
-                    },
+                    access_token=access_token,
                     message_id="user_logged_successfully"
                 )
-            # if login:
-            #     return LoginUserOut(message_id="user_logged_successfully")
             return None
         except Exception as e:
             log.error(f"Logger: Error get_login: {e}")
             raise
-
+    
     @classmethod
     def get_user(cls, id: int, db: Session):
         try:

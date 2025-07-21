@@ -14,7 +14,9 @@ from sqlalchemy import (
     func,
     text,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, Session
+from app.schemas.login import LoginEmployee, LoginEmployeeOut
+from app.auth.auth import create_access_token
 
 from app.db.db import Base
 from app.logs.log import setup_logger
@@ -46,6 +48,27 @@ class Employee(Base):
 
     def __repr__(self):
         return f"""{self.username} created employee_successfully"""
+    
+
+    @classmethod
+    def get_login(cls, data: LoginEmployee, db: Session):
+        try:
+            employee = db.query(cls).filter(cls.phone == data.phone).first()
+            if employee:
+                access_token = create_access_token({"sub": str(employee.id)})
+                return LoginEmployeeOut(
+                    user={
+                        "id": employee.id,
+                        "username": employee.username,
+                        "phone": employee.phone
+                    },
+                    access_token=access_token,
+                    message_id="employee_logged_successfully"
+                )
+            return None
+        except Exception as e:
+            log.error(f"Logger: Error get_login: {e}")
+            raise
 
 
 class ScheduleEmployee(Base):
