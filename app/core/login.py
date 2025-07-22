@@ -8,12 +8,12 @@ from app.logs.log import setup_logger
 
 log = setup_logger()
 
-class LoginCore:
 
+class LoginCore:
     @staticmethod
     async def login_user(data: LoginUser, db: Session = Session()):
         return User.get_login(data, db)
-    
+
     @staticmethod
     async def login_employee(data: LoginEmployee, db: Session = Session()):
         return Employee.get_login(data, db)

@@ -4,9 +4,11 @@ from app.routes.bot import bot
 from app.routes.healtchek import heartcheck
 from app.routes.users import users
 from app.routes.login import login
+from app.routes.employee import employee
 
 app = FastAPI(title="Fastapp build platform manager", version="1.0.0")
 
+app.include_router(employee)
 app.include_router(login)
 app.include_router(users)
 app.include_router(bot)

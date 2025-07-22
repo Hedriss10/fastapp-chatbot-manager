@@ -77,16 +77,16 @@ class User(Base):
                         "id": user.id,
                         "username": user.username,
                         "lastname": user.lastname,
-                        "phone": user.phone
+                        "phone": user.phone,
                     },
                     access_token=access_token,
-                    message_id="user_logged_successfully"
+                    message_id="user_logged_successfully",
                 )
             return None
         except Exception as e:
             log.error(f"Logger: Error get_login: {e}")
             raise
-    
+
     @classmethod
     def get_user(cls, id: int, db: Session):
         try:
