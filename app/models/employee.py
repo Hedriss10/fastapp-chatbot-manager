@@ -1,7 +1,7 @@
 # app/models/employee.py
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 from passlib.context import CryptContext
 
@@ -24,6 +24,7 @@ from app.schemas.login import LoginEmployee, LoginEmployeeOut
 from app.schemas.employee import (
     EmployeeBase,
     EmployeeOut,
+    EmployeeGetIdOut,
     EmployeeUpdate,
     EmployeeUpdateOut,
     EmployeeDeleteOut,
@@ -83,6 +84,7 @@ class Employee(Base):
                         "id": employee.id,
                         "username": employee.username,
                         "phone": employee.phone,
+                        "role": employee.role,
                     },
                     access_token=access_token,
                     message_id="employee_logged_successfully",
@@ -90,6 +92,28 @@ class Employee(Base):
             return None
         except Exception as e:
             log.error(f"Logger: Error get_login: {e}")
+            raise
+
+    @classmethod
+    def get_employee(cls, id: int, db: Session) -> Dict[str, Any]:
+        try:
+            employee = (
+                db.query(cls)
+                .filter(cls.id == id, cls.is_deleted == False)
+                .first()
+            )
+            if not employee:
+                return None
+
+            return EmployeeGetIdOut(
+                id=employee.id,
+                username=employee.username,
+                date_of_birth=employee.date_of_birth,
+                phone=employee.phone,
+                role=employee.role,
+            )
+        except Exception as e:
+            log.error(f"Logger: Error get_employee: {e}")
             raise
 
     @classmethod
@@ -190,6 +214,11 @@ class Employee(Base):
                     if hasattr(employee, key):
                         setattr(employee, key, value)
                         update_key[key] = value
+
+                    if key == "password":
+                        hashed_password = pwd_context.hash(value)
+                        setattr(employee, key, hashed_password)
+                        update_key[key] = hashed_password
 
             stmt = update(cls).where(cls.id == id).values(update_key)
             db.execute(stmt)

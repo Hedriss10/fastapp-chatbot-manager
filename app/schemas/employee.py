@@ -1,26 +1,22 @@
 # app/schemas/employee.py
 
 from datetime import datetime
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 from typing import Optional
 
 
 class EmployeeBase(BaseModel):
     username: str = Field(..., max_length=120)
-    date_of_birth: str = Field(..., description="DD/MM/YYYY format")
+    date_of_birth: datetime = Field(
+        ..., description="Date of birth in DD/MM/YYYY format"
+    )
     phone: str = Field(..., max_length=40)
-    role: str = Field(..., max_length=40)
+    role: str = Field(
+        default="Administrator",
+        max_length=50,
+        description="Role of the employee",
+    )
     password: str = Field(..., min_length=6, max_length=300)
-
-    @validator("date_of_birth")
-    def validate_date_of_birth(cls, value):
-        try:
-            date_object = datetime.strptime(value, "%d/%m/%Y")
-        except ValueError:
-            raise ValueError("Invalid date format. Please use DD/MM/YYYY")
-        if date_object.date() > datetime.now().date():
-            raise ValueError("Date of birth cannot be in the future.")
-        return value
 
 
 class EmployeeOut(BaseModel):
@@ -40,3 +36,11 @@ class EmployeeUpdateOut(BaseModel):
 
 class EmployeeDeleteOut(BaseModel):
     message_id: Optional[str] = "employee_deleted_successfully"
+
+
+class EmployeeGetIdOut(BaseModel):
+    id: int
+    username: str
+    date_of_birth: datetime
+    phone: str
+    role: str

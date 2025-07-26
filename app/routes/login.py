@@ -1,6 +1,5 @@
 # app/routes/login.py
 
-
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import ValidationError
@@ -14,7 +13,7 @@ from app.schemas.login import LoginEmployee, LoginEmployeeOut
 login = APIRouter(prefix="/login", tags=["login"])
 
 
-@login.post("", response_model=LoginUserOut)
+@login.post("", response_model=LoginUserOut, description="Login user")
 async def login_users(data: LoginUser, db: Session = Depends(get_db)):
     user = await LoginCore.login_user(data, db)
     if not user:
@@ -22,7 +21,9 @@ async def login_users(data: LoginUser, db: Session = Depends(get_db)):
     return user
 
 
-@login.post("/employee", response_model=LoginEmployeeOut)
+@login.post(
+    "/employee", response_model=LoginEmployeeOut, description="Login employee"
+)
 async def login_employee(data: LoginEmployee, db: Session = Depends(get_db)):
     user = await LoginCore.login_employee(data, db)
     if not user:
