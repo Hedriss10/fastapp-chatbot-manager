@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.logs.log import setup_logger
 from app.models.employee import Employee
 from app.models.messages import SummaryMessage
-from app.models.product import Products, ProductsEmployees
+from app.models.product.product import Products, ProductsEmployees
 
 log = setup_logger()
 

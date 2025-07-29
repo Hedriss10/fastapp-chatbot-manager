@@ -21,7 +21,7 @@ from app.logs.log import setup_logger
 log = setup_logger()
 
 
-class Product(Base):
+class Products(Base):
     __tablename__ = "products"
     __table_args__ = {"schema": "finance"}
 
