@@ -15,8 +15,10 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, Session, mapped_column
 
+from app.auth.auth import create_access_token
 from app.db.db import Base
 from app.logs.log import setup_logger
+from app.schemas.login import LoginUser, LoginUserOut
 from app.schemas.pagination import BuildMetadata, PaginationParams
 from app.schemas.user import (
     UserCreate,
@@ -25,9 +27,7 @@ from app.schemas.user import (
     UserUpdate,
     UserUpdateOut,
 )
-from app.schemas.login import LoginUser, LoginUserOut
 from app.utils.metadata import Metadata
-from app.auth.auth import create_access_token
 
 log = setup_logger()
 

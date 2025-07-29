@@ -1,9 +1,10 @@
 # app/core/employee.py
 
 from sqlalchemy.orm import Session
+
 from app.models.employee import Employee
-from app.schemas.pagination import PaginationParams
 from app.schemas.employee import EmployeeUpdate
+from app.schemas.pagination import PaginationParams
 
 
 class EmployeeCore:

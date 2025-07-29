@@ -1,7 +1,9 @@
 # app/utils/auth.py
 
-from jose import jwt
 from datetime import datetime, timedelta
+
+from jose import jwt
+
 from app.settings.settings import settings
 
 SECRET_KEY = settings.secret_key

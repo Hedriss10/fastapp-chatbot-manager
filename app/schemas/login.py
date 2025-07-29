@@ -1,6 +1,7 @@
 # app/schemas/login.py
+from typing import Any, Dict, Optional
+
 from pydantic import BaseModel
-from typing import Dict, Optional, Any
 
 
 class LoginUser(BaseModel):

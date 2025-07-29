@@ -4,7 +4,6 @@ from datetime import datetime
 from typing import Any, Dict, List, Tuple
 
 from passlib.context import CryptContext
-
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
@@ -15,25 +14,26 @@ from sqlalchemy import (
     Text,
     Time,
     func,
+    select,
     text,
     update,
-    select,
 )
-from sqlalchemy.orm import Mapped, mapped_column, Session
-from app.schemas.login import LoginEmployee, LoginEmployeeOut
-from app.schemas.employee import (
-    EmployeeBase,
-    EmployeeOut,
-    EmployeeGetIdOut,
-    EmployeeUpdate,
-    EmployeeUpdateOut,
-    EmployeeDeleteOut,
-)
-from app.utils.metadata import Metadata
+from sqlalchemy.orm import Mapped, Session, mapped_column
+
 from app.auth.auth import create_access_token
-from app.schemas.pagination import PaginationParams, BuildMetadata
 from app.db.db import Base
 from app.logs.log import setup_logger
+from app.schemas.employee import (
+    EmployeeBase,
+    EmployeeDeleteOut,
+    EmployeeGetIdOut,
+    EmployeeOut,
+    EmployeeUpdate,
+    EmployeeUpdateOut,
+)
+from app.schemas.login import LoginEmployee, LoginEmployeeOut
+from app.schemas.pagination import BuildMetadata, PaginationParams
+from app.utils.metadata import Metadata
 
 log = setup_logger()
 
@@ -138,7 +138,7 @@ class Employee(Base):
                             func.unaccent(filter_value)
                         )
                     )
-                except Exception as e:
+                except Exception:
                     stmt = stmt.filter(cls.username.ilike(filter_value))
 
             if pagination_params.order_by:

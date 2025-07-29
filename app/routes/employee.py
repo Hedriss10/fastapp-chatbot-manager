@@ -1,26 +1,26 @@
 # app/routes/employee.py
-from fastapi import status
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import ValidationError
-from app.schemas.employee import (
-    EmployeeBase,
-    EmployeeOut,
-    EmployeeUpdate,
-    EmployeeUpdateOut,
-    EmployeeDeleteOut,
-    EmployeeGetIdOut,
-)
-from app.schemas.pagination import PaginationParams
-
-from app.db.depency import get_db
 from sqlalchemy.orm import Session
 
 from app.core.employee import EmployeeCore
+from app.db.depency import get_db
+from app.schemas.employee import (
+    EmployeeBase,
+    EmployeeDeleteOut,
+    EmployeeGetIdOut,
+    EmployeeOut,
+    EmployeeUpdate,
+    EmployeeUpdateOut,
+)
+from app.schemas.pagination import PaginationParams
 
 employee = APIRouter(prefix="/employee", tags=["employee"])
 
 
-@employee.post("", response_model=EmployeeOut, status_code=status.HTTP_201_CREATED)
+@employee.post(
+    "", response_model=EmployeeOut, status_code=status.HTTP_201_CREATED
+)
 async def add_employee(data: EmployeeBase, db: Session = Depends(get_db)):
     try:
         return EmployeeCore.add_employee(data, db)
@@ -33,7 +33,9 @@ async def add_employee(data: EmployeeBase, db: Session = Depends(get_db)):
         )
 
 
-@employee.get("", description="List all employees", status_code=status.HTTP_200_OK)
+@employee.get(
+    "", description="List all employees", status_code=status.HTTP_200_OK
+)
 async def list_employees(
     pagination: PaginationParams = Depends(), db: Session = Depends(get_db)
 ):
@@ -49,7 +51,9 @@ async def list_employees(
         )
 
 
-@employee.get("/{id}", response_model=EmployeeGetIdOut, status_code=status.HTTP_200_OK)
+@employee.get(
+    "/{id}", response_model=EmployeeGetIdOut, status_code=status.HTTP_200_OK
+)
 async def get_employee(id: int, db: Session = Depends(get_db)):
     try:
         employee = EmployeeCore.get_employee(id, db)
@@ -65,7 +69,9 @@ async def get_employee(id: int, db: Session = Depends(get_db)):
         )
 
 
-@employee.put("/{id}", response_model=EmployeeUpdateOut, status_code=status.HTTP_200_OK)
+@employee.put(
+    "/{id}", response_model=EmployeeUpdateOut, status_code=status.HTTP_200_OK
+)
 async def update_employee(
     id: int, data: EmployeeUpdate, db: Session = Depends(get_db)
 ):
@@ -83,7 +89,9 @@ async def update_employee(
         )
 
 
-@employee.delete("/{id}", response_model=EmployeeDeleteOut, status_code=status.HTTP_200_OK)
+@employee.delete(
+    "/{id}", response_model=EmployeeDeleteOut, status_code=status.HTTP_200_OK
+)
 async def delete_employee(id: int, db: Session = Depends(get_db)):
     try:
         deleted_employee = EmployeeCore.delete_employee(id, db)

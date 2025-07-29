@@ -1,0 +1,16 @@
+from pydantic import BaseModel
+
+
+class ProductInSchema(BaseModel): ...
+
+
+class ProductOutSchema(BaseModel): ...
+
+
+class ProductUpdateSchema(BaseModel): ...
+
+
+class ProductDeleteSchema(BaseModel): ...
+
+
+class ProductEmployeeInSchema(BaseModel): ...

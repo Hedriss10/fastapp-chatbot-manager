@@ -2,13 +2,16 @@
 
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
-from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from app.core.login import LoginCore
 from app.db.depency import get_db
-from app.schemas.login import LoginUserOut, LoginUser
-from app.schemas.login import LoginEmployee, LoginEmployeeOut
+from app.schemas.login import (
+    LoginEmployee,
+    LoginEmployeeOut,
+    LoginUser,
+    LoginUserOut,
+)
 
 login = APIRouter(prefix="/login", tags=["login"])
 
