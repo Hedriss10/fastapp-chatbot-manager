@@ -2,7 +2,7 @@
 
 ### Module Finance
 
-```py
+```bash
 def upgrade():
     # Certifique-se que o schema 'finance' existe
     op.execute("CREATE SCHEMA IF NOT EXISTS finance")
