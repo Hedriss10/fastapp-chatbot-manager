@@ -1,6 +1,7 @@
 # app/settings/settings.py
 from pydantic_settings import BaseSettings
 
+
 class Settings(BaseSettings):
     sqlalchemy_database_uri: str
 

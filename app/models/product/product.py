@@ -12,13 +12,34 @@ from sqlalchemy import (
     Numeric,
     String,
     func,
+    update,
 )
-from sqlalchemy.orm import Mapped, mapped_column
-
+from sqlalchemy import insert, select, text
+from sqlalchemy.orm import Mapped, mapped_column, Session
+from app.schemas.pagination import BuildMetadata, PaginationParams
+from app.schemas.product import (
+    ProductInSchema,
+    ProductOutSchema,
+    ProductUpdateSchema,
+    ProductDeleteSchema,
+    ProductEmployeeInSchema,
+)
+from app.utils.metadata import Metadata
 from app.db.db import Base
 from app.logs.log import setup_logger
 
 log = setup_logger()
+
+
+PRODUCTS_FIELDS = [
+    "id",
+    "description",
+    "value_operation",
+    "time_to_spend",
+    "commission",
+    "category",
+]
+
 
 
 class Products(Base):
@@ -43,19 +64,118 @@ class Products(Base):
         return f"Product(id={self.id}, description={self.description})"
 
     @classmethod
-    def list_products(cls): ...
+    async def list_products(cls, pagination_params: PaginationParams, db: Session) -> tuple[list[dict], BuildMetadata]:
+        try:
+            stmt = select(
+                cls.id,
+                cls.description,
+                cls.value_operation,
+                func.to_char(cls.time_to_spend, text("'HH24:MI:SS'")).label("time_to_spend"),
+                cls.commission,
+                cls.category,
+            ).where(cls.is_deleted == False)
+
+            # Filtro
+            if pagination_params.filter_by:
+                filter_value = f"%{pagination_params.filter_by}%"
+                try:
+                    stmt = stmt.filter(
+                        func.unaccent(cls.description).ilike(func.unaccent(filter_value))
+                    )
+                except Exception:
+                    stmt = stmt.filter(cls.description.ilike(filter_value))
+
+            # Ordenação
+            if pagination_params.order_by:
+                try:
+                    sort_column = getattr(cls, pagination_params.order_by)
+                    sort_direction = (pagination_params.sort_by or "asc").lower()
+                    stmt = stmt.order_by(
+                        sort_column.asc() if sort_direction == "asc" else sort_column.desc()
+                    )
+                except AttributeError:
+                    log.warning(f"Logger: Campo de ordenação inválido: {pagination_params.order_by}")
+
+            total_count = db.execute(
+                select(func.count()).select_from(stmt.subquery())
+            ).scalar()
+
+            paginated_stmt = stmt.offset(
+                (pagination_params.current_page - 1) * pagination_params.rows_per_page
+            ).limit(pagination_params.rows_per_page)
+            
+            result = db.execute(paginated_stmt).fetchall()
+
+            metadata = BuildMetadata(
+                total_count=total_count,
+                current_page=pagination_params.current_page,
+                rows_per_page=pagination_params.rows_per_page,
+                total_pages=(total_count + pagination_params.rows_per_page - 1) // pagination_params.rows_per_page,
+            )
+            return Metadata(result).model_to_list(), metadata
+
+        except Exception as e:
+            log.exception(e)
+            raise
+
 
     @classmethod
-    def get_product(cls): ...
+    async def get_product(cls, id: int, db: Session):
+        try:
+            stmt = select(
+                cls.id,
+                cls.description,
+                cls.value_operation,
+                func.to_char(cls.time_to_spend, text("'HH24:MI:SS'")).label("time_to_spend"),
+                cls.commission,
+                cls.category,
+            ).where(
+                cls.id == id,
+                cls.is_deleted == False
+            )
+            result = db.execute(stmt).fetchone()
+            return Metadata(result).model_to_list()
+            
+        except Exception as e:
+            log.error(f"Logger: Error get_product: {e}")
+            raise
 
     @classmethod
-    def create_product(cls): ...
+    async def add_product(cls, data : ProductInSchema, db: Session):
+        try:
+            stmt = insert(cls).values(
+                description=data.description,
+                value_operation=data.value_operation,
+                time_to_spend=data.time_to_spend,
+                commission=data.commission,
+                category=data.category
+            )
+            db.execute(stmt)
+            db.commit()
+            return ProductOutSchema(
+                message_id="product_created_successfully"
+            )
+        except Exception as e:
+            print("erro coletado com sucesso", e)
+            db.rollback()
+            log.error("Error adding product")
 
     @classmethod
     def update_product(cls): ...
 
     @classmethod
-    def delete_product(cls): ...
+    async def delete_product(cls, id: int, db: Session):
+        try:
+            stmt = db.query(cls).filter(cls.id == id).first()
+            stmt.is_deleted = True
+            db.commit()
+            return ProductOutSchema(
+                message_id="product_deleted_successfully"
+            )
+        except Exception as e:
+            db.rollback()
+            log.error(f"Logger: Error delete_product: {e}")
+            raise
 
 
 class ProductsEmployees(Base):

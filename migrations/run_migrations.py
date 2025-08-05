@@ -14,7 +14,10 @@ load_dotenv(dotenv_path=BASE_DIR / ".env")
 
 DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI")
 if not DATABASE_URI:
-    raise ValueError("❌ Variável SQLALCHEMY_DATABASE_URI não encontrada no .env")
+    raise ValueError(
+        "❌ Variável SQLALCHEMY_DATABASE_URI não encontrada no .env"
+    )
+
 
 def run_migrations_online():
     print("🔧 Iniciando migrações...")
@@ -24,7 +27,7 @@ def run_migrations_online():
     config.set_main_option("script_location", str(BASE_DIR / "migrations"))
 
     logging.basicConfig()
-    logging.getLogger('alembic').setLevel(logging.INFO)
+    logging.getLogger("alembic").setLevel(logging.INFO)
 
     print("✅ Aplicando migrations...")
     command.upgrade(config, "head")
