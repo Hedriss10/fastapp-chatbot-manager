@@ -1,8 +1,8 @@
+from datetime import timedelta
 from decimal import Decimal
 from typing import Optional
-from pydantic import BaseModel
-from pydantic import Field
-from datetime import timedelta
+
+from pydantic import BaseModel, Field
 
 
 class ProductInSchema(BaseModel):

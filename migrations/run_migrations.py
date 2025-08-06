@@ -1,10 +1,11 @@
-import sys
 import logging
-from pathlib import Path
-from alembic.config import Config
-from alembic import command
-from dotenv import load_dotenv
 import os
+import sys
+from pathlib import Path
+
+from alembic import command
+from alembic.config import Config
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 sys.path.append(str(BASE_DIR))

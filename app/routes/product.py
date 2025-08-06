@@ -6,17 +6,16 @@ from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from app.core.product import ProdudtCore
+from app.db.depency import get_db
+from app.schemas.pagination import PaginationParams
 from app.schemas.product import (
+    ProductEmployeeInSchema,
     ProductInSchema,
     ProductOutSchema,
     ProductUpdateSchema,
-    ProductDeleteSchema,
-    ProductEmployeeInSchema,
 )
-from app.schemas.pagination import PaginationParams
-from app.db.depency import get_db
 
-prodcuts = APIRouter(prefix="/prodcuts", tags=["products"])
+prodcuts = APIRouter(prefix="/products", tags=["products"])
 
 
 @prodcuts.post(
@@ -30,7 +29,7 @@ async def add_products(data: ProductInSchema, db: Session = Depends(get_db)):
         return await ProdudtCore.add_product(data, db)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=500,
             detail="Something went wrong while creating the product.",
@@ -56,14 +55,11 @@ async def list_products(
             detail="Something went wrong while listing products.",
         )
 
+
 @prodcuts.get(
-    "/{id}",
-    description="Get product of id",
-    status_code=status.HTTP_200_OK
+    "/{id}", description="Get product of id", status_code=status.HTTP_200_OK
 )
-async def get_product(
-    id: int, db: Session = Depends(get_db)
-):
+async def get_product(id: int, db: Session = Depends(get_db)):
     try:
         return await ProdudtCore.get_product(id, db)
     except ValidationError as ve:
@@ -79,17 +75,17 @@ async def get_product(
 @prodcuts.put(
     "/{id}",
     description="Update product of id",
-    response_model=ProductOutSchema,
     status_code=status.HTTP_200_OK,
 )
 async def update_products(
     id: int, data: ProductUpdateSchema, db: Session = Depends(get_db)
-):    
+):
     try:
         return await ProdudtCore.update_product(id, data, db)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
-    except Exception:
+    except Exception as e:
+        print("Coletando o erro", e)
         raise HTTPException(
             status_code=500,
             detail="Something went wrong while updating the product.",
