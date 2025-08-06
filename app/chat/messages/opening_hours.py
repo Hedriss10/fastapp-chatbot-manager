@@ -9,7 +9,7 @@ from app.models.messages import SummaryMessage
 log = setup_logger()
 
 
-WORKING_HOURS_INFO = "working_hours_info"
+WORKING_HOURS_INFO = 'working_hours_info'
 
 
 class OpeningHoursCore:
@@ -40,8 +40,8 @@ class OpeningHoursCore:
             result = self.db.execute(stmt).first()
             if result:
                 _, _, message = result
-                return message["text"]
+                return message['text']
 
         except Exception as e:
-            log.error(f"Error flow_opening_hours: {e}")
+            log.error(f'Error flow_opening_hours: {e}')
             return None

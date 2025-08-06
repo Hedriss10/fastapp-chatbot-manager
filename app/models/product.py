@@ -19,8 +19,8 @@ from app.db.db import Base
 
 
 class Products(Base):
-    __tablename__ = "products"
-    __table_args__ = {"schema": "finance"}
+    __tablename__ = 'products'
+    __table_args__ = {'schema': 'finance'}
 
     id: Mapped[int] = mapped_column(primary_key=True)
     description: Mapped[str] = mapped_column(String(30), nullable=False)
@@ -41,15 +41,15 @@ class Products(Base):
 
 
 class ProductsEmployees(Base):
-    __tablename__ = "products_employees"
-    __table_args__ = {"schema": "finance"}
+    __tablename__ = 'products_employees'
+    __table_args__ = {'schema': 'finance'}
 
     id: Mapped[int] = mapped_column(primary_key=True)
     product_id: Mapped[int] = mapped_column(
-        ForeignKey("finance.products.id"), nullable=False
+        ForeignKey('finance.products.id'), nullable=False
     )
     employee_id: Mapped[int] = mapped_column(
-        ForeignKey("public.employee.id"), nullable=False
+        ForeignKey('public.employee.id'), nullable=False
     )
     is_check: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(

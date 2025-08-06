@@ -16,10 +16,10 @@ from app.models.users.users import User
 
 log = setup_logger()
 
-LIST_DATE = "list_dates"
-RESUME_SCHEDULING = "resume_scheduling"
-CHECK_SERVICE_EMPLOYEE = "check_service_employee"
-CONFIRM_SCHEDULE_EMPLOYEE = "confirm_schedule_employee"
+LIST_DATE = 'list_dates'
+RESUME_SCHEDULING = 'resume_scheduling'
+CHECK_SERVICE_EMPLOYEE = 'check_service_employee'
+CONFIRM_SCHEDULE_EMPLOYEE = 'confirm_schedule_employee'
 
 
 class ScheduleCore:
@@ -55,8 +55,8 @@ class ScheduleCore:
                 send_number=send_number, db=self.db
             )
 
-            datetime_str = f"{date} {time}"
-            time_register = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
+            datetime_str = f'{date} {time}'
+            time_register = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M')
 
             schedule = self.schedule.add_schedule(
                 db=self.db,
@@ -68,7 +68,7 @@ class ScheduleCore:
             self.db.commit()
             return schedule
         except Exception as e:
-            log.error(f"Logger: Error in add schedule: {e}")
+            log.error(f'Logger: Error in add schedule: {e}')
             self.db.rollback()
 
     def update_schedule(self, send_number: str) -> str:
@@ -82,7 +82,7 @@ class ScheduleCore:
             )
             return update
         except Exception as e:
-            log.error(f"Logger: Error in add schedule: {e}")
+            log.error(f'Logger: Error in add schedule: {e}')
             self.db.rollback()
 
     def list_available_days(self) -> tuple[str, list[str]]:
@@ -91,14 +91,14 @@ class ScheduleCore:
             base_date = datetime.now().date()
 
             days_available = []
-            options_day = ""
+            options_day = ''
             for idx in range(7):
                 day = base_date + timedelta(days=idx)
                 day_str = day.strftime(
-                    "%Y-%m-%d"
+                    '%Y-%m-%d'
                 )  # formato seguro para salvar e manipular
                 days_available.append(day_str)
-                options_day += f"{idx + 1}️⃣ {day.strftime('%d/%m')}\n"
+                options_day += f'{idx + 1}️⃣ {day.strftime("%d/%m")}\n'
 
             stmt = select(self.message.message).where(
                 self.message.ticket == LIST_DATE
@@ -106,16 +106,16 @@ class ScheduleCore:
             result_message = self.db.execute(stmt).fetchone()
 
             if not result_message:
-                return "⚠️ Nenhuma mensagem configurada para datas.", []
+                return '⚠️ Nenhuma mensagem configurada para datas.', []
 
-            message_format = result_message[0]["text"].format(
+            message_format = result_message[0]['text'].format(
                 datas=options_day.strip()
             )
             return message_format, days_available
 
         except Exception as e:
-            log.error(f"Logger: error list available days {e}")
-        return "⚠️ Erro ao listar datas. Tente novamente mais tarde.", []
+            log.error(f'Logger: error list available days {e}')
+        return '⚠️ Erro ao listar datas. Tente novamente mais tarde.', []
 
     def generator_interval(
         self, start: datetime, finish: datetime, delta_minutes: int = 20
@@ -140,18 +140,18 @@ class ScheduleCore:
     ) -> List[Tuple[datetime, datetime]]:
         if isinstance(select_date, str):
             try:
-                select_date = datetime.strptime(select_date, "%Y-%m-%d").date()
+                select_date = datetime.strptime(select_date, '%Y-%m-%d').date()
             except Exception:
                 return []
 
         weekday_map = {
-            0: "segunda",
-            1: "terça",
-            2: "quarta",
-            3: "quinta",
-            4: "sexta",
-            5: "sábado",
-            6: "domingo",
+            0: 'segunda',
+            1: 'terça',
+            2: 'quarta',
+            3: 'quinta',
+            4: 'sexta',
+            5: 'sábado',
+            6: 'domingo',
         }
         weekday_str = weekday_map[select_date.weekday()]
 
@@ -285,9 +285,9 @@ class ScheduleCore:
             result_message = self.db.execute(stmt).fetchone()
 
             if not result_message:
-                return "⚠️ Nenhuma mensagem configurada para resumo do agendamento."
+                return '⚠️ Nenhuma mensagem configurada para resumo do agendamento.'
 
-            message_formated = result_message[0]["text"].format(
+            message_formated = result_message[0]['text'].format(
                 nome_cliente=self.push_name,
                 profissional_escolhido=employee,
                 servico_escolhido=product,
@@ -298,8 +298,8 @@ class ScheduleCore:
             return message_formated
 
         except Exception as e:
-            log.error(f"Logger: Error in resume_scheduling: {e}")
-            return "⚠️ Erro ao montar resumo do agendamento. Tente novamente mais tarde."
+            log.error(f'Logger: Error in resume_scheduling: {e}')
+            return '⚠️ Erro ao montar resumo do agendamento. Tente novamente mais tarde.'
 
     def send_check_employee(
         self,
@@ -329,7 +329,7 @@ class ScheduleCore:
             result = self.db.execute(send_check).fetchone()
 
             # mensagem formatada enviada para o funcionario
-            send_check_formated = result[0]["text"].format(
+            send_check_formated = result[0]['text'].format(
                 nome_cliente=self.push_name,
                 servico_escolhido=product,
                 data_escolhida=date_selected,
@@ -338,7 +338,7 @@ class ScheduleCore:
             return phone_employee, send_check_formated
 
         except Exception as e:
-            log.error(f"Logger: error: send check employee: {e}")
+            log.error(f'Logger: error: send check employee: {e}')
             return None
 
     def check_service_employee(
@@ -360,9 +360,9 @@ class ScheduleCore:
             result = self.db.execute(stmt).fetchone()
 
             if not result:
-                return "⚠️ Nenhuma mensagem configurada para confirmação do agendamento."
+                return '⚠️ Nenhuma mensagem configurada para confirmação do agendamento.'
 
-            message_format = result[0]["text"].format(
+            message_format = result[0]['text'].format(
                 profissional_escolhido=employee,
                 data_escolhida=date_selected,
                 horario_escolhido=hour_selected,
@@ -370,8 +370,8 @@ class ScheduleCore:
             return message_format
 
         except Exception as e:
-            log.error(f"Logger: Error in check_service_employee: {e}")
-            return "⚠️ Erro ao gerar mensagem de confirmação."
+            log.error(f'Logger: Error in check_service_employee: {e}')
+            return '⚠️ Erro ao gerar mensagem de confirmação.'
 
 
 # if __name__ == "__main__":

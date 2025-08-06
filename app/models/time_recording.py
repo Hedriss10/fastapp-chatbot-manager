@@ -17,15 +17,15 @@ from app.db.db import Base
 
 
 class ScheduleEmployee(Base):
-    __tablename__ = "schedule_employee"
+    __tablename__ = 'schedule_employee'
     __table_args__ = (
         CheckConstraint(
             "weekday IN ('segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo')",
-            name="schedule_employee_weekday_check",
+            name='schedule_employee_weekday_check',
         ),
         {
-            "schema": "time_recording",
-            "extend_existing": True,
+            'schema': 'time_recording',
+            'extend_existing': True,
         },
     )
 
@@ -33,7 +33,7 @@ class ScheduleEmployee(Base):
 
     employee_id: Mapped[int] = mapped_column(
         Integer,
-        ForeignKey("employee.employees.id", ondelete="CASCADE"),
+        ForeignKey('employee.employees.id', ondelete='CASCADE'),
         nullable=False,
     )
 
@@ -45,7 +45,7 @@ class ScheduleEmployee(Base):
     end_time: Mapped[datetime.time] = mapped_column(Time)
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP")
+        DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP')
     )
 
     updated_at: Mapped[datetime] = mapped_column(DateTime)
@@ -54,5 +54,5 @@ class ScheduleEmployee(Base):
     deleted_by: Mapped[int] = mapped_column(Integer)
 
     is_deleted: Mapped[bool] = mapped_column(
-        Boolean, server_default=text("false"), nullable=False
+        Boolean, server_default=text('false'), nullable=False
     )

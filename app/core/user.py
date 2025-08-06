@@ -18,7 +18,7 @@ class UserCore(BaseCore[User, UserCreate]):
     def get_by_phone(self, phone: str):
         query = select(User.username, User.lastname).where(User.phone == phone)
         result = self.db.execute(query)
-        return [{"username": r[0], "phone": r[1]} for r in result]
+        return [{'username': r[0], 'phone': r[1]} for r in result]
 
     def add_user(self, data: dict):
         try:
@@ -26,8 +26,8 @@ class UserCore(BaseCore[User, UserCreate]):
             self.db.add(user)
             self.db.commit()
             self.db.refresh(user)
-            return [{"message": "user_created_successfully"}]
+            return [{'message': 'user_created_successfully'}]
         except Exception as e:
             self.db.rollback()
-            logger.error(f"Error creating user: {e}")
-            return [{"message": str(e)}]
+            logger.error(f'Error creating user: {e}')
+            return [{'message': str(e)}]

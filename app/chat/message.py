@@ -40,7 +40,7 @@ class MessagesCore:
                 stmt = WelcomeCore(db=session_local).flow_welcome()
                 return stmt
         except Exception as e:
-            log.error(f"Error in processing send welcome {e}")
+            log.error(f'Error in processing send welcome {e}')
 
     def send_list_employee(self) -> tuple[str, list[dict]]:
         try:
@@ -50,9 +50,9 @@ class MessagesCore:
                 ).list_employee()
                 return message, employees
         except Exception as e:
-            log.error(f"Error messages core list employee {e}")
+            log.error(f'Error messages core list employee {e}')
             return (
-                "⚠️ Erro ao listar funcionários. Tente novamente mais tarde.",
+                '⚠️ Erro ao listar funcionários. Tente novamente mais tarde.',
                 [],
             )
 
@@ -69,11 +69,11 @@ class MessagesCore:
 
         except Exception as e:
             log.error(
-                f"Error messages core \
-                list products filter by id employee {e}"
+                f'Error messages core \
+                list products filter by id employee {e}'
             )
             return (
-                "⚠️ Erro ao listar produtos.Tente novamente mais tarde.",
+                '⚠️ Erro ao listar produtos.Tente novamente mais tarde.',
                 [],
             )
 
@@ -88,8 +88,8 @@ class MessagesCore:
                 ).list_available_days()
                 return list_days_available, days
         except Exception as e:
-            log.error(f"Error messages core list available days {e}")
-            return "⚠️ Erro ao listar datas. Tente novamente mais tarde.", []
+            log.error(f'Error messages core list available days {e}')
+            return '⚠️ Erro ao listar datas. Tente novamente mais tarde.', []
 
     def send_available_slots(
         self, employee_id: int, data_escolhida: str, product_id: int
@@ -109,21 +109,21 @@ class MessagesCore:
 
                 if raw_slots:
                     formatted_slots = [
-                        f"{get_emoji_number(i + 1)} {slot[0].strftime('%H:%M')}"
+                        f'{get_emoji_number(i + 1)} {slot[0].strftime("%H:%M")}'
                         for i, slot in enumerate(raw_slots)
                     ]
 
-                    slots_list_text = "\n".join(formatted_slots)
+                    slots_list_text = '\n'.join(formatted_slots)
 
-                    finish_message = f"✅ Horários disponíveis:\n\n{slots_list_text}\n\nDigite o número do horário que deseja escolher 👇"
+                    finish_message = f'✅ Horários disponíveis:\n\n{slots_list_text}\n\nDigite o número do horário que deseja escolher 👇'
                 else:
-                    finish_message = "🗓️ Não há horários disponíveis para este dia. Tente outro dia."
+                    finish_message = '🗓️ Não há horários disponíveis para este dia. Tente outro dia.'
 
                 return finish_message, raw_slots
         except Exception as e:
-            log.error(f"Error in send_available_slots: {e}")
+            log.error(f'Error in send_available_slots: {e}')
             return (
-                "⚠️ Erro ao buscar horários disponíveis. Tente novamente mais tarde.",
+                '⚠️ Erro ao buscar horários disponíveis. Tente novamente mais tarde.',
                 [],
             )
 
@@ -150,8 +150,8 @@ class MessagesCore:
                 return message_formated
         except Exception as e:
             log.error(
-                f"Error messages core \
-                list avaliable days {e}"
+                f'Error messages core \
+                list avaliable days {e}'
             )
 
     def approved_service(
@@ -177,8 +177,8 @@ class MessagesCore:
                 return phone_employee, stmt
         except Exception as e:
             log.error(
-                f"Error messages core \
-                list avaliable days {e}"
+                f'Error messages core \
+                list avaliable days {e}'
             )
 
     def send_check_service_employee(
@@ -199,8 +199,8 @@ class MessagesCore:
                 return stmt
         except Exception as e:
             log.error(
-                f"Error messages core \
-                list avaliable days {e}"
+                f'Error messages core \
+                list avaliable days {e}'
             )
 
     def send_add_schedule(
@@ -229,8 +229,8 @@ class MessagesCore:
 
         except Exception as e:
             log.error(
-                f"Error messages core \
-                add schedule {e}"
+                f'Error messages core \
+                add schedule {e}'
             )
 
     def send_update_schedule(self, send_number: str) -> str:
@@ -248,8 +248,8 @@ class MessagesCore:
 
         except Exception as e:
             log.error(
-                f"Error messages core \
-                add update {e}"
+                f'Error messages core \
+                add update {e}'
             )
 
     def send_opening_hours(self) -> str:
@@ -263,8 +263,8 @@ class MessagesCore:
                 ).flow_opening_hours()
                 return stmt
         except Exception as e:
-            log.error(f"Error messages core opening hours {e}")
-            return "⚠️ Erro ao listar horários de funcionamento. Tente novamente mais tarde."
+            log.error(f'Error messages core opening hours {e}')
+            return '⚠️ Erro ao listar horários de funcionamento. Tente novamente mais tarde.'
 
     def send_barber_info(self) -> tuple[str, list[dict]]:
         try:
@@ -277,9 +277,9 @@ class MessagesCore:
                 ).get_barber_info()
                 return message, employees
         except Exception as e:
-            log.error(f"Error messages core barber info {e}")
+            log.error(f'Error messages core barber info {e}')
             return (
-                "⚠️ Erro ao obter informações do barbeiro. Tente novamente mais tarde.",
+                '⚠️ Erro ao obter informações do barbeiro. Tente novamente mais tarde.',
                 [],
             )
 
@@ -294,9 +294,9 @@ class MessagesCore:
                 ).get_aks_subject_barber_info()
                 return stmt
         except Exception as e:
-            log.error(f"Error messages core ask subject {e}")
-            return "⚠️ Erro ao obter informações do assunto. Tente novamente mais tarde."
-        return "Erro desconhecido ao obter informações do assunto."
+            log.error(f'Error messages core ask subject {e}')
+            return '⚠️ Erro ao obter informações do assunto. Tente novamente mais tarde.'
+        return 'Erro desconhecido ao obter informações do assunto.'
 
     def send_connecting_to_barber(self, employee_id: int) -> Optional[int]:
         try:
@@ -309,9 +309,9 @@ class MessagesCore:
                 ).get_connecting_to_barber_info(employee_id=employee_id)
                 return stmt
         except Exception as e:
-            log.error(f"Error messages core ask subject {e}")
-            return "⚠️ Erro ao obter informações do assunto. Tente novamente mais tarde."
-        return "Erro desconhecido ao obter informações do assunto."
+            log.error(f'Error messages core ask subject {e}')
+            return '⚠️ Erro ao obter informações do assunto. Tente novamente mais tarde.'
+        return 'Erro desconhecido ao obter informações do assunto.'
 
     def send_forward_to_barber(
         self, type_schedule: str, employee_id: int
@@ -328,9 +328,9 @@ class MessagesCore:
                 )
                 return stmt, emploee_phone
         except Exception as e:
-            log.error(f"Error messages core forward to barber {e}")
-            return "⚠️ Erro ao encaminhar para o barbeiro. Tente novamente mais tarde."
-        return "Erro desconhecido ao encaminhar para o barbeiro."
+            log.error(f'Error messages core forward to barber {e}')
+            return '⚠️ Erro ao encaminhar para o barbeiro. Tente novamente mais tarde.'
+        return 'Erro desconhecido ao encaminhar para o barbeiro.'
 
     def send_raffle_promo_info(self) -> str:
         try:
@@ -343,9 +343,9 @@ class MessagesCore:
                 ).get_raffle_promo_info()
                 return stmt
         except Exception as e:
-            log.error(f"Error messages core raffle promo info {e}")
-            return "⚠️ Erro ao obter informações da promoção. Tente novamente mais tarde."
-        return "Erro desconhecido ao obter informações da promoção."
+            log.error(f'Error messages core raffle promo info {e}')
+            return '⚠️ Erro ao obter informações da promoção. Tente novamente mais tarde.'
+        return 'Erro desconhecido ao obter informações da promoção.'
 
     def send_check_existing_user(self) -> bool:
         try:
@@ -358,7 +358,7 @@ class MessagesCore:
                 ).check_user_exists()
                 return user_id
         except Exception as e:
-            log.error(f"Error messages core check existing user {e}")
+            log.error(f'Error messages core check existing user {e}')
             return None
 
     def send_add_user(self, lastname: str) -> str:
@@ -372,5 +372,5 @@ class MessagesCore:
                 ).add_users(lastname=lastname)
                 return stmt
         except Exception as e:
-            log.error(f"Error messages core add user {e}")
-            return "⚠️ Erro ao adicionar usuário. Tente novamente mais tarde."
+            log.error(f'Error messages core add user {e}')
+            return '⚠️ Erro ao adicionar usuário. Tente novamente mais tarde.'

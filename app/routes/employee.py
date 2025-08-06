@@ -15,11 +15,11 @@ from app.schemas.employee import (
 )
 from app.schemas.pagination import PaginationParams
 
-employee = APIRouter(prefix="/employee", tags=["employee"])
+employee = APIRouter(prefix='/employee', tags=['employee'])
 
 
 @employee.post(
-    "", response_model=EmployeeOut, status_code=status.HTTP_201_CREATED
+    '', response_model=EmployeeOut, status_code=status.HTTP_201_CREATED
 )
 async def add_employee(data: EmployeeBase, db: Session = Depends(get_db)):
     try:
@@ -29,48 +29,48 @@ async def add_employee(data: EmployeeBase, db: Session = Depends(get_db)):
     except Exception:
         raise HTTPException(
             status_code=500,
-            detail="Something went wrong while creating the employee.",
+            detail='Something went wrong while creating the employee.',
         )
 
 
 @employee.get(
-    "", description="List all employees", status_code=status.HTTP_200_OK
+    '', description='List all employees', status_code=status.HTTP_200_OK
 )
 async def list_employees(
     pagination: PaginationParams = Depends(), db: Session = Depends(get_db)
 ):
     try:
         employees, metadata = EmployeeCore.list_employees(pagination, db)
-        return {"data": employees, "metadata": metadata}
+        return {'data': employees, 'metadata': metadata}
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception:
         raise HTTPException(
             status_code=500,
-            detail="Something went wrong while listing employees.",
+            detail='Something went wrong while listing employees.',
         )
 
 
 @employee.get(
-    "/{id}", response_model=EmployeeGetIdOut, status_code=status.HTTP_200_OK
+    '/{id}', response_model=EmployeeGetIdOut, status_code=status.HTTP_200_OK
 )
 async def get_employee(id: int, db: Session = Depends(get_db)):
     try:
         employee = EmployeeCore.get_employee(id, db)
         if not employee:
-            raise HTTPException(status_code=404, detail="Employee not found.")
+            raise HTTPException(status_code=404, detail='Employee not found.')
         return employee
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception:
         raise HTTPException(
             status_code=500,
-            detail="Something went wrong while retrieving the employee.",
+            detail='Something went wrong while retrieving the employee.',
         )
 
 
 @employee.put(
-    "/{id}", response_model=EmployeeUpdateOut, status_code=status.HTTP_200_OK
+    '/{id}', response_model=EmployeeUpdateOut, status_code=status.HTTP_200_OK
 )
 async def update_employee(
     id: int, data: EmployeeUpdate, db: Session = Depends(get_db)
@@ -78,30 +78,30 @@ async def update_employee(
     try:
         updated_employee = EmployeeCore.update_employee(id, data, db)
         if not updated_employee:
-            raise HTTPException(status_code=404, detail="Employee not found.")
+            raise HTTPException(status_code=404, detail='Employee not found.')
         return updated_employee
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception:
         raise HTTPException(
             status_code=500,
-            detail="Something went wrong while updating the employee.",
+            detail='Something went wrong while updating the employee.',
         )
 
 
 @employee.delete(
-    "/{id}", response_model=EmployeeDeleteOut, status_code=status.HTTP_200_OK
+    '/{id}', response_model=EmployeeDeleteOut, status_code=status.HTTP_200_OK
 )
 async def delete_employee(id: int, db: Session = Depends(get_db)):
     try:
         deleted_employee = EmployeeCore.delete_employee(id, db)
         if not deleted_employee:
-            raise HTTPException(status_code=404, detail="Employee not found.")
-        return EmployeeDeleteOut(message_id="employee_deleted_successfully")
+            raise HTTPException(status_code=404, detail='Employee not found.')
+        return EmployeeDeleteOut(message_id='employee_deleted_successfully')
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception:
         raise HTTPException(
             status_code=500,
-            detail="Something went wrong while deleting the employee.",
+            detail='Something went wrong while deleting the employee.',
         )

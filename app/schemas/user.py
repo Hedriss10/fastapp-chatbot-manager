@@ -25,12 +25,12 @@ class UserOut(BaseModel):
     username: str
     lastname: str
     phone: str
-    message_id: Optional[str] = "user_created_successfully"
+    message_id: Optional[str] = 'user_created_successfully'
 
 
 class UserUpdateOut(BaseModel):
-    message_id: Optional[str] = "user_updated_successfully"
+    message_id: Optional[str] = 'user_updated_successfully'
 
 
 class UserDeleteOut(BaseModel):
-    message_id: Optional[str] = "user_deleted_successfully"
+    message_id: Optional[str] = 'user_deleted_successfully'

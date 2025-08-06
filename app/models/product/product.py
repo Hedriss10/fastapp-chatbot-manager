@@ -32,17 +32,17 @@ log = setup_logger()
 
 
 PRODUCTS_FIELDS = [
-    "description",
-    "value_operation",
-    "time_to_spend",
-    "commission",
-    "category",
+    'description',
+    'value_operation',
+    'time_to_spend',
+    'commission',
+    'category',
 ]
 
 
 class Products(Base):
-    __tablename__ = "products"
-    __table_args__ = {"schema": "finance"}
+    __tablename__ = 'products'
+    __table_args__ = {'schema': 'finance'}
 
     id: Mapped[int] = mapped_column(primary_key=True)
     description: Mapped[str] = mapped_column(String(30), nullable=False)
@@ -59,7 +59,7 @@ class Products(Base):
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False)
 
     def __repr__(self):
-        return f"Product(id={self.id}, description={self.description})"
+        return f'Product(id={self.id}, description={self.description})'
 
     @classmethod
     async def list_products(
@@ -71,7 +71,7 @@ class Products(Base):
                 cls.description,
                 cls.value_operation,
                 func.to_char(cls.time_to_spend, text("'HH24:MI:SS'")).label(
-                    "time_to_spend"
+                    'time_to_spend'
                 ),
                 cls.commission,
                 cls.category,
@@ -79,7 +79,7 @@ class Products(Base):
 
             # Filtro
             if pagination_params.filter_by:
-                filter_value = f"%{pagination_params.filter_by}%"
+                filter_value = f'%{pagination_params.filter_by}%'
                 try:
                     stmt = stmt.filter(
                         func.unaccent(cls.description).ilike(
@@ -94,16 +94,16 @@ class Products(Base):
                 try:
                     sort_column = getattr(cls, pagination_params.order_by)
                     sort_direction = (
-                        pagination_params.sort_by or "asc"
+                        pagination_params.sort_by or 'asc'
                     ).lower()
                     stmt = stmt.order_by(
                         sort_column.asc()
-                        if sort_direction == "asc"
+                        if sort_direction == 'asc'
                         else sort_column.desc()
                     )
                 except AttributeError:
                     log.warning(
-                        f"Logger: Campo de ordenação inválido: {pagination_params.order_by}"
+                        f'Logger: Campo de ordenação inválido: {pagination_params.order_by}'
                     )
 
             total_count = db.execute(
@@ -138,7 +138,7 @@ class Products(Base):
                 cls.description,
                 cls.value_operation,
                 func.to_char(cls.time_to_spend, text("'HH24:MI:SS'")).label(
-                    "time_to_spend"
+                    'time_to_spend'
                 ),
                 cls.commission,
                 cls.category,
@@ -147,7 +147,7 @@ class Products(Base):
             return Metadata(result).model_to_list()
 
         except Exception as e:
-            log.error(f"Logger: Error get_product: {e}")
+            log.error(f'Logger: Error get_product: {e}')
             raise
 
     @classmethod
@@ -162,10 +162,10 @@ class Products(Base):
             )
             db.execute(stmt)
             db.commit()
-            return ProductOutSchema(message_id="product_created_successfully")
-        except Exception as e:
+            return ProductOutSchema(message_id='product_created_successfully')
+        except Exception:
             db.rollback()
-            log.error("Error adding product")
+            log.error('Error adding product')
 
     @classmethod
     async def update_product(cls, id: int, data: ProductInSchema, db: Session):
@@ -180,10 +180,10 @@ class Products(Base):
             stmt = update(cls).where(cls.id == id).values(update_key)
             db.execute(stmt)
             db.commit()
-            return ProductOutSchema(message_id="product_updated_successfully")
+            return ProductOutSchema(message_id='product_updated_successfully')
         except Exception as e:
             db.rollback()
-            log.error(f"Logger: Error update_product: {e}")
+            log.error(f'Logger: Error update_product: {e}')
             raise
 
     @classmethod
@@ -192,23 +192,23 @@ class Products(Base):
             stmt = db.query(cls).filter(cls.id == id).first()
             stmt.is_deleted = True
             db.commit()
-            return ProductOutSchema(message_id="product_deleted_successfully")
+            return ProductOutSchema(message_id='product_deleted_successfully')
         except Exception as e:
             db.rollback()
-            log.error(f"Logger: Error delete_product: {e}")
+            log.error(f'Logger: Error delete_product: {e}')
             raise
 
 
 class ProductsEmployees(Base):
-    __tablename__ = "products_employees"
-    __table_args__ = {"schema": "finance"}
+    __tablename__ = 'products_employees'
+    __table_args__ = {'schema': 'finance'}
 
     id: Mapped[int] = mapped_column(primary_key=True)
     product_id: Mapped[int] = mapped_column(
-        ForeignKey("finance.products.id"), nullable=False
+        ForeignKey('finance.products.id'), nullable=False
     )
     employee_id: Mapped[int] = mapped_column(
-        ForeignKey("public.employee.id"), nullable=False
+        ForeignKey('public.employee.id'), nullable=False
     )
     is_check: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(

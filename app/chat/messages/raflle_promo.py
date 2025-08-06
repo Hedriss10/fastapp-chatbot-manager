@@ -9,7 +9,7 @@ from app.models.messages import SummaryMessage
 log = setup_logger()
 
 
-RAFFLE_PROMO = "raflle_promo"
+RAFFLE_PROMO = 'raflle_promo'
 
 
 class RafflePromoCore:
@@ -29,13 +29,13 @@ class RafflePromoCore:
             )
             result_message = self.db.execute(message_stmt).fetchone()
             if not result_message:
-                return "⚠️ Promoção de Raffle não está disponível no momento."
+                return '⚠️ Promoção de Raffle não está disponível no momento.'
 
-            message_format = result_message[0]["text"].format(
+            message_format = result_message[0]['text'].format(
                 nome_cliente=self.push_name
             )
             return message_format
 
         except Exception as e:
-            log.error(f"Error getting raffle promo info: {e}")
-            return "⚠️ Erro ao obter informações da promoção. Tente novamente mais tarde."
+            log.error(f'Error getting raffle promo info: {e}')
+            return '⚠️ Erro ao obter informações da promoção. Tente novamente mais tarde.'

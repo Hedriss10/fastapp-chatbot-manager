@@ -33,11 +33,11 @@ class UsersCore:
             )
             self.db.execute(stmt)
             self.db.commit()
-            log.info(f"User {self.sender_number} added successfully.")
-            return "✅ Usuário adicionado com sucesso!"
+            log.info(f'User {self.sender_number} added successfully.')
+            return '✅ Usuário adicionado com sucesso!'
         except Exception as e:
-            log.error(f"Error adding user: {e}")
-            return "⚠️ Erro ao adicionar usuário. Tente novamente."
+            log.error(f'Error adding user: {e}')
+            return '⚠️ Erro ao adicionar usuário. Tente novamente.'
 
     def check_user_exists(self) -> bool:
         try:
@@ -47,11 +47,11 @@ class UsersCore:
                 .first()
             )
             if user:
-                log.info(f"User {self.sender_number} already exists.")
+                log.info(f'User {self.sender_number} already exists.')
                 return True
             else:
-                log.info(f"User {self.sender_number} does not exist.")
+                log.info(f'User {self.sender_number} does not exist.')
                 return False
         except Exception as e:
-            log.error(f"Error checking user existence: {e}")
+            log.error(f'Error checking user existence: {e}')
             return False

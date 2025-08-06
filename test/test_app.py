@@ -6,5 +6,5 @@ client = TestClient(app)
 
 
 def test_read_main():
-    response = client.get("/heartcheck")
+    response = client.get('/heartcheck')
     assert response.status_code == 200

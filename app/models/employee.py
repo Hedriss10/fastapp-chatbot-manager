@@ -39,18 +39,18 @@ log = setup_logger()
 
 
 EMPLOYEE_FIELDS = [
-    "username",
-    "date_of_birth",
-    "phone",
-    "role",
+    'username',
+    'date_of_birth',
+    'phone',
+    'role',
 ]
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 
 class Employee(Base):
-    __tablename__ = "employees"
-    __table_args__ = {"schema": "employee"}
+    __tablename__ = 'employees'
+    __table_args__ = {'schema': 'employee'}
 
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(String(120), nullable=False)
@@ -78,20 +78,20 @@ class Employee(Base):
         try:
             employee = db.query(cls).filter(cls.phone == data.phone).first()
             if employee:
-                access_token = create_access_token({"sub": str(employee.id)})
+                access_token = create_access_token({'sub': str(employee.id)})
                 return LoginEmployeeOut(
                     user={
-                        "id": employee.id,
-                        "username": employee.username,
-                        "phone": employee.phone,
-                        "role": employee.role,
+                        'id': employee.id,
+                        'username': employee.username,
+                        'phone': employee.phone,
+                        'role': employee.role,
                     },
                     access_token=access_token,
-                    message_id="employee_logged_successfully",
+                    message_id='employee_logged_successfully',
                 )
             return None
         except Exception as e:
-            log.error(f"Logger: Error get_login: {e}")
+            log.error(f'Logger: Error get_login: {e}')
             raise
 
     @classmethod
@@ -113,7 +113,7 @@ class Employee(Base):
                 role=employee.role,
             )
         except Exception as e:
-            log.error(f"Logger: Error get_employee: {e}")
+            log.error(f'Logger: Error get_employee: {e}')
             raise
 
     @classmethod
@@ -131,7 +131,7 @@ class Employee(Base):
 
             # filtrar por nome
             if pagination_params.filter_by:
-                filter_value = f"%{pagination_params.filter_by}%"
+                filter_value = f'%{pagination_params.filter_by}%'
                 try:
                     stmt = stmt.filter(
                         func.unaccent(cls.username).ilike(
@@ -145,15 +145,15 @@ class Employee(Base):
                 try:
                     sort_column = getattr(cls, pagination_params.order_by)
                     sort_direction = (
-                        pagination_params.sort_by or "asc"
+                        pagination_params.sort_by or 'asc'
                     ).lower()
                     stmt = stmt.order_by(
                         sort_column.asc()
-                        if sort_direction == "asc"
+                        if sort_direction == 'asc'
                         else sort_column.desc()
                     )
                 except Exception as e:
-                    log.error(f"Logger: Error list_employees: {e}")
+                    log.error(f'Logger: Error list_employees: {e}')
                     raise
 
             # total count
@@ -179,7 +179,7 @@ class Employee(Base):
 
             return Metadata(result).model_to_list(), metadata
         except Exception as e:
-            log.error(f"Logger: Error list_employees: {e}")
+            log.error(f'Logger: Error list_employees: {e}')
             raise
 
     @classmethod
@@ -197,10 +197,10 @@ class Employee(Base):
             db.commit()
             db.refresh(new_employee)
             return EmployeeOut(
-                message_id="employee_created_successfully",
+                message_id='employee_created_successfully',
             )
         except Exception as e:
-            log.error(f"Logger: Error add_employee: {e}")
+            log.error(f'Logger: Error add_employee: {e}')
             raise
 
     @classmethod
@@ -215,7 +215,7 @@ class Employee(Base):
                         setattr(employee, key, value)
                         update_key[key] = value
 
-                    if key == "password":
+                    if key == 'password':
                         hashed_password = pwd_context.hash(value)
                         setattr(employee, key, hashed_password)
                         update_key[key] = hashed_password
@@ -224,10 +224,10 @@ class Employee(Base):
             db.execute(stmt)
             db.commit()
             return EmployeeUpdateOut(
-                message_id="employee_updated_successfully"
+                message_id='employee_updated_successfully'
             )
         except Exception as e:
-            log.error(f"Logger: Error update_employee: {e}")
+            log.error(f'Logger: Error update_employee: {e}')
             raise
 
     @classmethod
@@ -241,28 +241,28 @@ class Employee(Base):
             employee.deleted_at = datetime.now()
             db.commit()
             return EmployeeDeleteOut(
-                message_id="employee_deleted_successfully"
+                message_id='employee_deleted_successfully'
             )
         except Exception as e:
-            log.error(f"Logger: Error delete_employee: {e}")
+            log.error(f'Logger: Error delete_employee: {e}')
             raise
 
 
 class ScheduleEmployee(Base):
-    __tablename__ = "schedule_employee"
+    __tablename__ = 'schedule_employee'
     __table_args__ = (
         CheckConstraint(
             "weekday IN ('segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo')",
-            name="schedule_employee_weekday_check",
+            name='schedule_employee_weekday_check',
         ),
-        {"schema": "time_recording"},
+        {'schema': 'time_recording'},
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
     employee_id: Mapped[int] = mapped_column(
         Integer,
-        ForeignKey("public.employee.id", ondelete="CASCADE"),
+        ForeignKey('public.employee.id', ondelete='CASCADE'),
         nullable=False,
     )
 
@@ -274,7 +274,7 @@ class ScheduleEmployee(Base):
     end_time: Mapped[datetime] = mapped_column(Time)
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP")
+        DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP')
     )
 
     updated_at: Mapped[datetime] = mapped_column(DateTime)
@@ -283,5 +283,5 @@ class ScheduleEmployee(Base):
     deleted_by: Mapped[int] = mapped_column(Integer)
 
     is_deleted: Mapped[bool] = mapped_column(
-        Boolean, server_default=text("false"), nullable=False
+        Boolean, server_default=text('false'), nullable=False
     )

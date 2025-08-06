@@ -12,7 +12,7 @@ from app.models.product.product import Products, ProductsEmployees
 log = setup_logger()
 
 
-LIST_PRODUCTS = "list_products"
+LIST_PRODUCTS = 'list_products'
 
 
 class ProductsCore:
@@ -51,20 +51,21 @@ class ProductsCore:
             result = self.db.execute(stmt).fetchall()
 
             if not result:
-                return "⚠️ Nenhum serviço disponível para esse profissional."
+                return '⚠️ Nenhum serviço disponível para esse profissional.'
 
             # Formatar opções de produtos
             produts_list = []
-            options_product = ""
+            options_product = ''
             for idx, (prod_id, description, value) in enumerate(
                 result, start=1
             ):
-                value_formatted = f"R${value:.2f}".replace(".", ",")
-                produts_list.append(
-                    {"id": prod_id, "description": description}
-                )
+                value_formatted = f'R${value:.2f}'.replace('.', ',')
+                produts_list.append({
+                    'id': prod_id,
+                    'description': description,
+                })
                 options_product += (
-                    f"{idx}️⃣ {description} – {value_formatted}  \n"
+                    f'{idx}️⃣ {description} – {value_formatted}  \n'
                 )
 
             # Buscar template do banco
@@ -75,9 +76,9 @@ class ProductsCore:
             result_message = self.db.execute(message_stmt).fetchone()
 
             if not result_message:
-                return "⚠️ Nenhuma mensagem configurada para serviços."
+                return '⚠️ Nenhuma mensagem configurada para serviços.'
 
-            message_format = result_message[0]["text"].format(
+            message_format = result_message[0]['text'].format(
                 nome_cliente=self.push_name,
                 opcoes_produtos=options_product.strip(),
             )
@@ -85,5 +86,5 @@ class ProductsCore:
             return message_format, produts_list
 
         except Exception as e:
-            log.error(f"Logger: error list product {e}")
-            return "⚠️ Erro ao listar serviços. Tente novamente mais tarde."
+            log.error(f'Logger: error list product {e}')
+            return '⚠️ Erro ao listar serviços. Tente novamente mais tarde.'

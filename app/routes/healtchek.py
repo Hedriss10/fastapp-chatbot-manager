@@ -7,12 +7,12 @@ from app.logs.log import setup_logger
 
 log = setup_logger()
 
-heartcheck = APIRouter(prefix="/heartcheck", tags=["heartcheck"])
+heartcheck = APIRouter(prefix='/heartcheck', tags=['heartcheck'])
 
 
-@heartcheck.get("/", description="heartcheck check system backend")
+@heartcheck.get('/', description='heartcheck check system backend')
 async def get_healtcheck():
     try:
-        return {"status": "ok"}
+        return {'status': 'ok'}
     except HTTPException as e:
         raise e

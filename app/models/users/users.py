@@ -33,15 +33,15 @@ log = setup_logger()
 
 
 USER_FIELDS = [
-    "username",
-    "lastname",
-    "phone",
+    'username',
+    'lastname',
+    'phone',
 ]
 
 
 class User(Base):
-    __tablename__ = "user"
-    __table_args__ = {"schema": "public"}
+    __tablename__ = 'user'
+    __table_args__ = {'schema': 'public'}
 
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(String(120), nullable=False)
@@ -63,7 +63,7 @@ class User(Base):
             user_id = db.query(cls.id).filter(cls.phone == send_number).first()
             return user_id.id if user_id else None
         except Exception as e:
-            log.error(f"Logger: error in colect ID user{e}")
+            log.error(f'Logger: error in colect ID user{e}')
             raise
 
     @classmethod
@@ -71,20 +71,20 @@ class User(Base):
         try:
             user = db.query(cls).filter(cls.phone == data.phone).first()
             if user:
-                access_token = create_access_token({"sub": str(user.id)})
+                access_token = create_access_token({'sub': str(user.id)})
                 return LoginUserOut(
                     user={
-                        "id": user.id,
-                        "username": user.username,
-                        "lastname": user.lastname,
-                        "phone": user.phone,
+                        'id': user.id,
+                        'username': user.username,
+                        'lastname': user.lastname,
+                        'phone': user.phone,
                     },
                     access_token=access_token,
-                    message_id="user_logged_successfully",
+                    message_id='user_logged_successfully',
                 )
             return None
         except Exception as e:
-            log.error(f"Logger: Error get_login: {e}")
+            log.error(f'Logger: Error get_login: {e}')
             raise
 
     @classmethod
@@ -96,7 +96,7 @@ class User(Base):
             result = db.execute(stmt).fetchall()
             return Metadata(result).model_to_list()
         except Exception as e:
-            log.error(f"Logger: Error get_user: {e}")
+            log.error(f'Logger: Error get_user: {e}')
             raise
 
     @classmethod
@@ -121,7 +121,7 @@ class User(Base):
                 phone=data.phone,
             )
         except Exception as e:
-            log.error(f"Logger: Error add_users: {e}")
+            log.error(f'Logger: Error add_users: {e}')
             raise
 
     @classmethod
@@ -138,7 +138,7 @@ class User(Base):
 
             # Filtro por nome
             if pagination_params.filter_by:
-                filter_value = f"%{pagination_params.filter_by}%"
+                filter_value = f'%{pagination_params.filter_by}%'
                 try:
                     stmt = stmt.filter(
                         func.unaccent(cls.username).ilike(
@@ -153,16 +153,16 @@ class User(Base):
                 try:
                     sort_column = getattr(cls, pagination_params.order_by)
                     sort_direction = (
-                        pagination_params.sort_by or "asc"
+                        pagination_params.sort_by or 'asc'
                     ).lower()
                     stmt = stmt.order_by(
                         sort_column.asc()
-                        if sort_direction == "asc"
+                        if sort_direction == 'asc'
                         else sort_column.desc()
                     )
                 except AttributeError:
                     log.warning(
-                        f"Logger: Campo de ordenação inválido: {pagination_params.order_by}"
+                        f'Logger: Campo de ordenação inválido: {pagination_params.order_by}'
                     )
 
             # Total de registros
@@ -189,7 +189,7 @@ class User(Base):
             return Metadata(result).model_to_list(), metadata
 
         except Exception as e:
-            log.error(f"Logger: Error list_users: {e}")
+            log.error(f'Logger: Error list_users: {e}')
             raise
 
     @classmethod
@@ -207,9 +207,9 @@ class User(Base):
             stmt = update(cls).where(cls.id == id).values(update_key)
             db.execute(stmt)
             db.commit()
-            return UserUpdateOut(message_id="user_updated_successfully")
+            return UserUpdateOut(message_id='user_updated_successfully')
         except Exception as e:
-            log.error(f"Logger: Error update_users: {e}")
+            log.error(f'Logger: Error update_users: {e}')
             raise
 
     @classmethod
@@ -218,7 +218,7 @@ class User(Base):
             users = db.query(cls).filter(cls.id == id).first()
             users.is_deleted = True
             db.commit()
-            return UserDeleteOut(message_id="user_deleted_successfully")
+            return UserDeleteOut(message_id='user_deleted_successfully')
         except Exception as e:
-            log.error(f"Logger: Error delete_users: {e}")
+            log.error(f'Logger: Error delete_users: {e}')
             raise

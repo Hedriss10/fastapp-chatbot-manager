@@ -6,8 +6,8 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-ModelType = TypeVar("ModelType")
-CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
+ModelType = TypeVar('ModelType')
+CreateSchemaType = TypeVar('CreateSchemaType', bound=BaseModel)
 
 
 class BaseCore(Generic[ModelType, CreateSchemaType]):

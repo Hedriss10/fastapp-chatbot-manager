@@ -9,7 +9,7 @@ from sqlalchemy.orm import sessionmaker
 from app.db.depency import get_db
 from app.main import app
 
-DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URI")
+DATABASE_URL = os.getenv('SQLALCHEMY_DATABASE_URI')
 
 engine = create_engine(DATABASE_URL)
 TestingSessionLocal = sessionmaker(

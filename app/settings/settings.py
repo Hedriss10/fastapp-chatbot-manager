@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     url_vite_frontend: str
 
     class Config:
-        env_file = ".env"
+        env_file = '.env'
 
 
 settings = Settings()

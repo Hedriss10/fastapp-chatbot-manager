@@ -15,12 +15,12 @@ from app.schemas.product import (
     ProductUpdateSchema,
 )
 
-prodcuts = APIRouter(prefix="/products", tags=["products"])
+prodcuts = APIRouter(prefix='/products', tags=['products'])
 
 
 @prodcuts.post(
-    "",
-    description="Create a new product",
+    '',
+    description='Create a new product',
     response_model=ProductOutSchema,
     status_code=status.HTTP_201_CREATED,
 )
@@ -32,13 +32,13 @@ async def add_products(data: ProductInSchema, db: Session = Depends(get_db)):
     except Exception:
         raise HTTPException(
             status_code=500,
-            detail="Something went wrong while creating the product.",
+            detail='Something went wrong while creating the product.',
         )
 
 
 @prodcuts.get(
-    "",
-    description="List all products",
+    '',
+    description='List all products',
     status_code=status.HTTP_200_OK,
 )
 async def list_products(
@@ -46,18 +46,18 @@ async def list_products(
 ):
     try:
         products, metadata = await ProdudtCore.list_products(pagination, db)
-        return {"data": products, "metadata": metadata}
+        return {'data': products, 'metadata': metadata}
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception:
         raise HTTPException(
             status_code=500,
-            detail="Something went wrong while listing products.",
+            detail='Something went wrong while listing products.',
         )
 
 
 @prodcuts.get(
-    "/{id}", description="Get product of id", status_code=status.HTTP_200_OK
+    '/{id}', description='Get product of id', status_code=status.HTTP_200_OK
 )
 async def get_product(id: int, db: Session = Depends(get_db)):
     try:
@@ -65,16 +65,16 @@ async def get_product(id: int, db: Session = Depends(get_db)):
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception as e:
-        print("Coletando o erro do", e)
+        print('Coletando o erro do', e)
         raise HTTPException(
             status_code=500,
-            detail="Something went wrong while retrieving the product.",
+            detail='Something went wrong while retrieving the product.',
         )
 
 
 @prodcuts.put(
-    "/{id}",
-    description="Update product of id",
+    '/{id}',
+    description='Update product of id',
     status_code=status.HTTP_200_OK,
 )
 async def update_products(
@@ -85,16 +85,16 @@ async def update_products(
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception as e:
-        print("Coletando o erro", e)
+        print('Coletando o erro', e)
         raise HTTPException(
             status_code=500,
-            detail="Something went wrong while updating the product.",
+            detail='Something went wrong while updating the product.',
         )
 
 
 @prodcuts.delete(
-    "/{id}",
-    description="Delete product of id",
+    '/{id}',
+    description='Delete product of id',
     status_code=status.HTTP_200_OK,
 )
 async def delete_products(id: int, db: Session = Depends(get_db)):
@@ -103,16 +103,16 @@ async def delete_products(id: int, db: Session = Depends(get_db)):
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception as e:
-        print("Coletando o erro", e)
+        print('Coletando o erro', e)
         raise HTTPException(
             status_code=500,
-            detail="Something went wrong while deleting the product.",
+            detail='Something went wrong while deleting the product.',
         )
 
 
 @prodcuts.post(
-    "/employee",
-    description="Relation between employee and product",
+    '/employee',
+    description='Relation between employee and product',
     status_code=status.HTTP_201_CREATED,
 )
 async def add_products_employe(
@@ -125,5 +125,5 @@ async def add_products_employe(
     except Exception:
         raise HTTPException(
             status_code=500,
-            detail="Something went wrong while creating the product.",
+            detail='Something went wrong while creating the product.',
         )

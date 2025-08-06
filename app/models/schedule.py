@@ -13,8 +13,8 @@ log = setup_logger()
 
 
 class ScheduleService(Base):
-    __tablename__ = "service"
-    __table_args__ = {"schema": "schedule"}
+    __tablename__ = 'service'
+    __table_args__ = {'schema': 'schedule'}
 
     id: Mapped[int] = mapped_column(primary_key=True)
     time_register: Mapped[datetime] = mapped_column(DateTime, nullable=False)
@@ -43,7 +43,7 @@ class ScheduleService(Base):
         user_id: int,
         is_check: bool = False,
         is_awayalone: bool = False,
-    ) -> Optional["ScheduleService"]:
+    ) -> Optional['ScheduleService']:
         try:
             schedule = cls(
                 time_register=time_register,
@@ -58,13 +58,13 @@ class ScheduleService(Base):
             db.add(schedule)
             return schedule
         except Exception as e:
-            log.error(f"Logger: Error add_schedule: {e}")
+            log.error(f'Logger: Error add_schedule: {e}')
             return None
 
     @classmethod
     def update_is_check(
         cls, db: Session, is_check: bool, user_id: int
-    ) -> Optional["ScheduleService"]:
+    ) -> Optional['ScheduleService']:
         try:
             schedule = (
                 db.query(cls)
@@ -76,7 +76,7 @@ class ScheduleService(Base):
                 .first()
             )
             if not schedule:
-                log.warning("Logger: not_found_user_in_schedule")
+                log.warning('Logger: not_found_user_in_schedule')
 
             schedule.is_check = is_check
             schedule.updated_at = datetime.now()
@@ -87,13 +87,13 @@ class ScheduleService(Base):
             return schedule
         except Exception as e:
             db.rollback()
-            log.error(f"Logger: Error update_schedule: {e}")
+            log.error(f'Logger: Error update_schedule: {e}')
             return None
 
 
 class ScheduleBlock(Base):
-    __tablename__ = "block"
-    __table_args__ = {"schema": "schedule"}
+    __tablename__ = 'block'
+    __table_args__ = {'schema': 'schedule'}
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
@@ -101,11 +101,11 @@ class ScheduleBlock(Base):
     end_time: Mapped[datetime] = mapped_column(DateTime)
 
     employee_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("employee.employees.id")
+        Integer, ForeignKey('employee.employees.id')
     )
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, server_default=text("now()")
+        DateTime, nullable=False, server_default=text('now()')
     )
 
     updated_at: Mapped[datetime] = mapped_column(DateTime)
@@ -114,9 +114,9 @@ class ScheduleBlock(Base):
     deleted_by: Mapped[int] = mapped_column(Integer)
 
     is_block: Mapped[bool] = mapped_column(
-        Boolean, server_default=text("false"), nullable=False
+        Boolean, server_default=text('false'), nullable=False
     )
 
     is_deleted: Mapped[bool] = mapped_column(
-        Boolean, server_default=text("false"), nullable=False
+        Boolean, server_default=text('false'), nullable=False
     )

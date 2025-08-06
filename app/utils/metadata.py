@@ -17,7 +17,7 @@ class Metadata:
 
         # Caso seja uma tupla simples, tenta converter manualmente
         if isinstance(obj, tuple):
-            return {f"col_{i}": value for i, value in enumerate(obj)}
+            return {f'col_{i}': value for i, value in enumerate(obj)}
 
         # Caso seja uma instância ORM
         try:
@@ -27,7 +27,7 @@ class Metadata:
             }
         except Exception:
             raise ValueError(
-                f"Não foi possível converter objeto: {obj}. Tipo: {type(obj)}"
+                f'Não foi possível converter objeto: {obj}. Tipo: {type(obj)}'
             )
 
     def model_to_list(self):
@@ -45,13 +45,13 @@ class Metadata:
         return json.dumps(self.model_to_list(), default=str)
 
     def model_instance_to_dict_get_id(self):
-        if hasattr(self.objects, "__table__"):
+        if hasattr(self.objects, '__table__'):
             return {
                 column.name: getattr(self.objects, column.name)
                 for column in self.objects.__table__.columns
             }
         raise ValueError(
-            "Objeto não possui __table__ para extração de colunas."
+            'Objeto não possui __table__ para extração de colunas.'
         )
 
 

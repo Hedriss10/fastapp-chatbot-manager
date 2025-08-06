@@ -10,7 +10,7 @@ from app.models.messages import SummaryMessage
 log = setup_logger()
 
 
-LIST_EMPLOYEE = "select_barber"
+LIST_EMPLOYEE = 'select_barber'
 
 
 class EmployeeCore:
@@ -30,13 +30,13 @@ class EmployeeCore:
             result_employees = self.db.execute(employees_stmt).fetchall()
 
             employees_list = []
-            options_employee = ""
+            options_employee = ''
 
             for idx, (emp_id, username) in enumerate(
                 result_employees, start=1
             ):
-                employees_list.append({"id": emp_id, "name": username})
-                options_employee += f"{idx}️⃣ {username}  \n"
+                employees_list.append({'id': emp_id, 'name': username})
+                options_employee += f'{idx}️⃣ {username}  \n'
 
             # Pega mensagem base do banco (com placeholders)
             message_stmt = select(self.message_summary.message).where(
@@ -45,7 +45,7 @@ class EmployeeCore:
             result_message = self.db.execute(message_stmt).fetchone()
 
             # Substitui o nome do cliente e insere os nomes formatados
-            message_format = result_message[0]["text"].format(
+            message_format = result_message[0]['text'].format(
                 nome_cliente=self.push_name,
                 opcoes_funcionarios=options_employee.strip(),
             )
@@ -53,9 +53,9 @@ class EmployeeCore:
             return message_format, employees_list
 
         except Exception as e:
-            log.error(f"Logger: Error list employees: {e}")
+            log.error(f'Logger: Error list employees: {e}')
             return (
-                "⚠️ Erro ao listar funcionários. Tente novamente mais tarde.",
+                '⚠️ Erro ao listar funcionários. Tente novamente mais tarde.',
                 [],
             )
 

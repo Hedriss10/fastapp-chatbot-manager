@@ -11,10 +11,10 @@ from app.models.messages import SummaryMessage
 
 log = setup_logger()
 
-ASK_WHICH_BARBER = "ask_which_barber"
-ASK_SUBJECT = "ask_subject"
-CONNECTING_TO_BARBER = "connecting_to_barber"
-FORWARD_TO_BARBER = "forward_to_barber"
+ASK_WHICH_BARBER = 'ask_which_barber'
+ASK_SUBJECT = 'ask_subject'
+CONNECTING_TO_BARBER = 'connecting_to_barber'
+FORWARD_TO_BARBER = 'forward_to_barber'
 
 
 class BarberCore:
@@ -43,11 +43,11 @@ class BarberCore:
         result_employees = self.db.execute(employees_stmt).fetchall()
 
         employees_list = []
-        options_employee = ""
+        options_employee = ''
 
         for idx, (emp_id, username) in enumerate(result_employees, start=1):
-            employees_list.append({"id": emp_id, "name": username})
-            options_employee += f"{idx}️⃣ {username}  \n"
+            employees_list.append({'id': emp_id, 'name': username})
+            options_employee += f'{idx}️⃣ {username}  \n'
 
         # Pega mensagem base do banco (com placeholders)
         message_stmt = select(self.message_summary.message).where(
@@ -57,7 +57,7 @@ class BarberCore:
         result_message = self.db.execute(message_stmt).fetchone()
 
         # Substitui o nome do cliente e insere os nomes formatados
-        message_format = result_message[0]["text"].format(
+        message_format = result_message[0]['text'].format(
             nome_cliente=self.push_name,
             opcoes_funcionarios=options_employee.strip(),
         )
@@ -77,10 +77,10 @@ class BarberCore:
             result = self.db.execute(stmt).first()
             if result:
                 _, _, message = result
-                return message["text"]
+                return message['text']
 
         except Exception as e:
-            log.error(f"Error get ask subject barbe info: {e}")
+            log.error(f'Error get ask subject barbe info: {e}')
             return None
 
     def get_connecting_to_barber_info(self, employee_id: int) -> Optional[int]:
@@ -97,13 +97,13 @@ class BarberCore:
             ).where(SummaryMessage.ticket == CONNECTING_TO_BARBER)
             result = self.db.execute(stmt).fetchone()
 
-            message_format = result[1]["text"].format(
+            message_format = result[1]['text'].format(
                 nome_cliente=self.push_name,
                 barbeiro_desejado=result_employees[0],
             )
             return message_format
         except Exception as e:
-            log.error(f"Error get connecting to barber info: {e}")
+            log.error(f'Error get connecting to barber info: {e}')
             return None
 
     def get_forward_to_barber_info(
@@ -125,11 +125,11 @@ class BarberCore:
             )
             result = self.db.execute(stmt).first()
 
-            message_format = result[1]["text"].format(
+            message_format = result[1]['text'].format(
                 nome_cliente=self.push_name,
                 tipo_atendimento=type_schedule,
             )
             return message_format, result_employees[1]
         except Exception as e:
-            log.error(f"Error get forward to barber info: {e}")
+            log.error(f'Error get forward to barber info: {e}')
             return None

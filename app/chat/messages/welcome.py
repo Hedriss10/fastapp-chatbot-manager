@@ -8,7 +8,7 @@ from app.models.messages import SummaryMessage
 log = setup_logger()
 
 
-WELCOME_SUMMARY = "welcome_summary"
+WELCOME_SUMMARY = 'welcome_summary'
 
 
 class WelcomeCore:
@@ -28,8 +28,8 @@ class WelcomeCore:
             result = self.db.execute(stmt).first()
             if result:
                 _, _, message = result
-                return message["text"]
+                return message['text']
 
         except Exception as e:
-            log.error(f"Error flow_welcome: {e}")
+            log.error(f'Error flow_welcome: {e}')
             return None
