@@ -31,6 +31,18 @@ python_files = "test_*.py"
 python_functions = "test_*"
 addopts = "--verbose --cov=app"
 
+[tool.coverage.run]
+branch = true
+omit = [
+  "tests/*",
+  "venv/*",
+  ".venv/*",
+  "app/main.py",
+  "app/alembic/*",
+  "app/alembic/*",
+  "app/alembic/*"
+]
+
 
 [tool.alembic]
 # path to migration scripts.
