@@ -1,5 +1,4 @@
 # app/core/schedule.py
 
 
-class ScheduleCore:
-    ...
+class ScheduleCore: ...

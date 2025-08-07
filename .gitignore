@@ -1,6 +1,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/python,circuitpython,flask,flashbuilder,macos
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,circuitpython,flask,flashbuilder,macos
 
+.static
+app/static
+
 ### CircuitPython ###
 .Trashes
 .metadata_never_index

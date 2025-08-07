@@ -2,11 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes.bot import bot
-from app.routes.schedule import schedule
 from app.routes.employee import employee
 from app.routes.healtchek import heartcheck
 from app.routes.login import login
 from app.routes.product import prodcuts
+from app.routes.schedule import schedule
 from app.routes.users import users
 from app.settings.settings import settings
 

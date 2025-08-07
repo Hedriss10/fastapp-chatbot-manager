@@ -1,5 +1,5 @@
 # app/core/product.py
-
+import os
 
 from sqlalchemy.orm import Session
 
@@ -8,6 +8,10 @@ from app.models.product.product import Products
 from app.schemas.pagination import PaginationParams
 
 log = setup_logger()
+
+UPLOAD_FILE = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), 'static'
+)
 
 
 class ProdudtCore:

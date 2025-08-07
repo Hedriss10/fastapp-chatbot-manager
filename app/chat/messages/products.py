@@ -5,8 +5,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.logs.log import setup_logger
-from app.models.employee.employee import Employee
 from app.models.campaign.messages import SummaryMessage
+from app.models.employee.employee import Employee
 from app.models.product.product import Products, ProductsEmployees
 
 log = setup_logger()

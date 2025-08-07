@@ -1,13 +1,11 @@
 # app/models/schedule.py
 
 from datetime import datetime
-from typing import Optional
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, text
-from sqlalchemy.orm import Mapped, Session, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.db import Base
-from app.logs.log import setup_logger
 
 
 class ScheduleBlock(Base):

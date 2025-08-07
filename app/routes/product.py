@@ -1,6 +1,7 @@
 # app/routes/product.py
+from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, File, Form, UploadFile, status
 from fastapi.exceptions import HTTPException
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
@@ -10,29 +11,58 @@ from app.db.depency import get_db
 from app.schemas.pagination import PaginationParams
 from app.schemas.product import (
     ProductEmployeeInSchema,
-    ProductInSchema,
     ProductOutSchema,
     ProductUpdateSchema,
 )
+from app.utils.products import UploadImageProduct
 
 prodcuts = APIRouter(prefix='/products', tags=['products'])
 
 
 @prodcuts.post(
     '',
-    description='Create a new product',
+    description='Create a new product with image upload',
     response_model=ProductOutSchema,
     status_code=status.HTTP_201_CREATED,
 )
-async def add_products(data: ProductInSchema, db: Session = Depends(get_db)):
+async def add_products(
+    description: str = Form(...),
+    value_operation: float = Form(...),
+    time_to_spend: timedelta = Form(...),
+    commission: float = Form(...),
+    category: str = Form(None),
+    image: UploadFile = File(None),
+    db: Session = Depends(get_db),
+):
     try:
+        image_path = None
+        if image:
+            uploader = UploadImageProduct(
+                description=description,
+                created_at=datetime.now(),
+            )
+            image_path = await uploader.save_image(image)
+
+        # repassando o dict para o produto
+        product_data = {
+            'description': description,
+            'value_operation': value_operation,
+            'time_to_spend': time_to_spend,
+            'commission': commission,
+            'category': category,
+            'image': image_path,
+        }
+
+        from app.schemas.product import ProductInSchema
+
+        data = ProductInSchema(**product_data)
+
         return await ProdudtCore.add_product(data, db)
-    except ValidationError as ve:
-        raise HTTPException(status_code=422, detail=ve.errors())
-    except Exception:
+
+    except Exception as e:
+        print('Coletadno o erro', e)
         raise HTTPException(
-            status_code=500,
-            detail='Something went wrong while creating the product.',
+            status_code=500, detail=f'Erro ao criar produto: {str(e)}'
         )
 
 
