@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes.bot import bot
+from app.routes.schedule import schedule
 from app.routes.employee import employee
 from app.routes.healtchek import heartcheck
 from app.routes.login import login
@@ -32,6 +33,7 @@ app.include_router(users)
 app.include_router(bot)
 app.include_router(heartcheck)
 app.include_router(prodcuts)
+app.include_router(schedule)
 
 
 if __name__ == '__main__':

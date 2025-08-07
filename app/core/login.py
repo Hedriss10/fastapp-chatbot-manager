@@ -3,7 +3,7 @@
 from sqlalchemy.orm import Session
 
 from app.logs.log import setup_logger
-from app.models.employee import Employee
+from app.models.employee.employee import Employee
 from app.models.users.users import User
 from app.schemas.login import LoginEmployee, LoginUser
 

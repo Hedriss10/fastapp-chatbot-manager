@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.logs.log import setup_logger
-from app.models.messages import SummaryMessage
+from app.models.campaign.messages import SummaryMessage
 
 log = setup_logger()
 

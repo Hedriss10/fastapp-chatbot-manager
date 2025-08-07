@@ -3,7 +3,7 @@
 from collections import namedtuple
 from unittest.mock import MagicMock
 
-from app.models.employee import Employee
+from app.models.employee.employee import Employee
 from app.schemas.pagination import PaginationParams
 
 
