@@ -164,9 +164,8 @@ class Products(Base):
             db.commit()
             return ProductOutSchema(message_id='product_created_successfully')
         except Exception as e:
-            print('Coletando o erro ao add o produto', e)
             db.rollback()
-            log.error('Error adding product')
+            log.error(f'Error adding product: {e}')
 
     @classmethod
     async def update_product(cls, id: int, data: ProductInSchema, db: Session):

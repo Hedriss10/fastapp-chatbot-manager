@@ -25,7 +25,7 @@ class UploadImageProduct:
             year,
             month,
             day,
-            f'product_images_{self.description.replace(" ", "_")}',
+            f'product_images_{self.description}',
         )
         os.makedirs(base_path, exist_ok=True)
         return base_path

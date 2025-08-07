@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int
     url_frontend: str
     url_vite_frontend: str
+    backend_base_url: str
 
     class Config:
         env_file = '.env'
