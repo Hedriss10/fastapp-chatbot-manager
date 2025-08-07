@@ -12,7 +12,7 @@ from app.logs.log import setup_logger
 
 class ScheduleBlock(Base):
     __tablename__ = 'block'
-    __table_args__ = {'schema': 'schedule'}
+    __table_args__ = {'schema': 'service'}
 
     id: Mapped[int] = mapped_column(primary_key=True)
 

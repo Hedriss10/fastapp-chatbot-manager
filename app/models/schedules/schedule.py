@@ -10,8 +10,8 @@ from app.logs.log import setup_logger
 log = setup_logger()
  
 class ScheduleService(Base):
-    __tablename__ = 'service'
-    __table_args__ = {'schema': 'schedule'}
+    __tablename__ = 'schedule'
+    __table_args__ = {'schema': 'service'}
 
     id: Mapped[int] = mapped_column(primary_key=True)
     time_register: Mapped[datetime] = mapped_column(DateTime, nullable=False)

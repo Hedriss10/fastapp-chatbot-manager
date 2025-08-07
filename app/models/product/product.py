@@ -208,7 +208,7 @@ class ProductsEmployees(Base):
         ForeignKey('finance.products.id'), nullable=False
     )
     employee_id: Mapped[int] = mapped_column(
-        ForeignKey('public.employee.id'), nullable=False
+        ForeignKey('employee.employees.id'), nullable=False
     )
     is_check: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(

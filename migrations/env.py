@@ -14,7 +14,15 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Importe seu Base e models para refletir no metadata
 from app.db.db import Base
+from app.models.users.users import User
+from app.models.employee.employee import Employee
+from app.models.product.product import Products
+from app.models.campaign.messages import SummaryMessage, MessageFlow
+from app.models.schedules.block import ScheduleBlock
 from app.models.schedules.schedule import ScheduleService
+from app.models.time_recording.time_recording import ScheduleEmployee
+
+
 
 # Configuração padrão do Alembic
 config = context.config
