@@ -87,3 +87,15 @@ class ScheduleService(Base):
             db.rollback()
             log.error(f'Logger: Error update_schedule: {e}')
             return None
+
+    @classmethod
+    def add_schedule(cls): ...
+
+    @classmethod
+    def get_schedule(cls): ...
+
+    @classmethod
+    def update_schedule(cls): ...
+
+    @classmethod
+    def delete_schedule(cls): ...
