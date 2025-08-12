@@ -222,12 +222,3 @@ class ProductsEmployees(Base):
 
     def __repr__(self):
         return f"""{self.id} created successfully"""
-
-    @classmethod
-    def list_products_employees(cls, employee_id: int): ...
-
-    @classmethod
-    def create_products_employees(cls, product_id: int, employee_id: int): ...
-
-    @classmethod
-    def delete_products_employees(cls): ...

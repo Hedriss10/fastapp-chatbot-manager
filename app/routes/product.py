@@ -6,13 +6,13 @@ from fastapi.exceptions import HTTPException
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from app.core.product import ProdudtCore
+from app.core.product import ProdudtCore, ProductEmployee
 from app.db.depency import get_db
 from app.schemas.pagination import PaginationParams
 from app.schemas.product import (
-    ProductEmployeeInSchema,
     ProductOutSchema,
     ProductUpdateSchema,
+    ProductsInEmployeeSchema
 )
 from app.utils.products import UploadImageProduct
 
@@ -146,14 +146,32 @@ async def delete_products(id: int, db: Session = Depends(get_db)):
     status_code=status.HTTP_201_CREATED,
 )
 async def add_products_employe(
-    data: ProductEmployeeInSchema, db: Session = Depends(get_db)
+    data: ProductsInEmployeeSchema, db: Session = Depends(get_db)
 ):
     try:
-        return await ProdudtCore.add_products_employe(data, db)
+        return await ProductEmployee().add_products_employees(data, db)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception:
         raise HTTPException(
             status_code=500,
             detail='Something went wrong while creating the product.',
+        )
+
+@prodcuts.get(
+    '/employee/{id}',
+    description='List all products related to employee',
+    status_code=status.HTTP_200_OK,
+)
+async def list_products_employee(id: int, db: Session = Depends(get_db)): 
+    try:
+        products = await ProductEmployee().list_employees_products(id=id, db=db)
+        return {'data': products}
+    except ValidationError as ve:
+        raise HTTPException(status_code=422, detail=ve.errors())
+    except Exception as e:
+        print("Error coletado", e)
+        raise HTTPException(
+            status_code=500,
+            detail='Something went wrong while listing products.',
         )

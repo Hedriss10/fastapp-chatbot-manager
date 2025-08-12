@@ -29,6 +29,7 @@ class ProductDeleteSchema(BaseModel):
     id: int
 
 
-class ProductEmployeeInSchema(BaseModel):
-    employee_id: int
+class ProductsInEmployeeSchema(BaseModel):
     product_id: int
+    employee_id: int
+    is_check: Optional[bool] = False

@@ -2,10 +2,14 @@
 import os
 
 from sqlalchemy.orm import Session
-
+from sqlalchemy import insert, select, func, text
 from app.logs.log import setup_logger
 from app.models.product.product import Products
-from app.schemas.pagination import PaginationParams
+from app.models.product.product import ProductsEmployees
+from app.models.employee.employee import Employee
+from app.schemas.pagination import PaginationParams, BuildMetadata
+from app.utils.metadata import Metadata
+from app.schemas.product import ProductsInEmployeeSchema, ProductOutSchema
 from app.settings.settings import settings
 
 log = setup_logger()
@@ -69,3 +73,50 @@ class ProdudtCore:
 
     async def delete_product(id: int, db: Session):
         return await Products.delete_product(id=id, db=db)
+
+
+class ProductEmployee:
+    
+    def __init__(self, *args, **kwargs):
+        self.products_employee = ProductsEmployees
+        self.employee = Employee
+        self.products = Products
+            
+    async def add_products_employees(self, data: ProductsInEmployeeSchema, db: Session):
+        try:
+            stmt = insert(self.products_employee).values(
+                product_id=data.product_id,
+                employee_id=data.employee_id
+            )
+            db.execute(stmt)
+            db.commit()
+            return ProductOutSchema(message_id='product_employee_created_successfully')
+        except Exception as e:
+            db.rollback()
+            log.error(f'Logger: Error add_products_employees: {e}')
+            raise
+    
+    async def list_employees_products(self, id: int, db: Session):
+        try:
+            stmt = select(
+                self.products.id,
+                self.products.description,
+                self.products.value_operation,
+                func.to_char(self.products.time_to_spend, text("'HH24:MI:SS'")).label(
+                    'time_to_spend'
+                ),
+                self.products.commission,
+                self.products.category,
+            ).join(
+                self.products_employee,
+                self.products.id == self.products_employee.product_id,
+            ).where(
+                self.products_employee.employee_id == id,
+                self.products.is_deleted == False,
+            )
+            result = db.execute(stmt).fetchall()
+            return Metadata(result).model_to_list()
+        except Exception as e:
+            db.rollback()
+            log.error(f'Logger: Error list_employees_products: {e}')
+            raise
