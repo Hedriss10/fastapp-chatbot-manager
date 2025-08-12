@@ -131,8 +131,7 @@ class ScheduleCore:
             log.error(f'Logger: Error list_schedules: {e}')
             raise
 
-    def get_schedule(self, user_id: int, db: Session):
-        # TODO - ajustar isso para pegar o id do user
+    async def get_schedule(self, id: int, db: Session):
         try:
             stmt = (
                 select(
@@ -153,14 +152,14 @@ class ScheduleCore:
                 )
                 .join(
                     self.employee,
-                    self.schedule.self.employee_id == self.employee.id,
+                    self.schedule.employee_id == self.employee.id,
                 )
                 .join(Products, self.schedule.product_id == Products.id)
                 .join(User, self.schedule.user_id == User.id)
                 .where(
                     self.schedule.is_deleted == False,
-                    self.schedule.user_id == user_id,
-                    self.schedule.is_check == True,
+                    self.schedule.user_id == id,
+                    self.schedule.is_check == False,
                 )
             )
             result_raw = db.execute(stmt).fetchall()

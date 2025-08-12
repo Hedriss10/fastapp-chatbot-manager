@@ -1,6 +1,6 @@
 # app/routes/schedule.py
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Header
 from fastapi.exceptions import HTTPException
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
@@ -32,12 +32,16 @@ async def add_schedule(data: ScheduleInSchema, db: Session = Depends(get_db)):
     '/manageruser',
     description='Get schedule of id',
 )
-async def get_schedule(id: int, db: Session = Depends(get_db)):
+async def get_schedule(
+    db: Session = Depends(get_db),
+    id: int = Header(..., alias="Id"),
+):
     try:
-        return ScheduleCore.get_schedule(id=id, db=db)
+        result = await ScheduleCore().get_schedule(id=id, db=db)
+        return {'data': result}
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
-    except Exception:
+    except Exception as e:
         raise HTTPException(
             status_code=500,
             detail='Something went wrong while getting the schedule.',
@@ -58,8 +62,7 @@ async def list_schedules(
         return {'data': users, 'metadata': metadata}
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
-    except Exception as e:
-        print('Erroor', e)
+    except Exception:
         raise HTTPException(
             status_code=500,
             detail='Something went wrong while getting the schedules.',
@@ -92,8 +95,7 @@ async def delete_schedule(id: int, db: Session = Depends(get_db)):
         return await ScheduleCore().delete_schedule(id=id, db=db)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
-    except Exception as e:
-        print('Coletnado o erro', e)
+    except Exception:
         raise HTTPException(
             status_code=500,
             detail='Something went wrong while deleting the schedule.',
