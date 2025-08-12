@@ -6,6 +6,7 @@ from sqlalchemy.orm import Mapped, Session, mapped_column
 
 from app.db.db import Base
 from app.logs.log import setup_logger
+from app.schemas.schedule import ScheduleInSchema, ScheduleOutSchema
 
 log = setup_logger()
 
@@ -89,7 +90,31 @@ class ScheduleService(Base):
             return None
 
     @classmethod
-    def add_schedule(cls): ...
+    def register_schedule(
+        cls,
+        data: ScheduleInSchema,
+        db: Session,
+    ):
+        try:
+            schedule = cls(
+                time_register=data.time_register,
+                product_id=data.product_id,
+                employee_id=data.employee_id,
+                user_id=data.user_id,
+                is_check=False,
+                is_awayalone=False,
+                is_deleted=False,
+                created_at=datetime.now(),
+            )
+            db.add(schedule)
+            db.commit()
+            return ScheduleOutSchema(
+                message_id='schedule_created_successfully'
+            )
+        except Exception as e:
+            db.rollback()
+            log.error(f'Logger: Error add_schedule: {e}')
+            raise
 
     @classmethod
     def get_schedule(cls): ...

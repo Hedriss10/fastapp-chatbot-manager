@@ -1,7 +1,8 @@
 # app/schemas/schedule.py
 
 from datetime import datetime
-from pydantic import BaseModel
+
+from pydantic import BaseModel, field_validator
 
 
 class ScheduleInSchema(BaseModel):
@@ -9,6 +10,12 @@ class ScheduleInSchema(BaseModel):
     employee_id: int
     user_id: int
     time_register: datetime
+
+    @field_validator('time_register', mode='after')
+    def parse_time(cls, value):
+        if isinstance(value, str):
+            return datetime.strptime(value, '%Y-%m-%d %H:%M')
+        return value
 
 
 class ScheduleOutSchema(BaseModel):
