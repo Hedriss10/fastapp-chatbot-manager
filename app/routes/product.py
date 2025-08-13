@@ -12,7 +12,7 @@ from app.schemas.pagination import PaginationParams
 from app.schemas.product import (
     ProductOutSchema,
     ProductUpdateSchema,
-    ProductsInEmployeeSchema
+    ProductsInEmployeeSchema,
 )
 from app.utils.products import UploadImageProduct
 
@@ -149,7 +149,10 @@ async def add_products_employe(
     data: ProductsInEmployeeSchema, db: Session = Depends(get_db)
 ):
     try:
-        return await ProductEmployee().add_products_employees(data, db)
+        products, metadata = await ProductEmployee().add_products_employees(
+            data, db
+        )
+        return {'data': products, 'metadata': metadata}
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception:
@@ -158,19 +161,22 @@ async def add_products_employe(
             detail='Something went wrong while creating the product.',
         )
 
+
 @prodcuts.get(
     '/employee/{id}',
     description='List all products related to employee',
     status_code=status.HTTP_200_OK,
 )
-async def list_products_employee(id: int, db: Session = Depends(get_db)): 
+async def list_products_employee(id: int, db: Session = Depends(get_db)):
     try:
-        products = await ProductEmployee().list_employees_products(id=id, db=db)
+        products = await ProductEmployee().list_employees_products(
+            id=id, db=db
+        )
         return {'data': products}
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception as e:
-        print("Error coletado", e)
+        print('Error coletado', e)
         raise HTTPException(
             status_code=500,
             detail='Something went wrong while listing products.',

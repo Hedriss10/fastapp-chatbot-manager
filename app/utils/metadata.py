@@ -1,9 +1,6 @@
-# src/utils/metadata.py
 import json
-
 from sqlalchemy.engine.row import Row
 from sqlalchemy.inspection import inspect
-
 
 class Metadata:
     def __init__(self, objects):
@@ -11,6 +8,11 @@ class Metadata:
 
     def model_to_dict(self, obj=None):
         obj = obj or self.objects
+
+        # Caso já seja um dicionário
+        if isinstance(obj, dict):
+            return obj
+
         # Caso seja resultado de SELECT (Row)
         if isinstance(obj, Row):
             return dict(obj._mapping)
@@ -32,11 +34,15 @@ class Metadata:
 
     def model_to_list(self):
         if isinstance(self.objects, list):
+            if all(isinstance(obj, dict) for obj in self.objects):
+                return self.objects  # já é lista de dicts
             if all(isinstance(obj, Row) for obj in self.objects):
                 return [dict(obj._mapping) for obj in self.objects]
             if all(isinstance(obj, tuple) for obj in self.objects):
                 return [self.model_to_dict(obj) for obj in self.objects]
+            # Lista mista ou ORM
             return [self.model_to_dict(obj) for obj in self.objects]
+
         elif self.objects:
             return [self.model_to_dict(self.objects)]
         return []
@@ -54,42 +60,17 @@ class Metadata:
             'Objeto não possui __table__ para extração de colunas.'
         )
 
-
-def model_to_dict(model):
-    """Converte um modelo SQLAlchemy em dicionário sem campos internos."""
-    return {
-        column.name: getattr(model, column.name)
-        for column in model.__table__.columns
-    }
-
-
-def model_to_json(model):
-    """Converte um modelo SQLAlchemy em JSON sem campos internos."""
-    return model_to_dict(model)
-
-
-def model_to_list(model):
-    """Converte um modelo SQLAlchemy em uma lista sem campos internos."""
-    return [model_to_dict(model)]
-
-
-def model_instance_to_dict(model):
-    return [
-        {
-            column.name: getattr(item, column.name)
-            for column in item.__table__.columns
-        }
-        for item in model
-    ]
-
-
-# Para uma lista de objetos
-def model_list_to_dict(instances):
-    return [model_instance_to_dict(instance) for instance in instances]
-
-
-def model_instance_to_dict_get_id(instance):
-    return {
-        column.name: getattr(instance, column.name)
-        for column in instance.__table__.columns
-    }
+    def model_to_raw_dict(self):
+        if isinstance(self.objects, dict):
+            return self.objects
+        elif hasattr(self.objects, '__dict__'):
+            return {
+                c: getattr(self.objects, c)
+                for c in self.objects.__table__.columns.keys()
+            }
+        elif hasattr(self.objects, '_mapping'):
+            return dict(self.objects._mapping)
+        else:
+            raise ValueError(
+                f'Não foi possível converter objeto: {self.objects}. Tipo: {type(self.objects)}'
+            )

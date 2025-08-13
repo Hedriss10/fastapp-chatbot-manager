@@ -34,7 +34,7 @@ async def add_schedule(data: ScheduleInSchema, db: Session = Depends(get_db)):
 )
 async def get_schedule(
     db: Session = Depends(get_db),
-    id: int = Header(..., alias="Id"),
+    id: int = Header(..., alias='Id'),
 ):
     try:
         result = await ScheduleCore().get_schedule(id=id, db=db)
