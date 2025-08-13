@@ -1,11 +1,5 @@
 # app/core/employee.py
-
-# TODO colocar a listagem de funcionario no core
-# TODO colocar o stmt do sql no core
-
-
 from sqlalchemy.orm import Session
-
 from app.models.employee.employee import Employee
 from app.schemas.employee import EmployeeUpdate
 from app.schemas.pagination import PaginationParams
