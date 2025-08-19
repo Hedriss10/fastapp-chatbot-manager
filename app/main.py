@@ -20,6 +20,8 @@ app = FastAPI(title='Fastapp build platform manager', version='1.0.0')
 origins = [
     f'{settings.url_frontend}',
     f'{settings.url_vite_frontend}',
+    f'{settings.cors_origins_}',
+    f'{settings.cors_origins}',
 ]
 
 app.add_middleware(
