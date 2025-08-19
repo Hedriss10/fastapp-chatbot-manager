@@ -16,7 +16,6 @@ from app.settings.settings import settings
 app = FastAPI(title='Fastapp build platform manager', version='1.0.0')
 
 
-# Lista de origens que podem acessar sua API
 origins = [
     f'{settings.url_frontend}',
     f'{settings.url_vite_frontend}',
