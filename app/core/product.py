@@ -1,16 +1,16 @@
 # app/core/product.py
 import os
 
+from sqlalchemy import func, insert, select, text
 from sqlalchemy.orm import Session
-from sqlalchemy import insert, select, func, text
+
 from app.logs.log import setup_logger
-from app.models.product.product import Products
-from app.models.product.product import ProductsEmployees
 from app.models.employee.employee import Employee
-from app.schemas.pagination import PaginationParams, BuildMetadata
-from app.utils.metadata import Metadata
-from app.schemas.product import ProductsInEmployeeSchema, ProductOutSchema
+from app.models.product.product import Products, ProductsEmployees
+from app.schemas.pagination import PaginationParams
+from app.schemas.product import ProductOutSchema, ProductsInEmployeeSchema
 from app.settings.settings import settings
+from app.utils.metadata import Metadata
 
 log = setup_logger()
 

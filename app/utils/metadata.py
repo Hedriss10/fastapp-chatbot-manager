@@ -1,6 +1,8 @@
 import json
+
 from sqlalchemy.engine.row import Row
 from sqlalchemy.inspection import inspect
+
 
 class Metadata:
     def __init__(self, objects):

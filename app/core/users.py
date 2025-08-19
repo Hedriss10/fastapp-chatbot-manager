@@ -8,22 +8,21 @@ from app.schemas.user import UserCreate, UserUpdate
 
 
 class UserCore:
-    @staticmethod
-    def add_users(data: UserCreate, db: Session):
-        return User.add_users(data, db)
+    def __init__(self, db: Session):
+        self.db = db
+
+    def add_users(self, data: UserCreate):
+        return User.add_users(data, self.db)
+
+    def list_users(self,pagination: PaginationParams):
+        return User.list_users(pagination, self.db)
+
+    def get_user(self, id: int):
+        return User.get_user(id, self.db)
+
+    def update_users(self, id: int, data: UserUpdate):
+        return User.update_users(id, data, self.db)
 
     @staticmethod
-    def list_users(pagination: PaginationParams, db: Session):
-        return User.list_users(pagination, db)
-
-    @staticmethod
-    def get_user(id: int, db: Session):
-        return User.get_user(id, db)
-
-    @staticmethod
-    def update_users(id: int, data: UserUpdate, db: Session):
-        return User.update_users(id, data, db)
-
-    @staticmethod
-    def delete_users(id: int, db: Session):
-        return User.delete_users(id, db)
+    def delete_users(self, id: int):
+        return User.delete_users(id, self.db)

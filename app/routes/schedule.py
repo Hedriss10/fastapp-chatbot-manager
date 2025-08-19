@@ -18,7 +18,7 @@ schedule = APIRouter(prefix='/schedule', tags=['schedule'])
 )
 async def add_schedule(data: ScheduleInSchema, db: Session = Depends(get_db)):
     try:
-        return ScheduleCore().add_schedule(data=data, db=db)
+        return ScheduleCore(db=db).add_schedule(data=data)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception:
@@ -37,11 +37,11 @@ async def get_schedule(
     id: int = Header(..., alias='Id'),
 ):
     try:
-        result = await ScheduleCore().get_schedule(id=id, db=db)
+        result = await ScheduleCore(db=db).get_schedule(id=id)
         return {'data': result}
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=500,
             detail='Something went wrong while getting the schedule.',
@@ -56,8 +56,8 @@ async def list_schedules(
     params: PaginationParams = Depends(), db: Session = Depends(get_db)
 ):
     try:
-        users, metadata = await ScheduleCore().list_schedules(
-            pagination_params=params, db=db
+        users, metadata = await ScheduleCore(db=db).list_schedules(
+            pagination_params=params
         )
         return {'data': users, 'metadata': metadata}
     except ValidationError as ve:
@@ -92,7 +92,7 @@ async def update_schedule(
 @schedule.delete('/{id}', description='Delete schedule of id')
 async def delete_schedule(id: int, db: Session = Depends(get_db)):
     try:
-        return await ScheduleCore().delete_schedule(id=id, db=db)
+        return await ScheduleCore(db=db).delete_schedule(id=id)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception:

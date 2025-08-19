@@ -11,10 +11,12 @@ log = setup_logger()
 
 
 class LoginCore:
-    @staticmethod
-    async def login_user(data: LoginUser, db: Session = Session()):
-        return User.get_login(data, db)
 
-    @staticmethod
-    async def login_employee(data: LoginEmployee, db: Session = Session()):
-        return Employee.get_login(data, db)
+    def __init__(self, db: Session):
+        self.db = db
+
+    async def login_user(self, data: LoginUser):
+        return await User.get_login(data, self.db)
+
+    async def login_employee(self, data: LoginEmployee):
+        return await Employee.get_login(data, self.db)

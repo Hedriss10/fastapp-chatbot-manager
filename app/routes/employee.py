@@ -23,7 +23,7 @@ employee = APIRouter(prefix='/employee', tags=['employee'])
 )
 async def add_employee(data: EmployeeBase, db: Session = Depends(get_db)):
     try:
-        return EmployeeCore.add_employee(data, db)
+        return EmployeeCore(db=db).add_employee(data)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception:
@@ -40,7 +40,7 @@ async def list_employees(
     pagination: PaginationParams = Depends(), db: Session = Depends(get_db)
 ):
     try:
-        employees, metadata = EmployeeCore.list_employees(pagination, db)
+        employees, metadata = EmployeeCore(db=db).list_employees(pagination)
         return {'data': employees, 'metadata': metadata}
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
@@ -56,7 +56,7 @@ async def list_employees(
 )
 async def get_employee(id: int, db: Session = Depends(get_db)):
     try:
-        employee = EmployeeCore.get_employee(id, db)
+        employee = EmployeeCore(db=db).get_employee(id)
         if not employee:
             raise HTTPException(status_code=404, detail='Employee not found.')
         return employee
@@ -76,7 +76,7 @@ async def update_employee(
     id: int, data: EmployeeUpdate, db: Session = Depends(get_db)
 ):
     try:
-        updated_employee = EmployeeCore.update_employee(id, data, db)
+        updated_employee = EmployeeCore(db=db).update_employee(id, data)
         if not updated_employee:
             raise HTTPException(status_code=404, detail='Employee not found.')
         return updated_employee
@@ -94,7 +94,7 @@ async def update_employee(
 )
 async def delete_employee(id: int, db: Session = Depends(get_db)):
     try:
-        deleted_employee = EmployeeCore.delete_employee(id, db)
+        deleted_employee = EmployeeCore(db=db).delete_employee(id)
         if not deleted_employee:
             raise HTTPException(status_code=404, detail='Employee not found.')
         return EmployeeDeleteOut(message_id='employee_deleted_successfully')

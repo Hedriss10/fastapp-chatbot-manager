@@ -1,27 +1,26 @@
 # app/core/employee.py
 from sqlalchemy.orm import Session
+
 from app.models.employee.employee import Employee
 from app.schemas.employee import EmployeeUpdate
 from app.schemas.pagination import PaginationParams
 
 
 class EmployeeCore:
-    @staticmethod
-    def get_employee(id: int, db: Session):
-        return Employee.get_employee(id, db)
+    def __init__(self, db: Session):
+        self.db = db
 
-    @staticmethod
-    def add_employee(data: Employee, db: Session):
-        return Employee.add_employee(data, db)
+    def get_employee(self, id: int):
+        return Employee.get_employee(id, self.db)
 
-    @staticmethod
-    def list_employees(pagination: PaginationParams, db: Session):
-        return Employee.list_employees(pagination, db)
+    def add_employee(self, data: Employee):
+        return Employee.add_employee(data, self.db)
 
-    @staticmethod
-    def update_employee(id: int, data: EmployeeUpdate, db: Session):
-        return Employee.update_employee(id, data, db)
+    def list_employees(self, pagination: PaginationParams):
+        return Employee.list_employees(pagination, self.db)
 
-    @staticmethod
-    def delete_employee(id: int, db: Session):
-        return Employee.delete_employee(id, db)
+    def update_employee(self, id: int, data: EmployeeUpdate):
+        return Employee.update_employee(id, data, self.db)
+
+    def delete_employee(self, id: int):
+        return Employee.delete_employee(id, self.db)

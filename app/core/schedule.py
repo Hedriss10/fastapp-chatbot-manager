@@ -25,21 +25,22 @@ SCHEDULE_FIELDS = [
 
 
 class ScheduleCore:
-    def __init__(self, *args, **kwargs):
+    def __init__(self, db: Session, *args, **kwargs):
+        self.db = db
         self.schedule = ScheduleService
         self.employee = Employee
         self.user = User
         self.products = Products
 
-    def add_schedule(self, data: ScheduleInSchema, db: Session):
+    def add_schedule(self, data: ScheduleInSchema):
         try:
-            return self.schedule.register_schedule(data=data, db=db)
+            return self.schedule.register_schedule(data=data, db=self.db)
         except Exception as e:
             log.error(f'Logger: Error add_schedule: {e}')
             raise
 
     async def list_schedules(
-        self, pagination_params: PaginationParams, db: Session
+        self, pagination_params: PaginationParams
     ):
         try:
             stmt = (
@@ -106,7 +107,7 @@ class ScheduleCore:
                     )
 
             # Total de registros
-            total_count = db.execute(
+            total_count = self.db.execute(
                 select(func.count()).select_from(stmt.subquery())
             ).scalar()
 
@@ -116,7 +117,7 @@ class ScheduleCore:
                 * pagination_params.rows_per_page
             ).limit(pagination_params.rows_per_page)
 
-            result = db.execute(paginated_stmt).fetchall()
+            result = self.db.execute(paginated_stmt).fetchall()
 
             metadata = BuildMetadata(
                 total_count=total_count,
@@ -131,7 +132,7 @@ class ScheduleCore:
             log.error(f'Logger: Error list_schedules: {e}')
             raise
 
-    async def get_schedule(self, id: int, db: Session):
+    async def get_schedule(self, id: int):
         try:
             stmt = (
                 select(
@@ -162,17 +163,17 @@ class ScheduleCore:
                     self.schedule.is_check == False,
                 )
             )
-            result_raw = db.execute(stmt).fetchall()
+            result_raw = self.db.execute(stmt).fetchall()
             return Metadata(result_raw).model_to_list()
         except Exception as e:
             log.error(f'Logger: Error get_schedule: {e}')
             raise
 
     async def update_schedule(
-        self, id: int, data: ScheduleInSchema, db: Session
+        self, id: int, data: ScheduleInSchema
     ):
         try:
-            schedule = db.query(self.schedule).filter_by(id=id).first()
+            schedule = self.db.query(self.schedule).filter_by(id=id).first()
             if not schedule:
                 log.error(f'Schedule with ID {id} not found.')
                 raise ValueError(f'Schedule with ID {id} not found.')
@@ -182,28 +183,28 @@ class ScheduleCore:
                     setattr(schedule, key, value)
 
             schedule.updated_at = datetime.now()
-            db.add(schedule)
-            db.commit()
+            self.db.add(schedule)
+            self.db.commit()
             return ScheduleOutSchema(
                 message_id='schedule_updated_successfully'
             )
 
         except Exception as e:
-            db.rollback()
+            self.db.rollback()
             log.error(f'Logger: Error update_schedule: {e}')
             raise
 
-    async def delete_schedule(self, id: int, db: Session):
+    async def delete_schedule(self, id: int):
         try:
             stmt = (
-                db.query(self.schedule).filter(self.schedule.id == id).first()
+                self.db.query(self.schedule).filter(self.schedule.id == id).first()
             )
             stmt.is_deleted = True
-            db.commit()
+            self.db.commit()
             return ScheduleOutSchema(
                 message_id='schedule_deleted_successfully'
             )
         except Exception as e:
-            db.rollback()
+            self.db.rollback()
             log.error(f'Logger: Error delete_schedule: {e}')
             raise

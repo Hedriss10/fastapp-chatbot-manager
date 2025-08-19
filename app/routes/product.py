@@ -6,13 +6,13 @@ from fastapi.exceptions import HTTPException
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from app.core.product import ProdudtCore, ProductEmployee
+from app.core.product import ProductEmployee, ProdudtCore
 from app.db.depency import get_db
 from app.schemas.pagination import PaginationParams
 from app.schemas.product import (
     ProductOutSchema,
-    ProductUpdateSchema,
     ProductsInEmployeeSchema,
+    ProductUpdateSchema,
 )
 from app.utils.products import UploadImageProduct
 
