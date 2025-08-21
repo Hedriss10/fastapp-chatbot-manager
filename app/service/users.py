@@ -2,7 +2,7 @@
 
 from sqlalchemy.orm import Session
 
-from app.models.users.users import User
+from app.models.users import User
 from app.schemas.pagination import PaginationParams
 from app.schemas.user import UserCreate, UserUpdate
 
@@ -14,7 +14,7 @@ class UserCore:
     def add_users(self, data: UserCreate):
         return User.add_users(data, self.db)
 
-    def list_users(self,pagination: PaginationParams):
+    def list_users(self, pagination: PaginationParams):
         return User.list_users(pagination, self.db)
 
     def get_user(self, id: int):

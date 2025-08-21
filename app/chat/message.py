@@ -12,9 +12,9 @@ from app.chat.messages.raflle_promo import RafflePromoCore
 from app.chat.messages.schedule import ScheduleCore
 from app.chat.messages.users import UsersCore
 from app.chat.messages.welcome import WelcomeCore
-from app.db.db import SessionLocal
-from app.logs.log import setup_logger
-from app.utils.slots import get_emoji_number
+from app.core.log import setup_logger
+from app.core.utils.slots import get_emoji_number
+from app.db.db import AsyncSessionLocal
 
 log = setup_logger()
 
@@ -36,7 +36,7 @@ class MessagesCore:
 
     def send_welcome(self):
         try:
-            with SessionLocal() as session_local:
+            with AsyncSessionLocal() as session_local:
                 stmt = WelcomeCore(db=session_local).flow_welcome()
                 return stmt
         except Exception as e:
@@ -44,7 +44,7 @@ class MessagesCore:
 
     def send_list_employee(self) -> tuple[str, list[dict]]:
         try:
-            with SessionLocal() as session_local:
+            with AsyncSessionLocal() as session_local:
                 message, employees = EmployeeCore(
                     push_name=self.push_name, db=session_local
                 ).list_employee()
@@ -58,7 +58,7 @@ class MessagesCore:
 
     def send_list_products_id(self, employee_id: int):
         try:
-            with SessionLocal() as session_local:
+            with AsyncSessionLocal() as session_local:
                 message, products = ProductsCore(
                     push_name=self.push_name,
                     message=self.message,
@@ -79,7 +79,7 @@ class MessagesCore:
 
     def send_available_days(self):
         try:
-            with SessionLocal() as session_local:
+            with AsyncSessionLocal() as session_local:
                 list_days_available, days = ScheduleCore(
                     message=self.message,
                     sender_number=self.sender_number,
@@ -95,7 +95,7 @@ class MessagesCore:
         self, employee_id: int, data_escolhida: str, product_id: int
     ):
         try:
-            with SessionLocal() as session_local:
+            with AsyncSessionLocal() as session_local:
                 raw_slots = ScheduleCore(
                     db=session_local,
                     message=self.message,
@@ -135,7 +135,7 @@ class MessagesCore:
         product_id: int,
     ):
         try:
-            with SessionLocal() as session_local:
+            with AsyncSessionLocal() as session_local:
                 message_formated = ScheduleCore(
                     message=self.message,
                     sender_number=self.sender_number,
@@ -162,7 +162,7 @@ class MessagesCore:
         hour_selected: str,
     ):
         try:
-            with SessionLocal() as session_local:
+            with AsyncSessionLocal() as session_local:
                 phone_employee, stmt = ScheduleCore(
                     message=self.message,
                     sender_number=self.sender_number,
@@ -185,7 +185,7 @@ class MessagesCore:
         self, employee_id: int, date_selected: str, hour_selected: str
     ):
         try:
-            with SessionLocal() as session_local:
+            with AsyncSessionLocal() as session_local:
                 stmt = ScheduleCore(
                     message=self.message,
                     sender_number=self.sender_number,
@@ -212,7 +212,7 @@ class MessagesCore:
         product_id: int,
     ):
         try:
-            with SessionLocal() as session_local:
+            with AsyncSessionLocal() as session_local:
                 stmt = ScheduleCore(
                     message=self.message,
                     sender_number=self.sender_number,
@@ -235,7 +235,7 @@ class MessagesCore:
 
     def send_update_schedule(self, send_number: str) -> str:
         try:
-            with SessionLocal() as session_local:
+            with AsyncSessionLocal() as session_local:
                 stmt = ScheduleCore(
                     message=self.message,
                     sender_number=self.sender_number,
@@ -254,7 +254,7 @@ class MessagesCore:
 
     def send_opening_hours(self) -> str:
         try:
-            with SessionLocal() as session_local:
+            with AsyncSessionLocal() as session_local:
                 stmt = OpeningHoursCore(
                     message=self.message,
                     sender_number=self.sender_number,
@@ -268,7 +268,7 @@ class MessagesCore:
 
     def send_barber_info(self) -> tuple[str, list[dict]]:
         try:
-            with SessionLocal() as session_local:
+            with AsyncSessionLocal() as session_local:
                 message, employees = BarberCore(
                     message=self.message,
                     sender_number=self.sender_number,
@@ -285,7 +285,7 @@ class MessagesCore:
 
     def send_ask_subject(self) -> str:
         try:
-            with SessionLocal() as session_local:
+            with AsyncSessionLocal() as session_local:
                 stmt = BarberCore(
                     message=self.message,
                     sender_number=self.sender_number,
@@ -300,7 +300,7 @@ class MessagesCore:
 
     def send_connecting_to_barber(self, employee_id: int) -> Optional[int]:
         try:
-            with SessionLocal() as session_local:
+            with AsyncSessionLocal() as session_local:
                 stmt = BarberCore(
                     message=self.message,
                     sender_number=self.sender_number,
@@ -317,7 +317,7 @@ class MessagesCore:
         self, type_schedule: str, employee_id: int
     ) -> Optional[str]:
         try:
-            with SessionLocal() as session_local:
+            with AsyncSessionLocal() as session_local:
                 stmt, emploee_phone = BarberCore(
                     message=self.message,
                     sender_number=self.sender_number,
@@ -334,7 +334,7 @@ class MessagesCore:
 
     def send_raffle_promo_info(self) -> str:
         try:
-            with SessionLocal() as session_local:
+            with AsyncSessionLocal() as session_local:
                 stmt = RafflePromoCore(
                     message=self.message,
                     sender_number=self.sender_number,
@@ -349,7 +349,7 @@ class MessagesCore:
 
     def send_check_existing_user(self) -> bool:
         try:
-            with SessionLocal() as session_local:
+            with AsyncSessionLocal() as session_local:
                 user_id = UsersCore(
                     message=self.message,
                     sender_number=self.sender_number,
@@ -363,7 +363,7 @@ class MessagesCore:
 
     def send_add_user(self, lastname: str) -> str:
         try:
-            with SessionLocal() as session_local:
+            with AsyncSessionLocal() as session_local:
                 stmt = UsersCore(
                     message=self.message,
                     sender_number=self.sender_number,

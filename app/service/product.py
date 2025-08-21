@@ -4,13 +4,13 @@ import os
 from sqlalchemy import func, insert, select, text
 from sqlalchemy.orm import Session
 
-from app.logs.log import setup_logger
-from app.models.employee.employee import Employee
-from app.models.product.product import Products, ProductsEmployees
+from app.core.log import setup_logger
+from app.core.utils.metadata import Metadata
+from app.models.employee import Employee
+from app.models.product import Products, ProductsEmployees
 from app.schemas.pagination import PaginationParams
 from app.schemas.product import ProductOutSchema, ProductsInEmployeeSchema
 from app.settings.settings import settings
-from app.utils.metadata import Metadata
 
 log = setup_logger()
 

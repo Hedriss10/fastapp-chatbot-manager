@@ -3,9 +3,9 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.logs.log import setup_logger
-from app.models.campaign.messages import SummaryMessage
-from app.models.employee.employee import Employee
+from app.core.log import setup_logger
+from app.models.employee import Employee
+from app.models.messages import SummaryMessage
 
 log = setup_logger()
 

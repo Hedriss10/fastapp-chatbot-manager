@@ -3,7 +3,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from app.core.employee import EmployeeCore
 from app.db.depency import get_db
 from app.schemas.employee import (
     EmployeeBase,
@@ -14,6 +13,7 @@ from app.schemas.employee import (
     EmployeeUpdateOut,
 )
 from app.schemas.pagination import PaginationParams
+from app.service.employee import EmployeeCore
 
 employee = APIRouter(prefix='/employee', tags=['employee'])
 

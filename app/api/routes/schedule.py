@@ -5,10 +5,10 @@ from fastapi.exceptions import HTTPException
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from app.core.schedule import ScheduleCore
 from app.db.depency import get_db
 from app.schemas.pagination import PaginationParams
 from app.schemas.schedule import ScheduleInSchema, ScheduleOutSchema
+from app.service.schedule import ScheduleCore
 
 schedule = APIRouter(prefix='/schedule', tags=['schedule'])
 

@@ -5,8 +5,8 @@ import httpx
 from dotenv import load_dotenv
 
 from app.chat.message import MessagesCore
-from app.logs.log import setup_logger
-from app.service.redis import SessionManager
+from app.core.cache.redis import SessionManager
+from app.core.log import setup_logger
 
 load_dotenv()
 

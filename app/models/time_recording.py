@@ -13,7 +13,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.db.db import Base
+from app.db.base import Base
 
 
 class ScheduleEmployee(Base):

@@ -19,14 +19,14 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, Session, mapped_column
 
-from app.db.db import Base
-from app.logs.log import setup_logger
+from app.core.log import setup_logger
+from app.core.utils.metadata import Metadata
+from app.db.base import Base
 from app.schemas.pagination import BuildMetadata, PaginationParams
 from app.schemas.product import (
     ProductInSchema,
     ProductOutSchema,
 )
-from app.utils.metadata import Metadata
 
 log = setup_logger()
 

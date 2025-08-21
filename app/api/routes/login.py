@@ -2,9 +2,8 @@
 
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.login import LoginCore
 from app.db.depency import get_db
 from app.schemas.login import (
     LoginEmployee,
@@ -12,13 +11,14 @@ from app.schemas.login import (
     LoginUser,
     LoginUserOut,
 )
+from app.service.login import LoginService
 
 login = APIRouter(prefix='/login', tags=['login'])
 
 
 @login.post('', response_model=LoginUserOut, description='Login user')
-async def login_users(data: LoginUser, db: Session = Depends(get_db)):
-    user = await LoginCore(db=db).login_user(data)
+async def login_users(data: LoginUser, db: AsyncSession = Depends(get_db)):
+    user = await LoginService(session=db).login_user(data)
     if not user:
         raise HTTPException(status_code=401, detail='Invalid credentials')
     return user
@@ -27,8 +27,10 @@ async def login_users(data: LoginUser, db: Session = Depends(get_db)):
 @login.post(
     '/employee', response_model=LoginEmployeeOut, description='Login employee'
 )
-async def login_employee(data: LoginEmployee, db: Session = Depends(get_db)):
-    user = await LoginCore(db=db).login_employee(data)
+async def login_employee(
+    data: LoginEmployee, db: AsyncSession = Depends(get_db)
+):
+    user = await LoginService(session=db).login_employee(data)
     if not user:
         raise HTTPException(status_code=401, detail='Invalid credentials')
     return user

@@ -5,7 +5,7 @@ from datetime import datetime
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.db.db import Base
+from app.db.base import Base
 
 
 class ScheduleBlock(Base):

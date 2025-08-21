@@ -16,9 +16,9 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, Session, mapped_column
 
-from app.auth.auth import create_access_token
-from app.db.db import Base
-from app.logs.log import setup_logger
+from app.core.log import setup_logger
+from app.core.utils.metadata import Metadata
+from app.db.base import Base
 from app.schemas.employee import (
     EmployeeBase,
     EmployeeDeleteOut,
@@ -27,9 +27,7 @@ from app.schemas.employee import (
     EmployeeUpdate,
     EmployeeUpdateOut,
 )
-from app.schemas.login import LoginEmployee, LoginEmployeeOut
 from app.schemas.pagination import BuildMetadata, PaginationParams
-from app.utils.metadata import Metadata
 
 log = setup_logger()
 
@@ -68,27 +66,6 @@ class Employee(Base):
 
     def __repr__(self):
         return f"""{self.username} created employee_successfully"""
-
-    @classmethod
-    def get_login(cls, data: LoginEmployee, db: Session):
-        try:
-            employee = db.query(cls).filter(cls.phone == data.phone).first()
-            if employee:
-                access_token = create_access_token({'sub': str(employee.id)})
-                return LoginEmployeeOut(
-                    user={
-                        'id': employee.id,
-                        'username': employee.username,
-                        'phone': employee.phone,
-                        'role': employee.role,
-                    },
-                    access_token=access_token,
-                    message_id='employee_logged_successfully',
-                )
-            return None
-        except Exception as e:
-            log.error(f'Logger: Error get_login: {e}')
-            raise
 
     @classmethod
     def get_employee(cls, id: int, db: Session) -> Dict[str, Any]:

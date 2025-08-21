@@ -4,8 +4,8 @@ from typing import Optional
 from sqlalchemy import Boolean, DateTime, Integer
 from sqlalchemy.orm import Mapped, Session, mapped_column
 
-from app.db.db import Base
-from app.logs.log import setup_logger
+from app.core.log import setup_logger
+from app.db.base import Base
 from app.schemas.schedule import ScheduleInSchema, ScheduleOutSchema
 
 log = setup_logger()

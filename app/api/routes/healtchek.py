@@ -3,7 +3,7 @@
 
 from fastapi import APIRouter, HTTPException
 
-from app.logs.log import setup_logger
+from app.core.log import setup_logger
 
 log = setup_logger()
 

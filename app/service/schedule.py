@@ -5,14 +5,14 @@ from datetime import datetime
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.logs.log import setup_logger
-from app.models.employee.employee import Employee
-from app.models.product.product import Products
-from app.models.schedules.schedule import ScheduleService
-from app.models.users.users import User
+from app.core.log import setup_logger
+from app.core.utils.metadata import Metadata
+from app.models.employee import Employee
+from app.models.product import Products
+from app.models.schedule import ScheduleService
+from app.models.users import User
 from app.schemas.pagination import BuildMetadata, PaginationParams
 from app.schemas.schedule import ScheduleInSchema, ScheduleOutSchema
-from app.utils.metadata import Metadata
 
 log = setup_logger()
 
@@ -39,9 +39,7 @@ class ScheduleCore:
             log.error(f'Logger: Error add_schedule: {e}')
             raise
 
-    async def list_schedules(
-        self, pagination_params: PaginationParams
-    ):
+    async def list_schedules(self, pagination_params: PaginationParams):
         try:
             stmt = (
                 select(
@@ -169,9 +167,7 @@ class ScheduleCore:
             log.error(f'Logger: Error get_schedule: {e}')
             raise
 
-    async def update_schedule(
-        self, id: int, data: ScheduleInSchema
-    ):
+    async def update_schedule(self, id: int, data: ScheduleInSchema):
         try:
             schedule = self.db.query(self.schedule).filter_by(id=id).first()
             if not schedule:
@@ -197,7 +193,9 @@ class ScheduleCore:
     async def delete_schedule(self, id: int):
         try:
             stmt = (
-                self.db.query(self.schedule).filter(self.schedule.id == id).first()
+                self.db.query(self.schedule)
+                .filter(self.schedule.id == id)
+                .first()
             )
             stmt.is_deleted = True
             self.db.commit()

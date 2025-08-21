@@ -15,10 +15,9 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, Session, mapped_column
 
-from app.auth.auth import create_access_token
-from app.db.db import Base
-from app.logs.log import setup_logger
-from app.schemas.login import LoginUser, LoginUserOut
+from app.core.log import setup_logger
+from app.core.utils.metadata import Metadata
+from app.db.base import Base
 from app.schemas.pagination import BuildMetadata, PaginationParams
 from app.schemas.user import (
     UserCreate,
@@ -27,7 +26,6 @@ from app.schemas.user import (
     UserUpdate,
     UserUpdateOut,
 )
-from app.utils.metadata import Metadata
 
 log = setup_logger()
 
@@ -64,27 +62,6 @@ class User(Base):
             return user_id.id if user_id else None
         except Exception as e:
             log.error(f'Logger: error in colect ID user{e}')
-            raise
-
-    @classmethod
-    def get_login(cls, data: LoginUser, db: Session):
-        try:
-            user = db.query(cls).filter(cls.phone == data.phone).first()
-            if user:
-                access_token = create_access_token({'sub': str(user.id)})
-                return LoginUserOut(
-                    user={
-                        'id': user.id,
-                        'username': user.username,
-                        'lastname': user.lastname,
-                        'phone': user.phone,
-                    },
-                    access_token=access_token,
-                    message_id='user_logged_successfully',
-                )
-            return None
-        except Exception as e:
-            log.error(f'Logger: Error get_login: {e}')
             raise
 
     @classmethod

@@ -3,8 +3,8 @@
 from sqlalchemy import insert
 from sqlalchemy.orm import Session
 
-from app.logs.log import setup_logger
-from app.models.users.users import User
+from app.core.log import setup_logger
+from app.models.users import User
 
 log = setup_logger()
 

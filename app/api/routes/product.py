@@ -6,7 +6,7 @@ from fastapi.exceptions import HTTPException
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from app.core.product import ProductEmployee, ProdudtCore
+from app.core.utils.products import UploadImageProduct
 from app.db.depency import get_db
 from app.schemas.pagination import PaginationParams
 from app.schemas.product import (
@@ -14,7 +14,7 @@ from app.schemas.product import (
     ProductsInEmployeeSchema,
     ProductUpdateSchema,
 )
-from app.utils.products import UploadImageProduct
+from app.service.product import ProductEmployee, ProdudtCore
 
 prodcuts = APIRouter(prefix='/products', tags=['products'])
 
