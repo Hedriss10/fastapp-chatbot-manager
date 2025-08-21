@@ -14,7 +14,7 @@ from app.schemas.user import (
     UserUpdate,
     UserUpdateOut,
 )
-from app.service.users import UserCore
+from app.service.users import UserService
 
 users = APIRouter(prefix='/users', tags=['users'])
 
@@ -22,7 +22,7 @@ users = APIRouter(prefix='/users', tags=['users'])
 @users.post('', description='Create a new user', response_model=UserOut)
 async def add_users(data: UserCreate, db: Session = Depends(get_db)):
     try:
-        return UserCore(db=db).add_users(data)
+        return await UserService(session=db).add_users(data)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception:
@@ -37,7 +37,7 @@ async def list_users(
     pagination: PaginationParams = Depends(), db: Session = Depends(get_db)
 ):
     try:
-        users, metadata = UserCore(db=db).list_users(pagination)
+        users, metadata = await UserService(session=db).list_users(pagination)
         return {'data': users, 'metadata': metadata}
     except Exception:
         raise HTTPException(
@@ -49,7 +49,7 @@ async def list_users(
 @users.get('/{id}', description='Get user of id')
 async def get_user(id: int, db: Session = Depends(get_db)):
     try:
-        return UserCore(db=db).get_user(id)
+        return await UserService(session=db).get_user(id)
     except Exception:
         raise HTTPException(
             status_code=500,
@@ -64,7 +64,7 @@ async def update_user(
     id: int, data: UserUpdate, db: Session = Depends(get_db)
 ):
     try:
-        return UserCore(db=db).update_users(id, data)
+        return await UserService(session=db).update_users(id, data)
     except Exception:
         raise HTTPException(
             status_code=500,
@@ -77,7 +77,7 @@ async def update_user(
 )
 async def delete_user(id: int, db: Session = Depends(get_db)):
     try:
-        return UserCore(db=db).delete_users(id)
+        return await UserService(session=db).delete_users(id)
     except Exception:
         raise HTTPException(
             status_code=500,

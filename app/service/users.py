@@ -1,28 +1,29 @@
-# app/core/users.py
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from sqlalchemy.orm import Session
+from app.core.utils.pagination import PaginationParams
+from app.repositories.users_repositories import UserRepositories
+from app.schemas.user import (
+    UserCreate,
+    UserUpdate,
+)
 
-from app.models.users import User
-from app.schemas.pagination import PaginationParams
-from app.schemas.user import UserCreate, UserUpdate
 
+class UserService:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+        self.user_repo = UserRepositories(session)
 
-class UserCore:
-    def __init__(self, db: Session):
-        self.db = db
+    async def add_users(self, data: UserCreate):
+        return await self.user_repo.add_users(data)
 
-    def add_users(self, data: UserCreate):
-        return User.add_users(data, self.db)
+    async def list_users(self, pagination_params: PaginationParams):
+        return await self.user_repo.list_users(pagination_params)
 
-    def list_users(self, pagination: PaginationParams):
-        return User.list_users(pagination, self.db)
+    async def get_user(self, user_id: int):
+        return await self.user_repo.get_user(user_id)
 
-    def get_user(self, id: int):
-        return User.get_user(id, self.db)
+    async def update_users(self, user_id: int, users_update: UserUpdate):
+        return await self.user_repo.update_users(user_id, users_update)
 
-    def update_users(self, id: int, data: UserUpdate):
-        return User.update_users(id, data, self.db)
-
-    @staticmethod
-    def delete_users(self, id: int):
-        return User.delete_users(id, self.db)
+    async def delete_users(self, user_id: int):
+        return await self.user_repo.delete_users(user_id)

@@ -81,7 +81,7 @@ async def update_schedule(
         return await ScheduleCore().update_schedule(id=id, data=data, db=db)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=500,
             detail='Something went wrong while updating the schedule.',
