@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import ValidationError
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.depency import get_db
 from app.schemas.pagination import PaginationParams
@@ -20,7 +20,7 @@ users = APIRouter(prefix='/users', tags=['users'])
 
 
 @users.post('', description='Create a new user', response_model=UserOut)
-async def add_users(data: UserCreate, db: Session = Depends(get_db)):
+async def add_users(data: UserCreate, db: AsyncSession = Depends(get_db)):
     try:
         return await UserService(session=db).add_users(data)
     except ValidationError as ve:
@@ -34,7 +34,8 @@ async def add_users(data: UserCreate, db: Session = Depends(get_db)):
 
 @users.get('', description='List all users')
 async def list_users(
-    pagination: PaginationParams = Depends(), db: Session = Depends(get_db)
+    pagination: PaginationParams = Depends(),
+    db: AsyncSession = Depends(get_db),
 ):
     try:
         users, metadata = await UserService(session=db).list_users(pagination)
@@ -47,7 +48,7 @@ async def list_users(
 
 
 @users.get('/{id}', description='Get user of id')
-async def get_user(id: int, db: Session = Depends(get_db)):
+async def get_user(id: int, db: AsyncSession = Depends(get_db)):
     try:
         return await UserService(session=db).get_user(id)
     except Exception:
@@ -61,7 +62,7 @@ async def get_user(id: int, db: Session = Depends(get_db)):
     '/{id}', description='Update user of id', response_model=UserUpdateOut
 )
 async def update_user(
-    id: int, data: UserUpdate, db: Session = Depends(get_db)
+    id: int, data: UserUpdate, db: AsyncSession = Depends(get_db)
 ):
     try:
         return await UserService(session=db).update_users(id, data)
@@ -75,7 +76,7 @@ async def update_user(
 @users.delete(
     '/{id}', description='Delete user of id', response_model=UserDeleteOut
 )
-async def delete_user(id: int, db: Session = Depends(get_db)):
+async def delete_user(id: int, db: AsyncSession = Depends(get_db)):
     try:
         return await UserService(session=db).delete_users(id)
     except Exception:

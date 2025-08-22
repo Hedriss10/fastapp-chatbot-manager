@@ -6,7 +6,6 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.routes.bot import bot
 from app.api.routes.employee import employee
-from app.api.routes.healtchek import heartcheck
 from app.api.routes.login import login
 from app.api.routes.product import prodcuts
 from app.api.routes.schedule import schedule
@@ -35,7 +34,6 @@ app.include_router(employee)
 app.include_router(login)
 app.include_router(users)
 app.include_router(bot)
-app.include_router(heartcheck)
 app.include_router(prodcuts)
 app.include_router(schedule)
 

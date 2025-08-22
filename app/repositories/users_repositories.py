@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Tuple
+
 from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -53,7 +54,9 @@ class UserRepositories:
         except Exception as e:
             log.error(f'Error getting user {user_id}: {e}')
 
-    async def list_users(self, pagination_params: PaginationParams) -> Tuple[List[Dict[str, Any]], BuildMetadata]:
+    async def list_users(
+        self, pagination_params: PaginationParams
+    ) -> Tuple[List[Dict[str, Any]], BuildMetadata]:
         try:
             stmt = select(
                 self.user.id,
@@ -126,7 +129,7 @@ class UserRepositories:
         try:
             user = await self.session.get(self.user, user_id)
             if not user:
-                return UserUpdateOut(message_id="user_not_found")
+                return UserUpdateOut(message_id='user_not_found')
 
             update_key = {}
             for key, value in data.dict(exclude_unset=True).items():
@@ -142,10 +145,10 @@ class UserRepositories:
                 await self.session.execute(stmt)
                 await self.session.commit()
 
-            return UserUpdateOut(message_id="user_updated_successfully")
+            return UserUpdateOut(message_id='user_updated_successfully')
 
         except Exception as e:
-            log.error(f"Error updating user {user_id}: {e}")
+            log.error(f'Error updating user {user_id}: {e}')
             raise
 
     async def delete_users(self, user_id: int) -> UserDeleteOut:
@@ -157,8 +160,8 @@ class UserRepositories:
             )
             await self.session.execute(stmt)
             await self.session.commit()
-            return UserDeleteOut(message_id="user_deleted_successfully")
+            return UserDeleteOut(message_id='user_deleted_successfully')
 
         except Exception as e:
-            log.error(f"Error deleting user {user_id}: {e}")
+            log.error(f'Error deleting user {user_id}: {e}')
             raise
