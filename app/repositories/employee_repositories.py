@@ -5,6 +5,7 @@ from passlib.context import CryptContext
 from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exception.exceptions import DatabaseError
 from app.core.log import setup_logger
 from app.core.utils.metadata import Metadata
 from app.models.employee import Employee
@@ -15,7 +16,6 @@ from app.schemas.employee import (
     EmployeeUpdate,
     EmployeeUpdateOut,
 )
-from app.core.exception.exceptions import DatabaseError
 from app.schemas.pagination import BuildMetadata, PaginationParams
 
 EMPLOYEE_FIELDS = [

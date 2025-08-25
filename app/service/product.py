@@ -1,13 +1,9 @@
 # app/core/product.py
 import os
 
-from sqlalchemy import func, insert, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.log import setup_logger
-from app.core.utils.metadata import Metadata
-from app.models.employee import Employee
-from app.models.product import Products, ProductsEmployees
 from app.repositories.products_repositories import ProductRepositories
 from app.schemas.pagination import PaginationParams
 from app.schemas.product import (
@@ -15,7 +11,6 @@ from app.schemas.product import (
     ProductOutSchema,
     ProductsInEmployeeSchema,
 )
-from app.settings.settings import settings
 
 log = setup_logger()
 

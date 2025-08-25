@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Tuple
 from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exception.exceptions import DatabaseError
 from app.core.log import setup_logger
 from app.core.utils.metadata import Metadata
 from app.models.users import User
@@ -10,11 +11,9 @@ from app.schemas.pagination import BuildMetadata, PaginationParams
 from app.schemas.users import (
     UserCreate,
     UserDeleteOut,
-    UserOut,
     UserUpdate,
     UserUpdateOut,
 )
-from app.core.exception.exceptions import DatabaseError
 
 log = setup_logger()
 

@@ -1,5 +1,5 @@
-from datetime import datetime
 import os
+from datetime import datetime
 from typing import Any, Dict, List, Tuple
 
 from sqlalchemy import func, insert, select, update
@@ -12,9 +12,8 @@ from app.models.product import Products, ProductsEmployees
 from app.schemas.pagination import BuildMetadata, PaginationParams
 from app.schemas.product import (
     ProductInSchema,
-    ProductOutSchema,
-    ProductUpdateSchema,
     ProductsInEmployeeSchema,
+    ProductUpdateSchema,
 )
 from app.settings.settings import settings
 

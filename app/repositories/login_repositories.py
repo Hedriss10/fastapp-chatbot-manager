@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.auth import create_access_token
+from app.core.exception.exceptions import DatabaseError
 from app.core.log import setup_logger
 from app.models.employee import Employee
 from app.models.users import User
@@ -13,7 +14,6 @@ from app.schemas.login import (
     LoginUser,
     LoginUserOut,
 )
-from app.core.exception.exceptions import DatabaseError
 
 log = setup_logger()
 

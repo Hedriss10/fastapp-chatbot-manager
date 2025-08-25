@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.utils.pagination import PaginationParams
 from app.repositories.users_repositories import UserRepositories
-from app.schemas.users import UserCreate, UserUpdate, UserOut
+from app.schemas.users import UserCreate, UserOut, UserUpdate
 
 
 class UserService:

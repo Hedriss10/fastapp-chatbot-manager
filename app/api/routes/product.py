@@ -1,24 +1,21 @@
 # app/routes/product.py
 from datetime import datetime, timedelta
-from importlib import metadata
 
 from fastapi import APIRouter, Depends, File, Form, UploadFile, status
 from fastapi.exceptions import HTTPException
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 
 from app.core.utils.products import UploadImageProduct
 from app.db.depency import get_db
 from app.schemas.pagination import PaginationParams
 from app.schemas.product import (
+    ProductInSchema,
     ProductOutSchema,
     ProductsInEmployeeSchema,
     ProductUpdateSchema,
-    ProductInSchema,
 )
-
-from app.service.product import ProductsService, ProductEmployeeService
+from app.service.product import ProductEmployeeService, ProductsService
 
 prodcuts = APIRouter(prefix='/products', tags=['products'])
 
@@ -116,7 +113,7 @@ async def update_products(
         return await ProductsService(session=db).update_product(id, data)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=500,
             detail='Something went wrong while updating the product.',
