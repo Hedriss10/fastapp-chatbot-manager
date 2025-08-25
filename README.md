@@ -31,6 +31,4 @@ app/
 │  └─ unit/, integration/
 └─ utils/
    └─ pagination.py
-
-└──────────────┘
 ```
