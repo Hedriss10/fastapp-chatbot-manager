@@ -15,6 +15,7 @@ from app.schemas.employee import (
     EmployeeUpdate,
     EmployeeUpdateOut,
 )
+from app.core.exception.exceptions import DatabaseError
 from app.schemas.pagination import BuildMetadata, PaginationParams
 
 EMPLOYEE_FIELDS = [
@@ -50,7 +51,7 @@ class EmployeeRepositories:
         except Exception as e:
             await self.session.rollback()
             log.error(f'Error adding employee: {e}')
-            raise
+            raise DatabaseError('Error adding employee to the database')
 
     async def list_employee(
         self, pagination_params: PaginationParams
@@ -123,6 +124,7 @@ class EmployeeRepositories:
 
         except Exception as e:
             log.error(f'Error listing employees: {e}')
+            raise DatabaseError('Error listing employees from the database')
 
     async def get_employee_by_id(self, employee_id: int) -> Employee | None:
         try:
@@ -137,7 +139,7 @@ class EmployeeRepositories:
 
         except Exception as e:
             log.error(f'Error getting employee {employee_id}: {e}')
-            raise
+            raise DatabaseError('Error getting employee from the database')
 
     async def update_employee(self, employee_id: int, data: EmployeeUpdate):
         try:
@@ -172,7 +174,9 @@ class EmployeeRepositories:
             )
 
         except Exception as e:
+            self.session.rollback()
             log.error(f'Error updating employee {employee_id}: {e}')
+            raise DatabaseError('Error updating employee in the database')
 
     async def delete_employee(self, employee_id: int):
         try:
@@ -185,4 +189,6 @@ class EmployeeRepositories:
             await self.session.commit()
             return EmployeeOut(message_id='employee_deleted_successfully')
         except Exception as e:
+            self.session.rollback()
             log.error(f'Error deleting employee {employee_id}: {e}')
+            raise DatabaseError('Error deleting employee from the database')
