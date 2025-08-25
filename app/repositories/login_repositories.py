@@ -13,6 +13,7 @@ from app.schemas.login import (
     LoginUser,
     LoginUserOut,
 )
+from app.core.exception.exceptions import DatabaseError
 
 log = setup_logger()
 
@@ -44,7 +45,7 @@ class LoginRepositories:
             return None
         except Exception as e:
             log.error(f'Logger: Error get_login: {e}')
-            raise
+            raise DatabaseError('Error getting user login from the database')
 
     async def get_employee_login(
         self, data: LoginEmployee
@@ -69,4 +70,4 @@ class LoginRepositories:
             return None
         except Exception as e:
             log.error(f'Logger: Error get_employee_login: {e}')
-            raise
+            raise DatabaseError('Error getting employee login from the database')

@@ -7,13 +7,14 @@ from app.core.log import setup_logger
 from app.core.utils.metadata import Metadata
 from app.models.users import User
 from app.schemas.pagination import BuildMetadata, PaginationParams
-from app.schemas.user import (
+from app.schemas.users import (
     UserCreate,
     UserDeleteOut,
     UserOut,
     UserUpdate,
     UserUpdateOut,
 )
+from app.core.exception.exceptions import DatabaseError
 
 log = setup_logger()
 
@@ -30,21 +31,31 @@ class UserRepositories:
         self.session = session
         self.user = User
 
-    async def add_users(self, data: UserCreate) -> UserOut:
+    async def add_users(self, data: UserCreate) -> int:
         try:
-            user = (
+            stmt = (
                 insert(self.user)
                 .values(
                     username=data.username,
                     lastname=data.lastname,
                     phone=data.phone,
                 )
-                .returning(self.user.id)
+                .returning(
+                    self.user.id,
+                    self.user.username,
+                    self.user.lastname,
+                    self.user.phone,
+                )
             )
-            result = await self.session.execute(user)
-            return result.scalar()
+            result = await self.session.execute(stmt)
+            await self.session.commit()
+
+            row = result.fetchone()
+            return dict(row._mapping) if row else {}
         except Exception as e:
+            await self.session.rollback()
             log.error(f'Error adding user: {e}')
+            raise DatabaseError('Error adding user to the database')
 
     async def get_user(self, user_id: int):
         try:
@@ -53,6 +64,7 @@ class UserRepositories:
             return result.scalar()
         except Exception as e:
             log.error(f'Error getting user {user_id}: {e}')
+            raise DatabaseError('Error getting user from the database')
 
     async def list_users(
         self, pagination_params: PaginationParams
@@ -122,6 +134,7 @@ class UserRepositories:
 
         except Exception as e:
             log.error(f'Error listing users: {e}')
+            raise DatabaseError('Error listing users from the database')
 
     async def update_users(
         self, user_id: int, data: UserUpdate
@@ -149,7 +162,7 @@ class UserRepositories:
 
         except Exception as e:
             log.error(f'Error updating user {user_id}: {e}')
-            raise
+            raise DatabaseError('Error updating user in the database')
 
     async def delete_users(self, user_id: int) -> UserDeleteOut:
         try:
@@ -164,4 +177,4 @@ class UserRepositories:
 
         except Exception as e:
             log.error(f'Error deleting user {user_id}: {e}')
-            raise
+            raise DatabaseError('Error deleting user from the database')

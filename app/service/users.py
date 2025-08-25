@@ -2,9 +2,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.utils.pagination import PaginationParams
 from app.repositories.users_repositories import UserRepositories
-from app.schemas.user import (
+from app.schemas.users import (
     UserCreate,
     UserUpdate,
+    UserOut
 )
 
 
@@ -13,8 +14,9 @@ class UserService:
         self.session = session
         self.user_repo = UserRepositories(session)
 
-    async def add_users(self, data: UserCreate):
-        return await self.user_repo.add_users(data)
+    async def add_users(self, data: UserCreate) -> UserOut:
+        user_dict = await self.user_repo.add_users(data)
+        return UserOut(**user_dict, message_id="user_created_successfully")
 
     async def list_users(self, pagination_params: PaginationParams):
         return await self.user_repo.list_users(pagination_params)

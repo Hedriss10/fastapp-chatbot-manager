@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.depency import get_db
 from app.schemas.pagination import PaginationParams
-from app.schemas.user import (
+from app.schemas.users import (
     UserCreate,
     UserDeleteOut,
     UserOut,
@@ -25,7 +25,8 @@ async def add_users(data: UserCreate, db: AsyncSession = Depends(get_db)):
         return await UserService(session=db).add_users(data)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
-    except Exception:
+    except Exception as e:
+        print(f'Error creating user: {e}')
         raise HTTPException(
             status_code=500,
             detail='Something went wrong while creating the user.',
