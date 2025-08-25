@@ -1,9 +1,11 @@
 # app/routes/product.py
 from datetime import datetime, timedelta
+from importlib import metadata
 
 from fastapi import APIRouter, Depends, File, Form, UploadFile, status
 from fastapi.exceptions import HTTPException
 from pydantic import ValidationError
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from app.core.utils.products import UploadImageProduct
@@ -13,8 +15,10 @@ from app.schemas.product import (
     ProductOutSchema,
     ProductsInEmployeeSchema,
     ProductUpdateSchema,
+    ProductInSchema
 )
-from app.service.product import ProductEmployee, ProdudtCore
+
+from app.service.product import ProductsService, ProductEmployeeService
 
 prodcuts = APIRouter(prefix='/products', tags=['products'])
 
@@ -32,16 +36,15 @@ async def add_products(
     commission: float = Form(...),
     category: str = Form(None),
     image: UploadFile = File(None),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     try:
-        image_path = None
         if image:
             uploader = UploadImageProduct(
                 description=description,
                 created_at=datetime.now(),
             )
-            image_path = await uploader.save_image(image)
+            await uploader.save_image(image)
 
         # repassando o dict para o produto
         product_data = {
@@ -50,17 +53,13 @@ async def add_products(
             'time_to_spend': time_to_spend,
             'commission': commission,
             'category': category,
-            'image': image_path,
         }
-
-        from app.schemas.product import ProductInSchema
 
         data = ProductInSchema(**product_data)
 
-        return await ProdudtCore.add_product(data, db)
+        return await ProductsService(session=db).add_product(data)
 
     except Exception as e:
-        print('Coletadno o erro', e)
         raise HTTPException(
             status_code=500, detail=f'Erro ao criar produto: {str(e)}'
         )
@@ -72,11 +71,15 @@ async def add_products(
     status_code=status.HTTP_200_OK,
 )
 async def list_products(
-    pagination: PaginationParams = Depends(), db: Session = Depends(get_db)
+    pagination: PaginationParams = Depends(),
+    db: AsyncSession = Depends(get_db),
 ):
     try:
-        products, metadata = await ProdudtCore.list_products(pagination, db)
+        products, metadata = await ProductsService(session=db).list_products(
+            pagination
+        )
         return {'data': products, 'metadata': metadata}
+
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception:
@@ -89,13 +92,12 @@ async def list_products(
 @prodcuts.get(
     '/{id}', description='Get product of id', status_code=status.HTTP_200_OK
 )
-async def get_product(id: int, db: Session = Depends(get_db)):
+async def get_product(id: int, db: AsyncSession = Depends(get_db)):
     try:
-        return await ProdudtCore.get_product(id, db)
+        return await ProductsService(session=db).get_product(id)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
-    except Exception as e:
-        print('Coletando o erro do', e)
+    except Exception:
         raise HTTPException(
             status_code=500,
             detail='Something went wrong while retrieving the product.',
@@ -108,14 +110,13 @@ async def get_product(id: int, db: Session = Depends(get_db)):
     status_code=status.HTTP_200_OK,
 )
 async def update_products(
-    id: int, data: ProductUpdateSchema, db: Session = Depends(get_db)
+    id: int, data: ProductUpdateSchema, db: AsyncSession = Depends(get_db)
 ):
     try:
-        return await ProdudtCore.update_product(id, data, db)
+        return await ProductsService(session=db).update_product(id, data)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception as e:
-        print('Coletando o erro', e)
         raise HTTPException(
             status_code=500,
             detail='Something went wrong while updating the product.',
@@ -127,13 +128,12 @@ async def update_products(
     description='Delete product of id',
     status_code=status.HTTP_200_OK,
 )
-async def delete_products(id: int, db: Session = Depends(get_db)):
+async def delete_products(id: int, db: AsyncSession = Depends(get_db)):
     try:
-        return await ProdudtCore.delete_product(id, db)
+        return await ProductsService(session=db).delete_product(id)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
-    except Exception as e:
-        print('Coletando o erro', e)
+    except Exception:
         raise HTTPException(
             status_code=500,
             detail='Something went wrong while deleting the product.',
@@ -146,13 +146,10 @@ async def delete_products(id: int, db: Session = Depends(get_db)):
     status_code=status.HTTP_201_CREATED,
 )
 async def add_products_employe(
-    data: ProductsInEmployeeSchema, db: Session = Depends(get_db)
+    data: ProductsInEmployeeSchema, db: AsyncSession = Depends(get_db)
 ):
     try:
-        products, metadata = await ProductEmployee().add_products_employees(
-            data, db
-        )
-        return {'data': products, 'metadata': metadata}
+        return await ProductEmployeeService(session=db).add_products_employees(data)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception:
@@ -167,16 +164,13 @@ async def add_products_employe(
     description='List all products related to employee',
     status_code=status.HTTP_200_OK,
 )
-async def list_products_employee(id: int, db: Session = Depends(get_db)):
+async def list_products_employee(id: int, db: AsyncSession = Depends(get_db)):
     try:
-        products = await ProductEmployee().list_employees_products(
-            id=id, db=db
-        )
+        products = await ProductEmployeeService(session=db).list_employees_products(employee_id=id)
         return {'data': products}
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
-    except Exception as e:
-        print('Error coletado', e)
+    except Exception:
         raise HTTPException(
             status_code=500,
             detail='Something went wrong while listing products.',

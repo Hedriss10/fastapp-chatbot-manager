@@ -1,5 +1,5 @@
-from typing import Any, Dict, List, Tuple
 from datetime import datetime
+from typing import Any, Dict, List, Tuple
 
 from passlib.context import CryptContext
 from sqlalchemy import func, insert, select, update
@@ -148,12 +148,14 @@ class EmployeeRepositories:
             update_key = {}
             for key, value in data.dict(exclude_unset=True).items():
                 if value is not None and key in EMPLOYEE_FIELDS:
-                    if key == "date_of_birth":
+                    if key == 'date_of_birth':
                         if isinstance(value, str):
                             try:
                                 value = datetime.fromisoformat(value).date()
                             except ValueError:
-                                value = datetime.strptime(value, "%Y-%m-%d").date()
+                                value = datetime.strptime(
+                                    value, '%Y-%m-%d'
+                                ).date()
                     update_key[key] = value
 
             if update_key:
@@ -181,8 +183,6 @@ class EmployeeRepositories:
             )
             await self.session.execute(stmt)
             await self.session.commit()
-            return EmployeeOut(
-                message_id='employee_deleted_successfully'
-            )
+            return EmployeeOut(message_id='employee_deleted_successfully')
         except Exception as e:
             log.error(f'Error deleting employee {employee_id}: {e}')
