@@ -3,12 +3,12 @@
 from fastapi import APIRouter, Depends, Header
 from fastapi.exceptions import HTTPException
 from pydantic import ValidationError
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.depency import get_db
 from app.schemas.pagination import PaginationParams
 from app.schemas.schedule import ScheduleInSchema, ScheduleOutSchema
-from app.service.schedule import ScheduleCore
+from app.service.schedule import ScheduleService
 
 schedule = APIRouter(prefix='/schedule', tags=['schedule'])
 
@@ -16,9 +16,11 @@ schedule = APIRouter(prefix='/schedule', tags=['schedule'])
 @schedule.post(
     '', description='Add schedule', response_model=ScheduleOutSchema
 )
-async def add_schedule(data: ScheduleInSchema, db: Session = Depends(get_db)):
+async def add_schedule(
+    data: ScheduleInSchema, db: AsyncSession = Depends(get_db)
+):
     try:
-        return ScheduleCore(db=db).add_schedule(data=data)
+        return await ScheduleService(session=db).register_schedule(data=data)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception:
@@ -33,11 +35,11 @@ async def add_schedule(data: ScheduleInSchema, db: Session = Depends(get_db)):
     description='Get schedule of id',
 )
 async def get_schedule(
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     id: int = Header(..., alias='Id'),
 ):
     try:
-        result = await ScheduleCore(db=db).get_schedule(id=id)
+        result = await ScheduleService(session=db).get_schedule(id=id)
         return {'data': result}
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
@@ -53,10 +55,10 @@ async def get_schedule(
     description='List all schedules',
 )
 async def list_schedules(
-    params: PaginationParams = Depends(), db: Session = Depends(get_db)
+    params: PaginationParams = Depends(), db: AsyncSession = Depends(get_db)
 ):
     try:
-        users, metadata = await ScheduleCore(db=db).list_schedules(
+        users, metadata = await ScheduleService(session=db).list_schedules(
             pagination_params=params
         )
         return {'data': users, 'metadata': metadata}
@@ -75,10 +77,12 @@ async def list_schedules(
     response_model=ScheduleOutSchema,
 )
 async def update_schedule(
-    id: int, data: ScheduleInSchema, db: Session = Depends(get_db)
+    id: int, data: ScheduleInSchema, db: AsyncSession = Depends(get_db)
 ):
     try:
-        return await ScheduleCore().update_schedule(id=id, data=data, db=db)
+        return await ScheduleService(session=db).update_schedule(
+            id=id, data=data
+        )
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception:
@@ -89,9 +93,9 @@ async def update_schedule(
 
 
 @schedule.delete('/{id}', description='Delete schedule of id')
-async def delete_schedule(id: int, db: Session = Depends(get_db)):
+async def delete_schedule(id: int, db: AsyncSession = Depends(get_db)):
     try:
-        return await ScheduleCore(db=db).delete_schedule(id=id)
+        return await ScheduleService(session=db).delete_schedule(id=id)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception:

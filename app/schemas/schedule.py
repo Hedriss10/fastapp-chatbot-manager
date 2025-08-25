@@ -20,6 +20,7 @@ class ScheduleInSchema(BaseModel):
 
 class ScheduleOutSchema(BaseModel):
     message_id: str = 'schedule_created_successfully'
+    schedule_id: int | None = None
 
 
 class UpdateScheduleInSchema(BaseModel):
