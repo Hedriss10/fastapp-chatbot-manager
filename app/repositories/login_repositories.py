@@ -70,4 +70,6 @@ class LoginRepositories:
             return None
         except Exception as e:
             log.error(f'Logger: Error get_employee_login: {e}')
-            raise DatabaseError('Error getting employee login from the database')
+            raise DatabaseError(
+                'Error getting employee login from the database'
+            )

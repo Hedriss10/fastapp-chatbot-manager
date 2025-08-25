@@ -242,14 +242,16 @@ class ProductRepositories(HelpersProducts):
             stmt = insert(self.products_employee).values(
                 product_id=data.product_id,
                 created_at=datetime.now(),
-                employee_id=data.employee_id
+                employee_id=data.employee_id,
             )
             await self.session.execute(stmt)
             await self.session.commit()
         except Exception as e:
             self.session.rollback()
             log.error(f'Logger: Error add_products_employee: {e}')
-            raise DatabaseError('Erro inesperado ao adicionar produtos ao funcionário')
+            raise DatabaseError(
+                'Erro inesperado ao adicionar produtos ao funcionário'
+            )
 
     async def list_employees_products(self, employee_id: int):
         try:
@@ -258,9 +260,9 @@ class ProductRepositories(HelpersProducts):
                     self.product.id,
                     self.product.description,
                     self.product.value_operation,
-                    func.to_char(self.product.time_to_spend, 'HH24:MI:SS').label(
-                        'time_to_spend'
-                    ),
+                    func.to_char(
+                        self.product.time_to_spend, 'HH24:MI:SS'
+                    ).label('time_to_spend'),
                     self.product.commission,
                     self.product.category,
                 )
@@ -275,12 +277,12 @@ class ProductRepositories(HelpersProducts):
             )
             result = await self.session.execute(stmt)
             result = result.mappings().all()  # pega como dict-like
-            
+
             enriched = self._add_images(result)
             return enriched
         except Exception as e:
             self.session.rollback()
             log.error(f'Logger: Error add_products_employee: {e}')
-            raise DatabaseError('Erro inesperado ao adicionar produtos ao funcionário')
-    
-    
+            raise DatabaseError(
+                'Erro inesperado ao adicionar produtos ao funcionário'
+            )

@@ -15,7 +15,7 @@ from app.schemas.product import (
     ProductOutSchema,
     ProductsInEmployeeSchema,
     ProductUpdateSchema,
-    ProductInSchema
+    ProductInSchema,
 )
 
 from app.service.product import ProductsService, ProductEmployeeService
@@ -149,7 +149,9 @@ async def add_products_employe(
     data: ProductsInEmployeeSchema, db: AsyncSession = Depends(get_db)
 ):
     try:
-        return await ProductEmployeeService(session=db).add_products_employees(data)
+        return await ProductEmployeeService(session=db).add_products_employees(
+            data
+        )
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception:
@@ -166,7 +168,9 @@ async def add_products_employe(
 )
 async def list_products_employee(id: int, db: AsyncSession = Depends(get_db)):
     try:
-        products = await ProductEmployeeService(session=db).list_employees_products(employee_id=id)
+        products = await ProductEmployeeService(
+            session=db
+        ).list_employees_products(employee_id=id)
         return {'data': products}
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())

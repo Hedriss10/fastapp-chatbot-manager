@@ -61,10 +61,14 @@ class ProductEmployeeService:
     def __init__(self, session: AsyncSession):
         self.session = session
         self.repository = ProductRepositories(session)
-    
+
     async def add_products_employees(self, data: ProductsInEmployeeSchema):
         await self.repository.add_products_employee(data)
-        return ProductOutSchema(message_id="product_employee_created_successfully")
+        return ProductOutSchema(
+            message_id='product_employee_created_successfully'
+        )
 
     async def list_employees_products(self, employee_id: int):
-        return await self.repository.list_employees_products(employee_id=employee_id)
+        return await self.repository.list_employees_products(
+            employee_id=employee_id
+        )
