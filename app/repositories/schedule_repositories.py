@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Tuple
 
 from sqlalchemy import func, insert, select, update
@@ -34,13 +34,17 @@ class ScheduleRepository:
         self.employee = Employee
         self.user = User
         self.products = Products
+    def make_naive(self, dt: datetime) -> datetime:
+        if dt.tzinfo:
+            return dt.astimezone(timezone.utc).replace(tzinfo=None)
+        return dt
 
     async def add_schedule(self, schedule: ScheduleInSchema):
         try:
             stmt = (
                 insert(self.schedule)
                 .values(
-                    time_register=schedule.time_register,
+                    time_register=self.make_naive(schedule.time_register),
                     product_id=schedule.product_id,
                     employee_id=schedule.employee_id,
                     user_id=schedule.user_id,
@@ -74,7 +78,7 @@ class ScheduleRepository:
                 select(
                     self.schedule.id,
                     self.schedule.time_register,
-                    self.employee.id.label('self.employee_id'),
+                    self.employee.id.label('employee_id'),
                     self.products.id.label('product_id'),
                     self.products.description.label('product_name'),
                     func.to_char(
@@ -264,3 +268,4 @@ class ScheduleRepository:
             self.session.rollback()
             log.error(f'Error updating is_check: {e}')
             raise DatabaseError('Error updating is_check')
+    
