@@ -22,6 +22,8 @@ ignore = ["E402", "F811"]
 [tool.ruff.format]
 preview = true
 quote-style = "single"
+indent-style = "space"
+skip-magic-trailing-comma = false
 
 
 [tool.pytest.ini_options] # para gerar o html --cov-report=html
@@ -29,7 +31,7 @@ pythonpath = ["."]
 testpaths = ["tests"]
 python_files = "test_*.py"
 python_functions = "test_*"
-addopts = "--verbose --cov=app"
+addopts = "--verbose --cov=app --cov-report=html --cov-report=term --cov-branch"
 
 [tool.coverage.run]
 branch = true
@@ -41,6 +43,13 @@ omit = [
   "app/alembic/*",
   "app/alembic/*",
   "app/alembic/*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
 ]
 
 

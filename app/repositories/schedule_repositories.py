@@ -34,6 +34,7 @@ class ScheduleRepository:
         self.employee = Employee
         self.user = User
         self.products = Products
+
     def make_naive(self, dt: datetime) -> datetime:
         if dt.tzinfo:
             return dt.astimezone(timezone.utc).replace(tzinfo=None)
@@ -268,4 +269,3 @@ class ScheduleRepository:
             self.session.rollback()
             log.error(f'Error updating is_check: {e}')
             raise DatabaseError('Error updating is_check')
-    
