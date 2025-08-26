@@ -14,10 +14,11 @@ target-version = "py312"
 exclude = ["venv", ".venv", "__pycache__", ".pytest_cache", "migrations", "alembic", "docs", ".git"]
 fix = true
 
-[tool.ruff.lint]
-extend-select = ["E501"]
-select = ["I", "F", "E", "W", "PL", "PT"]
-ignore = ["E402", "F811"]
+# E
+# [tool.ruff.lint]
+# extend-select = ["E501"]
+# select = ["I", "F", "W", "PL", "PT"]
+# ignore = ["E402", "F811"]
 
 [tool.ruff.format]
 preview = true
