@@ -41,11 +41,11 @@ app.include_router(schedule)
 static_dir = os.path.join(os.path.dirname(__file__), 'static')
 
 
-static_dir = Path(__file__).parent / "app" / "static"
+static_dir = Path(__file__).parent / 'app' / 'static'
 if static_dir.exists():
-    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+    app.mount('/static', StaticFiles(directory=static_dir), name='static')
 else:
-    print(f"[WARNING] Static folder not found at {static_dir}")
+    print(f'[WARNING] Static folder not found at {static_dir}')
 
 
 app.mount('/static', StaticFiles(directory=static_dir), name='static')
