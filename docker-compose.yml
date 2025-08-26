@@ -65,29 +65,17 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
-
-  fastapp_db:
-    image: postgres:15
-    container_name: fastapp_db
-    restart: always
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=barbershop_db
-      - DATABASE_URL=postgresql://postgres:postgres@fastapp_db:5432/barbershop_db
-      - ALLOWED_HOSTS=localhost,127.0.0.1
-    volumes:
-      - fastapp_db:/var/lib/postgresql/data
-    ports:
-      - "5477:5432"
-    networks:
-      - evolution-net
-    command: >
-      -c 'listen_addresses=*'
-      -c 'max_connections=200'
-      -c 'shared_buffers=256MB'
-      -c 'work_mem=8MB'
-      -c 'log_min_messages=WARNING'
+  
+  fastapi:
+      build: .
+      container_name: fastapi_app
+      ports:
+        - "8000:8000"
+      volumes:
+        - ./app:/app/app
+      env_file:
+        - .env
+      restart: unless-stopped
 
 volumes:
   evolution_instances:

@@ -1,5 +1,6 @@
 import os
 
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -39,12 +40,17 @@ app.include_router(schedule)
 
 static_dir = os.path.join(os.path.dirname(__file__), 'static')
 
+
+static_dir = Path(__file__).parent / "app" / "static"
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+else:
+    print(f"[WARNING] Static folder not found at {static_dir}")
+
+
 app.mount('/static', StaticFiles(directory=static_dir), name='static')
 
 if __name__ == '__main__':
     import uvicorn
 
     uvicorn.run(app=app, host='0.0.0.0', port=8000, reload=True)
-
-
-# TODO - ajusta a refatoração do produto, precisa altera a importação no bot
