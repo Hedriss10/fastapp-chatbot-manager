@@ -40,3 +40,13 @@ class DeleteScheduleOutSchema(BaseModel):
 
 class CheckScheduleOutSchema(BaseModel):
     is_check: bool
+
+
+class ScheduleInBlock(BaseModel):
+    schedule_id: int
+    start_time: datetime
+    end_time: datetime
+
+
+class ScheduleBlockOut(BaseModel):
+    message_id: str = 'schedule_updated_successfully'
