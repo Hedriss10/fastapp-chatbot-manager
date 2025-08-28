@@ -29,7 +29,7 @@ class BotCore:
             push_name=self.push_name,
         )
 
-    def _reset_session(self, phone: str = None) -> str:
+    async def _reset_session(self, phone: str = None) -> str:
         """Reseta completamente a sessão do usuário"""
         phone = phone or self.sender_number
         try:
@@ -42,7 +42,7 @@ class BotCore:
             self.log.error(f'Error resetting session: {e}')
             return '⚠️ Ocorreu um erro ao reiniciar sua sessão.'
 
-    def _validate_scheduling_data(self) -> Tuple[bool, Optional[Dict]]:
+    async def _validate_scheduling_data(self) -> Tuple[bool, Optional[Dict]]:
         """Valida e retorna todos os dados do agendamento"""
         keys = [
             'selected_employee_id',
@@ -60,11 +60,10 @@ class BotCore:
 
         return True, data
 
-    def _send_message_to_number(self, number: str, message: str) -> bool:
+    async def _send_message_to_number(self, number: str, message: str) -> bool:
         """Envia mensagem para qualquer número"""
         try:
             payload = {'number': number, 'text': message, 'delay': 2000}
-            print(f'Payload: {payload}')
             headers = {
                 'apikey': self.apikey,
                 'Content-Type': 'application/json',
@@ -77,7 +76,7 @@ class BotCore:
             self.log.error(f'Error sending message to {number}: {str(e)}')
             return False
 
-    def _notify_employee(
+    async def _notify_employee(
         self, employee_id: str, scheduling_data: Dict
     ) -> bool:
         """Notifica o barbeiro e registra confirmação pendente"""
@@ -121,7 +120,7 @@ class BotCore:
             self.log.error(f'Error in notify_employee: {str(e)}')
             return False
 
-    def _handle_employee_response(self, msg: str) -> Optional[str]:
+    async def _handle_employee_response(self, msg: str) -> Optional[str]:
         """Trata mensagens recebidas de barbeiros"""
         if not self.session.is_employee(self.sender_number):
             return None
@@ -148,7 +147,7 @@ class BotCore:
                 f'Data: {pending.get("date", "N/A")} às {pending.get("time", "N/A")}'
             )
 
-    def _confirm_scheduling(self, scheduling_data: dict) -> str:
+    async def _confirm_scheduling(self, scheduling_data: dict) -> str:
         """Confirma o agendamento pelo barbeiro"""
         try:
             client_response = self.message_handler.send_check_service_employee(
@@ -171,7 +170,7 @@ class BotCore:
             self.log.error(f'Error confirming scheduling: {str(e)}')
             return '⚠️ Erro ao confirmar agendamento. Tente novamente.'
 
-    def _reject_scheduling(self, scheduling_data: dict) -> str:
+    async def _reject_scheduling(self, scheduling_data: dict) -> str:
         """Recusa o agendamento pelo barbeiro"""
         try:
             # 1. Atualiza o status no banco de dados
@@ -196,7 +195,7 @@ class BotCore:
             self.log.error(f'Logger: reject scheduling: {e}')
             return None
 
-    def get_response(self) -> str:
+    async def get_response(self) -> str:
         """Lida com o fluxo principal de mensagens"""
         try:
             msg = self.message_text.lower().strip()
@@ -543,7 +542,7 @@ class BotCore:
             self.log.error(f'Error in get_response: {str(e)}')
             return self._reset_session()
 
-    def send_message(self) -> Optional[httpx.Response]:
+    async def send_message(self) -> Optional[httpx.Response]:
         try:
             response_text = self.get_response()
 
@@ -560,7 +559,6 @@ class BotCore:
             return httpx.post(
                 self.base_url, json=payload, headers=headers, timeout=10
             )
-
         except Exception as e:
             self.log.error(f'Error sending message: {str(e)}')
             return None

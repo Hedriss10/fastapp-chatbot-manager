@@ -2,7 +2,7 @@
 
 from typing import Optional
 
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.chat.messages.barber import BarberCore
 from app.chat.messages.employee import EmployeeCore
@@ -14,7 +14,6 @@ from app.chat.messages.users import UsersCore
 from app.chat.messages.welcome import WelcomeCore
 from app.core.log import setup_logger
 from app.core.utils.slots import get_emoji_number
-from app.db.db import AsyncSessionLocal
 
 log = setup_logger()
 
@@ -25,11 +24,11 @@ class MessagesCore:
         message: str,
         sender_number: str,
         push_name: str,
-        db: Session = None,
+        session: AsyncSession,
         *args,
         **kwargs,
     ):
-        self.db = db
+        self.session = session
         self.message = message
         self.sender_number = sender_number
         self.push_name = push_name
