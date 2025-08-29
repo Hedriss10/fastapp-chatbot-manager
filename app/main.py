@@ -41,7 +41,8 @@ app.include_router(service)
 static_dir = os.path.join(os.path.dirname(__file__), 'static')
 
 
-static_dir = Path(__file__).parent / 'static'
+# static_dir = Path(__file__).parent / 'static'
+static_dir = Path(__file__).parent / 'app' / 'static'
 if static_dir.exists():
     app.mount('/static', StaticFiles(directory=static_dir), name='static')
 else:
