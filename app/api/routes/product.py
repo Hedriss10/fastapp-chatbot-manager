@@ -29,10 +29,10 @@ prodcuts = APIRouter(prefix='/products', tags=['products'])
 async def add_products(
     description: str = Form(...),
     value_operation: float = Form(...),
-    time_to_spend: timedelta = Form(...),
+    time_to_spend: str = Form(...),
     commission: float = Form(...),
-    category: str = Form(None),
-    image: UploadFile = File(None),
+    category: str = Form(...),
+    image: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
 ):
     try:
