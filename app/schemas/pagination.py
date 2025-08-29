@@ -20,13 +20,10 @@ class BuildMetadata(BaseModel):
     total_pages: int
 
     @staticmethod
-    def build_metadata(
-        total_count: int, params: PaginationParams
-    ) -> Dict[str, Any]:
+    def build_metadata(total_count: int, params: PaginationParams) -> Dict[str, Any]:
         return {
             'total_count': total_count,
             'current_page': params.current_page,
             'rows_per_page': params.rows_per_page,
-            'total_pages': (total_count + params.rows_per_page - 1)
-            // params.rows_per_page,
+            'total_pages': (total_count + params.rows_per_page - 1) // params.rows_per_page,
         }

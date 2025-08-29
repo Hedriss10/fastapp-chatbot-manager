@@ -11,9 +11,7 @@ service = APIRouter(prefix='/service', tags=['service'])
 
 
 @service.post('/block', description='Create block schedule')
-async def add_block(
-    block_data: ScheduleInEmployee, db: AsyncSession = Depends(get_db)
-):
+async def add_block(block_data: ScheduleInEmployee, db: AsyncSession = Depends(get_db)):
     try:
         return await ServiceSchedule(session=db).add_block(block_data)
     except ValidationError as e:

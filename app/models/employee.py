@@ -40,15 +40,11 @@ class Employee(Base):
     role: Mapped[str] = mapped_column(String(40), nullable=False)
     session_token: Mapped[str] = mapped_column(Text, nullable=True)
     password: Mapped[str] = mapped_column(String(300), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
     updated_at: Mapped[str] = mapped_column(DateTime, nullable=True)
     updated_by: Mapped[int] = mapped_column(Integer, nullable=True)
     deleted_by: Mapped[int] = mapped_column(Integer, nullable=True)
-    deleted_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=True, server_default=func.now()
-    )
+    deleted_at: Mapped[datetime] = mapped_column(DateTime, nullable=True, server_default=func.now())
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False)
 
     def __repr__(self):

@@ -57,9 +57,7 @@ async def add_products(
         return await ProductsService(session=db).add_product(data)
 
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f'Erro ao criar produto: {str(e)}'
-        )
+        raise HTTPException(status_code=500, detail=f'Erro ao criar produto: {str(e)}')
 
 
 @prodcuts.get(
@@ -72,9 +70,7 @@ async def list_products(
     db: AsyncSession = Depends(get_db),
 ):
     try:
-        products, metadata = await ProductsService(session=db).list_products(
-            pagination
-        )
+        products, metadata = await ProductsService(session=db).list_products(pagination)
         return {'data': products, 'metadata': metadata}
 
     except ValidationError as ve:
@@ -86,9 +82,7 @@ async def list_products(
         )
 
 
-@prodcuts.get(
-    '/{id}', description='Get product of id', status_code=status.HTTP_200_OK
-)
+@prodcuts.get('/{id}', description='Get product of id', status_code=status.HTTP_200_OK)
 async def get_product(id: int, db: AsyncSession = Depends(get_db)):
     try:
         return await ProductsService(session=db).get_product(id)
@@ -106,9 +100,7 @@ async def get_product(id: int, db: AsyncSession = Depends(get_db)):
     description='Update product of id',
     status_code=status.HTTP_200_OK,
 )
-async def update_products(
-    id: int, data: ProductUpdateSchema, db: AsyncSession = Depends(get_db)
-):
+async def update_products(id: int, data: ProductUpdateSchema, db: AsyncSession = Depends(get_db)):
     try:
         return await ProductsService(session=db).update_product(id, data)
     except ValidationError as ve:
@@ -142,13 +134,9 @@ async def delete_products(id: int, db: AsyncSession = Depends(get_db)):
     description='Relation between employee and product',
     status_code=status.HTTP_201_CREATED,
 )
-async def add_products_employe(
-    data: ProductsInEmployeeSchema, db: AsyncSession = Depends(get_db)
-):
+async def add_products_employe(data: ProductsInEmployeeSchema, db: AsyncSession = Depends(get_db)):
     try:
-        return await ProductEmployeeService(session=db).add_products_employees(
-            data
-        )
+        return await ProductEmployeeService(session=db).add_products_employees(data)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception:
@@ -165,9 +153,7 @@ async def add_products_employe(
 )
 async def list_products_employee(id: int, db: AsyncSession = Depends(get_db)):
     try:
-        products = await ProductEmployeeService(
-            session=db
-        ).list_employees_products(employee_id=id)
+        products = await ProductEmployeeService(session=db).list_employees_products(employee_id=id)
         return {'data': products}
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())

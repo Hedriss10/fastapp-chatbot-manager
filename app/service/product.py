@@ -14,13 +14,9 @@ from app.schemas.product import (
 
 log = setup_logger()
 
-UPLOAD_FILE = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), 'static'
-)
+UPLOAD_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
 
-BASE_IMAGE_DIR = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), '..', 'static', 'uploads'
-)
+BASE_IMAGE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'static', 'uploads')
 URL_IMAGE_PREFIX = '/static/uploads'
 
 
@@ -34,9 +30,7 @@ class ProductsService:
         return ProductOutSchema(message_id='product_created_successfully')
 
     async def list_products(self, pagination_params: PaginationParams):
-        products, metadata = await self.repository.list_products(
-            pagination_params
-        )
+        products, metadata = await self.repository.list_products(pagination_params)
         enriched_products = self.repository._add_images(products)
         return enriched_products, metadata
 
@@ -59,11 +53,7 @@ class ProductEmployeeService:
 
     async def add_products_employees(self, data: ProductsInEmployeeSchema):
         await self.repository.add_products_employee(data)
-        return ProductOutSchema(
-            message_id='product_employee_created_successfully'
-        )
+        return ProductOutSchema(message_id='product_employee_created_successfully')
 
     async def list_employees_products(self, employee_id: int):
-        return await self.repository.list_employees_products(
-            employee_id=employee_id
-        )
+        return await self.repository.list_employees_products(employee_id=employee_id)

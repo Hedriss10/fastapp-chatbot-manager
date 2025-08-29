@@ -30,9 +30,7 @@ class EmployeeService:
         except Exception as e:
             log.error(f'Error in get_employee: {e}')
 
-    async def update_employee(
-        self, employee_id: int, data: EmployeeBase
-    ) -> EmployeeOut:
+    async def update_employee(self, employee_id: int, data: EmployeeBase) -> EmployeeOut:
         try:
             return await self.employee_repo.update_employee(employee_id, data)
         except Exception as e:

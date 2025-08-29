@@ -3,6 +3,8 @@ import json
 from sqlalchemy.engine.row import Row
 from sqlalchemy.inspection import inspect
 
+from app.core.exception.exceptions import DatabaseError
+
 
 class Metadata:
     def __init__(self, objects):
@@ -25,14 +27,9 @@ class Metadata:
 
         # Caso seja uma instância ORM
         try:
-            return {
-                c.key: getattr(obj, c.key)
-                for c in inspect(obj).mapper.column_attrs
-            }
+            return {c.key: getattr(obj, c.key) for c in inspect(obj).mapper.column_attrs}
         except Exception:
-            raise ValueError(
-                f'Não foi possível converter objeto: {obj}. Tipo: {type(obj)}'
-            )
+            raise ValueError(f'Não foi possível converter objeto: {obj}. Tipo: {type(obj)}')
 
     def model_to_list(self):
         if isinstance(self.objects, list):
@@ -54,25 +51,15 @@ class Metadata:
 
     def model_instance_to_dict_get_id(self):
         if hasattr(self.objects, '__table__'):
-            return {
-                column.name: getattr(self.objects, column.name)
-                for column in self.objects.__table__.columns
-            }
-        raise ValueError(
-            'Objeto não possui __table__ para extração de colunas.'
-        )
+            return {column.name: getattr(self.objects, column.name) for column in self.objects.__table__.columns}
+        raise ValueError('Objeto não possui __table__ para extração de colunas.')
 
     def model_to_raw_dict(self):
         if isinstance(self.objects, dict):
             return self.objects
         elif hasattr(self.objects, '__dict__'):
-            return {
-                c: getattr(self.objects, c)
-                for c in self.objects.__table__.columns.keys()
-            }
+            return {c: getattr(self.objects, c) for c in self.objects.__table__.columns.keys()}
         elif hasattr(self.objects, '_mapping'):
             return dict(self.objects._mapping)
         else:
-            raise ValueError(
-                f'Não foi possível converter objeto: {self.objects}. Tipo: {type(self.objects)}'
-            )
+            raise DatabaseError('Não foi possível converter objeto')

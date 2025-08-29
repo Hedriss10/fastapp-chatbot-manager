@@ -20,13 +20,9 @@ from app.settings.settings import settings
 log = setup_logger()
 
 
-UPLOAD_FILE = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), 'static'
-)
+UPLOAD_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
 
-BASE_IMAGE_DIR = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), '..', 'static', 'uploads'
-)
+BASE_IMAGE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'static', 'uploads')
 
 URL_IMAGE_PREFIX = '/static/uploads'
 
@@ -53,11 +49,7 @@ class HelpersProducts:
             for root, dirs, files in os.walk(BASE_IMAGE_DIR):
                 if folder_name in dirs:
                     full_folder_path = os.path.join(root, folder_name)
-                    image_files = [
-                        f
-                        for f in os.listdir(full_folder_path)
-                        if f.lower().endswith(('.jpg', '.jpeg', '.png'))
-                    ]
+                    image_files = [f for f in os.listdir(full_folder_path) if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
                     if image_files:
                         # Gera o caminho relativo para servir como URL
                         relative_path = os.path.relpath(
@@ -103,53 +95,34 @@ class ProductRepositories(HelpersProducts):
             await self.session.rollback()
             raise DatabaseError('Erro ao criar produto')
 
-    async def list_products(
-        self, pagination_params: PaginationParams
-    ) -> Tuple[List[Dict[str, Any]], BuildMetadata]:
+    async def list_products(self, pagination_params: PaginationParams) -> Tuple[List[Dict[str, Any]], BuildMetadata]:
         try:
             stmt = select(
                 self.product.id,
                 self.product.description,
                 self.product.value_operation,
-                func.to_char(self.product.time_to_spend, 'HH24:MI:SS').label(
-                    'time_to_spend'
-                ),
+                func.to_char(self.product.time_to_spend, 'HH24:MI:SS').label('time_to_spend'),
                 self.product.commission,
                 self.product.category,
             ).where(self.product.is_deleted.is_(False))
 
             if pagination_params.filter_by:
                 filter_value = f'%{pagination_params.filter_by}%'
-                stmt = stmt.filter(
-                    func.unaccent(self.product.description).ilike(filter_value)
-                )
+                stmt = stmt.filter(func.unaccent(self.product.description).ilike(filter_value))
 
             if pagination_params.order_by:
                 try:
-                    sort_column = getattr(
-                        self.product, pagination_params.order_by
-                    )
-                    sort_direction = (
-                        pagination_params.sort_by or 'asc'
-                    ).lower()
-                    stmt = stmt.order_by(
-                        sort_column.asc()
-                        if sort_direction == 'asc'
-                        else sort_column.desc()
-                    )
+                    sort_column = getattr(self.product, pagination_params.order_by)
+                    sort_direction = (pagination_params.sort_by or 'asc').lower()
+                    stmt = stmt.order_by(sort_column.asc() if sort_direction == 'asc' else sort_column.desc())
                 except AttributeError:
-                    log.warning(
-                        f'Campo de ordenação inválido: {pagination_params.order_by}'
-                    )
+                    log.warning(f'Campo de ordenação inválido: {pagination_params.order_by}')
 
-            total_count = await self.session.scalar(
-                select(func.count()).select_from(stmt.subquery())
+            total_count = await self.session.scalar(select(func.count()).select_from(stmt.subquery()))
+
+            paginated_stmt = stmt.offset((pagination_params.current_page - 1) * pagination_params.rows_per_page).limit(
+                pagination_params.rows_per_page
             )
-
-            paginated_stmt = stmt.offset(
-                (pagination_params.current_page - 1)
-                * pagination_params.rows_per_page
-            ).limit(pagination_params.rows_per_page)
 
             result = await self.session.execute(paginated_stmt)
             result = result.mappings().all()  # pega como dict-like
@@ -158,8 +131,7 @@ class ProductRepositories(HelpersProducts):
                 total_count=total_count,
                 current_page=pagination_params.current_page,
                 rows_per_page=pagination_params.rows_per_page,
-                total_pages=(total_count + pagination_params.rows_per_page - 1)
-                // pagination_params.rows_per_page,
+                total_pages=(total_count + pagination_params.rows_per_page - 1) // pagination_params.rows_per_page,
             )
 
             enriched = self._add_images(result)
@@ -180,9 +152,7 @@ class ProductRepositories(HelpersProducts):
                 self.product.id,
                 self.product.description,
                 self.product.value_operation,
-                func.to_char(self.product.time_to_spend, 'HH24:MI:SS').label(
-                    'time_to_spend'
-                ),
+                func.to_char(self.product.time_to_spend, 'HH24:MI:SS').label('time_to_spend'),
                 self.product.commission,
                 self.product.category,
             ).where(self.product.id == id, self.product.is_deleted.is_(False))
@@ -210,11 +180,7 @@ class ProductRepositories(HelpersProducts):
                 if hasattr(prodcuts, key):
                     setattr(prodcuts, key, value)
                     updated_key[key] = value
-            stmt = (
-                update(self.product)
-                .where(self.product.id == id)
-                .values(updated_key)
-            )
+            stmt = update(self.product).where(self.product.id == id).values(updated_key)
             await self.session.execute(stmt)
             await self.session.commit()
         except Exception as e:
@@ -224,11 +190,7 @@ class ProductRepositories(HelpersProducts):
 
     async def delete_product(self, product_id: int):
         try:
-            stmt = (
-                update(self.product)
-                .where(self.product.id == product_id)
-                .values(is_deleted=True)
-            )
+            stmt = update(self.product).where(self.product.id == product_id).values(is_deleted=True)
             await self.session.execute(stmt)
             await self.session.commit()
         except Exception as e:
@@ -248,9 +210,7 @@ class ProductRepositories(HelpersProducts):
         except Exception as e:
             self.session.rollback()
             log.error(f'Logger: Error add_products_employee: {e}')
-            raise DatabaseError(
-                'Erro inesperado ao adicionar produtos ao funcionário'
-            )
+            raise DatabaseError('Erro inesperado ao adicionar produtos ao funcionário')
 
     async def list_employees_products(self, employee_id: int):
         try:
@@ -259,9 +219,7 @@ class ProductRepositories(HelpersProducts):
                     self.product.id,
                     self.product.description,
                     self.product.value_operation,
-                    func.to_char(
-                        self.product.time_to_spend, 'HH24:MI:SS'
-                    ).label('time_to_spend'),
+                    func.to_char(self.product.time_to_spend, 'HH24:MI:SS').label('time_to_spend'),
                     self.product.commission,
                     self.product.category,
                 )
@@ -282,6 +240,4 @@ class ProductRepositories(HelpersProducts):
         except Exception as e:
             self.session.rollback()
             log.error(f'Logger: Error add_products_employee: {e}')
-            raise DatabaseError(
-                'Erro inesperado ao adicionar produtos ao funcionário'
-            )
+            raise DatabaseError('Erro inesperado ao adicionar produtos ao funcionário')

@@ -24,12 +24,8 @@ async def login_users(data: LoginUser, db: AsyncSession = Depends(get_db)):
     return user
 
 
-@login.post(
-    '/employee', response_model=LoginEmployeeOut, description='Login employee'
-)
-async def login_employee(
-    data: LoginEmployee, db: AsyncSession = Depends(get_db)
-):
+@login.post('/employee', response_model=LoginEmployeeOut, description='Login employee')
+async def login_employee(data: LoginEmployee, db: AsyncSession = Depends(get_db)):
     user = await LoginService(session=db).login_employee(data)
     if not user:
         raise HTTPException(status_code=401, detail='Invalid credentials')

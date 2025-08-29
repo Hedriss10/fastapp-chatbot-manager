@@ -40,4 +40,9 @@ jobs:
           pip install --upgrade pip
           pip install pytest pytest-cov pymupdf==1.24.2
           pip install -r requirements.txt
-                
+      
+      # lint
+      - name: Run linters
+        run: |
+          ruff format
+          ruff check . --fix

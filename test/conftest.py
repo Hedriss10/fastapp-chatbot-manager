@@ -12,9 +12,7 @@ from app.main import app
 DATABASE_URL = os.getenv('SQLALCHEMY_DATABASE_URI')
 
 engine = create_engine(DATABASE_URL)
-TestingSessionLocal = sessionmaker(
-    autocommit=False, autoflush=False, bind=engine
-)
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 def override_get_db():

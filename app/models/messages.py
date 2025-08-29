@@ -23,9 +23,7 @@ class SummaryMessage(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     ticket: Mapped[str] = mapped_column(String(40), nullable=False)
     message: Mapped[str] = mapped_column(JSON, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     updated_by: Mapped[int] = mapped_column(Integer, nullable=True)
     deleted_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
@@ -59,23 +57,15 @@ class MessageFlow(Base):
         nullable=False,
     )
 
-    next_message_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey('campaign.summary_message.id'), nullable=False
-    )
+    next_message_id: Mapped[int] = mapped_column(Integer, ForeignKey('campaign.summary_message.id'), nullable=False)
 
     option_number: Mapped[int] = mapped_column(Integer, nullable=False)
     option_label: Mapped[str] = mapped_column(String(30), nullable=False)
     action_type: Mapped[str] = mapped_column(String(30), nullable=False)
     action_payload: Mapped[str] = mapped_column(JSON, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
 
     # Relacionamentos
-    summary: Mapped['SummaryMessage'] = relationship(
-        back_populates='message_flows', foreign_keys=[summary_id]
-    )
+    summary: Mapped['SummaryMessage'] = relationship(back_populates='message_flows', foreign_keys=[summary_id])
 
-    next_message: Mapped['SummaryMessage'] = relationship(
-        back_populates='next_flows', foreign_keys=[next_message_id]
-    )
+    next_message: Mapped['SummaryMessage'] = relationship(back_populates='next_flows', foreign_keys=[next_message_id])

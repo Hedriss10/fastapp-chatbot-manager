@@ -13,12 +13,8 @@ from app.service.schedule import ScheduleService
 schedule = APIRouter(prefix='/schedule', tags=['schedule'])
 
 
-@schedule.post(
-    '', description='Add schedule', response_model=ScheduleOutSchema
-)
-async def add_schedule(
-    data: ScheduleInSchema, db: AsyncSession = Depends(get_db)
-):
+@schedule.post('', description='Add schedule', response_model=ScheduleOutSchema)
+async def add_schedule(data: ScheduleInSchema, db: AsyncSession = Depends(get_db)):
     try:
         return await ScheduleService(session=db).register_schedule(data=data)
     except ValidationError as ve:
@@ -54,13 +50,9 @@ async def get_schedule(
     '',
     description='List all schedules',
 )
-async def list_schedules(
-    params: PaginationParams = Depends(), db: AsyncSession = Depends(get_db)
-):
+async def list_schedules(params: PaginationParams = Depends(), db: AsyncSession = Depends(get_db)):
     try:
-        users, metadata = await ScheduleService(session=db).list_schedules(
-            pagination_params=params
-        )
+        users, metadata = await ScheduleService(session=db).list_schedules(pagination_params=params)
         return {'data': users, 'metadata': metadata}
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
@@ -76,13 +68,9 @@ async def list_schedules(
     description='Update schedule of id',
     response_model=ScheduleOutSchema,
 )
-async def update_schedule(
-    id: int, data: ScheduleInSchema, db: AsyncSession = Depends(get_db)
-):
+async def update_schedule(id: int, data: ScheduleInSchema, db: AsyncSession = Depends(get_db)):
     try:
-        return await ScheduleService(session=db).update_schedule(
-            id=id, data=data
-        )
+        return await ScheduleService(session=db).update_schedule(id=id, data=data)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception:

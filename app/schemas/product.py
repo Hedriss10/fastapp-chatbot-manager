@@ -1,7 +1,17 @@
 from datetime import timedelta
 from typing import Optional
 
+from fastapi import File, Form
 from pydantic import BaseModel, Field
+
+
+class ProductArgumentSchemas:
+    arguments_description = (Form(...),)
+    arguments_value_operation = (Form(...),)
+    arguments_time_to_spend = (Form(...),)
+    arguments_commission = (Form(...),)
+    arguments_category = (Form(None),)
+    arguments_image = (File(None),)
 
 
 class ProductInSchema(BaseModel):
