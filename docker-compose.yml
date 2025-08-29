@@ -11,9 +11,32 @@ services:
       env_file:
         - .env
       restart: unless-stopped
-
+  
+  fastapi_db:
+      image: postgres:15
+      container_name: fastapi_db
+      restart: always
+      environment:
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=postgres
+        - POSTGRES_DB=barbershop_db
+        - DATABASE_URL=postgresql://postgres:postgres@fastapi_db:5432/barbershop_db
+        - ALLOWED_HOSTS=localhost,127.0.0.1
+      volumes:
+        - fastapi_db_data:/var/lib/postgresql/data
+      ports:
+        - "5477:5432"
+      networks:
+        - evolution-net
+      command: >
+        -c 'listen_addresses=*'
+        -c 'max_connections=200'
+        -c 'shared_buffers=256MB'
+        -c 'work_mem=8MB'
+        -c 'log_min_messages=WARNING'
 volumes:
-  fastapp_db:
+  fastapi_db_data:
+  fastapi_app_data:
 
 networks:
   evolution-net:

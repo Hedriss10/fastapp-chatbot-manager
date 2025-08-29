@@ -13,7 +13,7 @@ from app.api.routes.service import service
 from app.api.routes.users import users
 from app.settings.settings import settings
 
-app = FastAPI(title='Fastapp build platform manager', version='1.0.0')
+app = FastAPI(title='Fastapp build platform manager', version='1.0.1')
 
 
 origins = [
@@ -41,8 +41,8 @@ app.include_router(service)
 static_dir = os.path.join(os.path.dirname(__file__), 'static')
 
 
-# static_dir = Path(__file__).parent / 'static'
-static_dir = Path(__file__).parent / 'app' / 'static'
+static_dir = Path(__file__).parent / 'static'
+# static_dir = Path(__file__).parent / 'app' / 'static'
 if static_dir.exists():
     app.mount('/static', StaticFiles(directory=static_dir), name='static')
 else:

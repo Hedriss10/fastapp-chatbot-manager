@@ -1,5 +1,12 @@
 # Generic single-database configuration.
 
+## Commands migrations
+
+```sh
+alembic revision --autogenerate -m "Init migrations"
+```
+
+
 ### Module Finance
 
 ```bash

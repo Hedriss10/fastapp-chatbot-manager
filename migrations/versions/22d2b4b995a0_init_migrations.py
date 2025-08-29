@@ -1,8 +1,8 @@
-"""Criar todas tabelas
+"""Init migrations
 
-Revision ID: 9829a35dfff2
+Revision ID: 22d2b4b995a0
 Revises: 
-Create Date: 2025-08-07 18:43:12.982481
+Create Date: 2025-08-29 20:14:32.390790
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '9829a35dfff2'
+revision: str = '22d2b4b995a0'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -31,7 +31,7 @@ def upgrade() -> None:
     sa.Column('deleted_at', sa.DateTime(), nullable=True),
     sa.Column('deleted_by', sa.Integer(), nullable=True),
     sa.Column('is_deleted', sa.Boolean(), nullable=False),
-    sa.PrimaryKeyConstraint('id'),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_summary_message')),
     schema='campaign'
     )
     op.create_table('employees',
@@ -48,13 +48,13 @@ def upgrade() -> None:
     sa.Column('deleted_by', sa.Integer(), nullable=True),
     sa.Column('deleted_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
     sa.Column('is_deleted', sa.Boolean(), nullable=False),
-    sa.PrimaryKeyConstraint('id'),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_employees')),
     schema='employee'
     )
     op.create_table('products',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('description', sa.String(length=30), nullable=False),
-    sa.Column('value_operation', sa.Numeric(precision=2, scale=10), nullable=False),
+    sa.Column('value_operation', sa.Numeric(precision=10, scale=2), nullable=False),
     sa.Column('time_to_spend', sa.Interval(), nullable=False),
     sa.Column('commission', sa.Float(), nullable=False),
     sa.Column('category', sa.String(length=20), nullable=False),
@@ -63,7 +63,7 @@ def upgrade() -> None:
     sa.Column('deleted_at', sa.DateTime(), nullable=True),
     sa.Column('deleted_by', sa.Integer(), nullable=True),
     sa.Column('is_deleted', sa.Boolean(), nullable=False),
-    sa.PrimaryKeyConstraint('id'),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_products')),
     schema='finance'
     )
     op.create_table('user',
@@ -75,7 +75,7 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('is_deleted', sa.Boolean(), nullable=False),
-    sa.PrimaryKeyConstraint('id'),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_user')),
     schema='public'
     )
     op.create_table('schedule',
@@ -92,7 +92,7 @@ def upgrade() -> None:
     sa.Column('is_check', sa.Boolean(), nullable=False),
     sa.Column('is_awayalone', sa.Boolean(), nullable=False),
     sa.Column('is_deleted', sa.Boolean(), nullable=False),
-    sa.PrimaryKeyConstraint('id'),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_schedule')),
     schema='service'
     )
     op.create_table('message_flow',
@@ -104,9 +104,9 @@ def upgrade() -> None:
     sa.Column('action_type', sa.String(length=30), nullable=False),
     sa.Column('action_payload', sa.JSON(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
-    sa.ForeignKeyConstraint(['next_message_id'], ['campaign.summary_message.id'], ),
-    sa.ForeignKeyConstraint(['summary_id'], ['campaign.summary_message.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id'),
+    sa.ForeignKeyConstraint(['next_message_id'], ['campaign.summary_message.id'], name=op.f('fk_message_flow_next_message_id_summary_message')),
+    sa.ForeignKeyConstraint(['summary_id'], ['campaign.summary_message.id'], name=op.f('fk_message_flow_summary_id_summary_message'), ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_message_flow')),
     schema='campaign'
     )
     op.create_table('products_employees',
@@ -120,9 +120,9 @@ def upgrade() -> None:
     sa.Column('deleted_at', sa.DateTime(), nullable=True),
     sa.Column('deleted_by', sa.Integer(), nullable=True),
     sa.Column('is_deleted', sa.Boolean(), nullable=False),
-    sa.ForeignKeyConstraint(['employee_id'], ['employee.employees.id'], ),
-    sa.ForeignKeyConstraint(['product_id'], ['finance.products.id'], ),
-    sa.PrimaryKeyConstraint('id'),
+    sa.ForeignKeyConstraint(['employee_id'], ['employee.employees.id'], name=op.f('fk_products_employees_employee_id_employees')),
+    sa.ForeignKeyConstraint(['product_id'], ['finance.products.id'], name=op.f('fk_products_employees_product_id_products')),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_products_employees')),
     schema='finance'
     )
     op.create_table('block',
@@ -131,14 +131,14 @@ def upgrade() -> None:
     sa.Column('end_time', sa.DateTime(), nullable=False),
     sa.Column('employee_id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.Column('updated_by', sa.Integer(), nullable=False),
-    sa.Column('deleted_at', sa.DateTime(), nullable=False),
-    sa.Column('deleted_by', sa.Integer(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_by', sa.Integer(), nullable=True),
+    sa.Column('deleted_at', sa.DateTime(), nullable=True),
+    sa.Column('deleted_by', sa.Integer(), nullable=True),
     sa.Column('is_block', sa.Boolean(), server_default=sa.text('false'), nullable=False),
     sa.Column('is_deleted', sa.Boolean(), server_default=sa.text('false'), nullable=False),
-    sa.ForeignKeyConstraint(['employee_id'], ['employee.employees.id'], ),
-    sa.PrimaryKeyConstraint('id'),
+    sa.ForeignKeyConstraint(['employee_id'], ['employee.employees.id'], name=op.f('fk_block_employee_id_employees')),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_block')),
     schema='service'
     )
     op.create_table('schedule_employee',
@@ -155,9 +155,9 @@ def upgrade() -> None:
     sa.Column('deleted_at', sa.DateTime(), nullable=False),
     sa.Column('deleted_by', sa.Integer(), nullable=False),
     sa.Column('is_deleted', sa.Boolean(), server_default=sa.text('false'), nullable=False),
-    sa.CheckConstraint("weekday IN ('segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo')", name='schedule_employee_weekday_check'),
-    sa.ForeignKeyConstraint(['employee_id'], ['employee.employees.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id'),
+    sa.CheckConstraint("weekday IN ('segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo')", name=op.f('ck_schedule_employee_schedule_employee_weekday_check')),
+    sa.ForeignKeyConstraint(['employee_id'], ['employee.employees.id'], name=op.f('fk_schedule_employee_employee_id_employees'), ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_schedule_employee')),
     schema='time_recording'
     )
     # ### end Alembic commands ###
