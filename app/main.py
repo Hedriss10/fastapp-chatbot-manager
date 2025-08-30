@@ -19,7 +19,7 @@ app = FastAPI(title='Fastapp build platform manager', version='1.0.1')
 origins = os.getenv("CORS_ORIGINS", "").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=['*'],
     allow_credentials=True,
     allow_methods=['*'],
     allow_headers=['*'],
