@@ -16,13 +16,7 @@ from app.settings.settings import settings
 app = FastAPI(title='Fastapp build platform manager', version='1.0.1')
 
 
-origins = [
-    f'{settings.url_frontend}',
-    f'{settings.url_vite_frontend}',
-    f'{settings.cors_origins_}',
-    f'{settings.cors_origins}',
-]
-
+origins = os.getenv("CORS_ORIGINS", "").split(",")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -41,8 +35,8 @@ app.include_router(service)
 static_dir = os.path.join(os.path.dirname(__file__), 'static')
 
 
-static_dir = Path(__file__).parent / 'static'
-# static_dir = Path(__file__).parent / 'app' / 'static'
+# static_dir = Path(__file__).parent / 'static'
+static_dir = Path(__file__).parent / 'app' / 'static'
 if static_dir.exists():
     app.mount('/static', StaticFiles(directory=static_dir), name='static')
 else:
