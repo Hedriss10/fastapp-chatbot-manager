@@ -25,7 +25,7 @@ services:
       volumes:
         - fastapi_db_data:/var/lib/postgresql/data
       ports:
-        - "5477:5432"
+        - "5498:5432"
       networks:
         - evolution-net
       command: >
