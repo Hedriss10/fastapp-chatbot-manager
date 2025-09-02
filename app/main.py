@@ -11,12 +11,11 @@ from app.api.routes.product import prodcuts
 from app.api.routes.schedule import schedule
 from app.api.routes.service import service
 from app.api.routes.users import users
-from app.settings.settings import settings
 
 app = FastAPI(title='Fastapp build platform manager', version='1.0.1')
 
 
-origins = os.getenv("CORS_ORIGINS", "").split(",")
+origins = os.getenv('CORS_ORIGINS', '').split(',')
 app.add_middleware(
     CORSMiddleware,
     allow_origins=['*'],

@@ -13,7 +13,6 @@ class Settings(BaseSettings):
     backend_base_url: str
     cors_origins: str
 
-
     class Config:
         env_file = '.env'
 
