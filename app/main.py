@@ -7,8 +7,6 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api import init_routers
 
-
-
 app = FastAPI(title='FastAPI - Build Barbershop', version='1.0.1')
 
 
