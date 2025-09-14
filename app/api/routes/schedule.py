@@ -1,5 +1,5 @@
 # app/routes/schedule.py
-
+from uuid import UUID
 from fastapi import APIRouter, Depends, Header
 from fastapi.exceptions import HTTPException
 from pydantic import ValidationError
@@ -80,7 +80,7 @@ async def list_schedules(
     response_model=ScheduleOutSchema,
 )
 async def update_schedule(
-    id: int, data: ScheduleInSchema, db: AsyncSession = Depends(get_db)
+    id: UUID, data: ScheduleInSchema, db: AsyncSession = Depends(get_db)
 ):
     try:
         return await ScheduleService(session=db).update_schedule(
@@ -96,7 +96,7 @@ async def update_schedule(
 
 
 @schedule.delete('/{id}', description='Delete schedule of id')
-async def delete_schedule(id: int, db: AsyncSession = Depends(get_db)):
+async def delete_schedule(id: UUID, db: AsyncSession = Depends(get_db)):
     try:
         return await ScheduleService(session=db).delete_schedule(id=id)
     except ValidationError as ve:

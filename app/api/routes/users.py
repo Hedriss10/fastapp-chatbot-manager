@@ -1,5 +1,4 @@
-# app/routes/users.py
-
+from uuid import UUID
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import ValidationError
@@ -51,7 +50,7 @@ async def list_users(
 
 
 @users.get('/{id}', description='Get user of id')
-async def get_user(id: int, db: AsyncSession = Depends(get_db)):
+async def get_user(id: UUID, db: AsyncSession = Depends(get_db)):
     try:
         return await UserService(session=db).get_user(id)
     except Exception:
@@ -65,7 +64,7 @@ async def get_user(id: int, db: AsyncSession = Depends(get_db)):
     '/{id}', description='Update user of id', response_model=UserUpdateOut
 )
 async def update_user(
-    id: int, data: UserUpdate, db: AsyncSession = Depends(get_db)
+    id: UUID, data: UserUpdate, db: AsyncSession = Depends(get_db)
 ):
     try:
         return await UserService(session=db).update_users(id, data)
@@ -79,7 +78,7 @@ async def update_user(
 @users.delete(
     '/{id}', description='Delete user of id', response_model=UserDeleteOut
 )
-async def delete_user(id: int, db: AsyncSession = Depends(get_db)):
+async def delete_user(id: UUID, db: AsyncSession = Depends(get_db)):
     try:
         return await UserService(session=db).delete_users(id)
     except Exception:

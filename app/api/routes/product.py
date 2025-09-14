@@ -1,4 +1,5 @@
 # app/routes/product.py
+from uuid import UUID
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, File, Form, UploadFile, status
@@ -91,7 +92,7 @@ async def list_products(
     description='Get product of id',
     status_code=status.HTTP_200_OK,
 )
-async def get_product(id: int, db: AsyncSession = Depends(get_db)):
+async def get_product(id: UUID, db: AsyncSession = Depends(get_db)):
     try:
         return await ProductsService(session=db).get_product(id)
     except ValidationError as ve:
@@ -109,7 +110,7 @@ async def get_product(id: int, db: AsyncSession = Depends(get_db)):
     status_code=status.HTTP_200_OK,
 )
 async def update_products(
-    id: int, data: ProductUpdateSchema, db: AsyncSession = Depends(get_db)
+    id: UUID, data: ProductUpdateSchema, db: AsyncSession = Depends(get_db)
 ):
     try:
         return await ProductsService(session=db).update_product(id, data)
@@ -127,7 +128,7 @@ async def update_products(
     description='Delete product of id',
     status_code=status.HTTP_200_OK,
 )
-async def delete_products(id: int, db: AsyncSession = Depends(get_db)):
+async def delete_products(id: UUID, db: AsyncSession = Depends(get_db)):
     try:
         return await ProductsService(session=db).delete_product(id)
     except ValidationError as ve:
@@ -166,7 +167,7 @@ async def add_products_employe(
     status_code=status.HTTP_200_OK,
 )
 async def list_products_employee(
-    id: int, db: AsyncSession = Depends(get_db)
+    id: UUID, db: AsyncSession = Depends(get_db)
 ):
     try:
         products = await ProductEmployeeService(

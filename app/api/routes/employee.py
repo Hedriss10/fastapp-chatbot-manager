@@ -1,4 +1,5 @@
 # app/routes/employee.py
+from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -61,7 +62,7 @@ async def list_employees(
     response_model=EmployeeGetIdOut,
     status_code=status.HTTP_200_OK,
 )
-async def get_employee(id: int, db: AsyncSession = Depends(get_db)):
+async def get_employee(id: UUID, db: AsyncSession = Depends(get_db)):
     try:
         employee = await EmployeeService(session=db).get_employee(id)
         if not employee:
@@ -84,7 +85,7 @@ async def get_employee(id: int, db: AsyncSession = Depends(get_db)):
     status_code=status.HTTP_200_OK,
 )
 async def update_employee(
-    id: int, data: EmployeeUpdate, db: AsyncSession = Depends(get_db)
+    id: UUID, data: EmployeeUpdate, db: AsyncSession = Depends(get_db)
 ):
     try:
         updated_employee = await EmployeeService(
@@ -109,7 +110,7 @@ async def update_employee(
     response_model=EmployeeDeleteOut,
     status_code=status.HTTP_200_OK,
 )
-async def delete_employee(id: int, db: AsyncSession = Depends(get_db)):
+async def delete_employee(id: UUID, db: AsyncSession = Depends(get_db)):
     try:
         deleted_employee = await EmployeeService(
             session=db

@@ -1,3 +1,4 @@
+from uuid import UUID
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import ValidationError
@@ -35,7 +36,7 @@ async def get_all_block(db: AsyncSession = Depends(get_db)):
 
 
 @service.delete('/block/{block_id}', description='Delete block schedule')
-async def delete_block(block_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_block(block_id: UUID, db: AsyncSession = Depends(get_db)):
     try:
         return await ServiceSchedule(session=db).delete_block(block_id)
     except Exception:
