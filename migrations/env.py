@@ -27,7 +27,6 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# URL para migrations (usar psycopg2, sync)
 database_url = os.getenv("SQLALCHEMY_DATABASE_URI_MIGRATIONS")
 if not database_url:
     raise RuntimeError("SQLALCHEMY_DATABASE_URI_MIGRATIONS não encontrada no .env")
@@ -35,6 +34,13 @@ if not database_url:
 config.set_main_option("sqlalchemy.url", database_url)
 target_metadata = Base.metadata
 
+def include_object(object, name, type_, reflected, compare_to):
+    # if type_ == "table" and name in [
+    #     "summary_message", "employees", "products", "schedule", "message_flow",
+    #     "products_employees", "block", "schedule_employee"
+    # ]:
+    #     return False
+    return True
 
 def run_migrations_offline():
     """Rodar migrations em modo offline (gera SQL sem conectar)."""
@@ -58,11 +64,15 @@ def run_migrations_online():
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection, 
+            target_metadata=target_metadata,
+            include_object=include_object,
+            compare_type=True
+        )
 
         with context.begin_transaction():
             context.run_migrations()
-
 
 def run_migrations():
     if context.is_offline_mode():

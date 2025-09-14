@@ -39,7 +39,9 @@ async def list_users(
     db: AsyncSession = Depends(get_db),
 ):
     try:
-        users, metadata = await UserService(session=db).list_users(pagination)
+        users, metadata = await UserService(session=db).list_users(
+            pagination
+        )
         return {'data': users, 'metadata': metadata}
     except Exception:
         raise HTTPException(
@@ -59,8 +61,12 @@ async def get_user(id: int, db: AsyncSession = Depends(get_db)):
         )
 
 
-@users.put('/{id}', description='Update user of id', response_model=UserUpdateOut)
-async def update_user(id: int, data: UserUpdate, db: AsyncSession = Depends(get_db)):
+@users.put(
+    '/{id}', description='Update user of id', response_model=UserUpdateOut
+)
+async def update_user(
+    id: int, data: UserUpdate, db: AsyncSession = Depends(get_db)
+):
     try:
         return await UserService(session=db).update_users(id, data)
     except Exception:
@@ -70,7 +76,9 @@ async def update_user(id: int, data: UserUpdate, db: AsyncSession = Depends(get_
         )
 
 
-@users.delete('/{id}', description='Delete user of id', response_model=UserDeleteOut)
+@users.delete(
+    '/{id}', description='Delete user of id', response_model=UserDeleteOut
+)
 async def delete_user(id: int, db: AsyncSession = Depends(get_db)):
     try:
         return await UserService(session=db).delete_users(id)

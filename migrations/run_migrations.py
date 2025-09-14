@@ -13,8 +13,7 @@ sys.path.append(str(BASE_DIR))
 # Carrega .env da raiz
 load_dotenv(dotenv_path=BASE_DIR / ".env")
 
-DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI")
-print(DATABASE_URI)
+DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI_MIGRATIONS")
 if not DATABASE_URI:
     raise ValueError(
         "❌ Variável SQLALCHEMY_DATABASE_URI não encontrada no .env"

@@ -11,8 +11,14 @@ from app.service.slots import SlotService
 slots = APIRouter(prefix='/slot', tags=['slot'])
 
 
-@slots.post('', description='List available slots for an employee', response_model=List[SlotSchema])
-async def list_slots(data: SlotsInSchema, db: AsyncSession = Depends(get_db)):
+@slots.post(
+    '',
+    description='List available slots for an employee',
+    response_model=List[SlotSchema],
+)
+async def list_slots(
+    data: SlotsInSchema, db: AsyncSession = Depends(get_db)
+):
     try:
         return await SlotService(session=db).list_slots(data)
     except ValidationError as ve:

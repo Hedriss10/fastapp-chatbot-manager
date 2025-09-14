@@ -10,7 +10,8 @@ naming_convention = {
 }
 
 metadata_obj = MetaData(naming_convention=naming_convention)
-# metadata_obj = MetaData(schema="public", naming_convention=naming_convention)
+# metadata_obj = MetaData(schema="public",
+#   naming_convention=naming_convention)
 
 
 class Base(DeclarativeBase):

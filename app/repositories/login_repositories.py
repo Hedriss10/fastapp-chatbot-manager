@@ -26,7 +26,9 @@ class LoginRepositories:
 
     async def get_login(self, data: LoginUser) -> Optional[LoginUserOut]:
         try:
-            user = await self.session.execute(select(self.user).where(self.user.phone == data.phone))
+            user = await self.session.execute(
+                select(self.user).where(self.user.phone == data.phone)
+            )
             user = user.scalar_one_or_none()
             if user:
                 access_token = create_access_token({'sub': str(user.id)})
@@ -43,14 +45,24 @@ class LoginRepositories:
             return None
         except Exception as e:
             log.error(f'Logger: Error get_login: {e}')
-            raise DatabaseError('Error getting user login from the database')
+            raise DatabaseError(
+                'Error getting user login from the database'
+            )
 
-    async def get_employee_login(self, data: LoginEmployee) -> Optional[LoginEmployeeOut]:
+    async def get_employee_login(
+        self, data: LoginEmployee
+    ) -> Optional[LoginEmployeeOut]:
         try:
-            employee = await self.session.execute(select(self.employee).where(self.employee.phone == data.phone))
+            employee = await self.session.execute(
+                select(self.employee).where(
+                    self.employee.phone == data.phone
+                )
+            )
             employee = employee.scalar_one_or_none()
             if employee:
-                access_token = create_access_token({'sub': str(employee.id)})
+                access_token = create_access_token({
+                    'sub': str(employee.id)
+                })
                 return LoginEmployeeOut(
                     user={
                         'id': employee.id,
@@ -64,4 +76,6 @@ class LoginRepositories:
             return None
         except Exception as e:
             log.error(f'Logger: Error get_employee_login: {e}')
-            raise DatabaseError('Error getting employee login from the database')
+            raise DatabaseError(
+                'Error getting employee login from the database'
+            )

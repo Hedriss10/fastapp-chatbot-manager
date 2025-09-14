@@ -1,5 +1,5 @@
 # app/schemas/user.py
-
+from uuid import UUID
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
@@ -20,7 +20,7 @@ class UserUpdate(BaseModel):
 
 
 class UserOut(BaseModel):
-    id: int
+    id: UUID
     username: str
     lastname: str
     phone: str

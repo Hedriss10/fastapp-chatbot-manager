@@ -30,7 +30,9 @@ class Pagination:
         """Check params and return PaginationParams if valid."""
         try:
             current_page = max(int(self.params.get('current_page', 1)), 1)
-            rows_per_page = max(int(self.params.get('rows_per_page', 10)), 1)
+            rows_per_page = max(
+                int(self.params.get('rows_per_page', 10)), 1
+            )
             sort_by = self.params.get('sort_by', 'asc').lower()
             if sort_by not in ['asc', 'desc']:
                 raise ValueError("sort_by must be 'asc' or 'desc'")
@@ -69,11 +71,14 @@ class Pagination:
             'filter_by': pagination_params.filter_by,
         }
 
-    def build_metadata(self, total_count: int, params: PaginationParams) -> Dict[str, Any]:
+    def build_metadata(
+        self, total_count: int, params: PaginationParams
+    ) -> Dict[str, Any]:
         """Build metadata for the response."""
         return {
             'total_count': total_count,
             'current_page': params.current_page,
             'rows_per_page': params.rows_per_page,
-            'total_pages': (total_count + params.rows_per_page - 1) // params.rows_per_page,
+            'total_pages': (total_count + params.rows_per_page - 1)
+            // params.rows_per_page,
         }

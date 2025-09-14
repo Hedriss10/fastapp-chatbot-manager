@@ -3,6 +3,7 @@ from typing import Optional
 
 from fastapi import File, Form
 from pydantic import BaseModel, Field
+from uuid import UUID
 
 
 class ProductArgumentSchemas:
@@ -36,10 +37,10 @@ class ProductUpdateSchema(BaseModel):
 
 
 class ProductDeleteSchema(BaseModel):
-    id: int
+    id: UUID
 
 
 class ProductsInEmployeeSchema(BaseModel):
-    product_id: int
-    employee_id: int
+    product_id: UUID
+    employee_id: UUID
     is_check: Optional[bool] = False

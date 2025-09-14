@@ -20,7 +20,9 @@ class ServiceScheduleRepository:
 
     async def add_block_schedule(self, block_data: ScheduleInBlock):
         try:
-            new_block = insert(self.schedule_block).values(**block_data.model_dump())
+            new_block = insert(self.schedule_block).values(
+                **block_data.model_dump()
+            )
             await self.session.execute(new_block)
             await self.session.commit()
             return ScheduleEmployeeOut(message_id='added_block')
@@ -46,7 +48,11 @@ class ServiceScheduleRepository:
 
     async def delete_block_schedule(self, block_id: int):
         try:
-            stmt = update(self.schedule_block).where(self.schedule_block.id == block_id).values(is_deleted=True)
+            stmt = (
+                update(self.schedule_block)
+                .where(self.schedule_block.id == block_id)
+                .values(is_deleted=True)
+            )
             await self.session.execute(stmt)
             await self.session.commit()
             return ScheduleEmployeeOut(message_id='delete_block_success')

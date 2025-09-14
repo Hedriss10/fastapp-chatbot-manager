@@ -18,8 +18,12 @@ from app.service.employee import EmployeeService
 employee = APIRouter(prefix='/employee', tags=['employee'])
 
 
-@employee.post('', response_model=EmployeeOut, status_code=status.HTTP_201_CREATED)
-async def add_employee(data: EmployeeBase, db: AsyncSession = Depends(get_db)):
+@employee.post(
+    '', response_model=EmployeeOut, status_code=status.HTTP_201_CREATED
+)
+async def add_employee(
+    data: EmployeeBase, db: AsyncSession = Depends(get_db)
+):
     try:
         return await EmployeeService(session=db).add_employee(data)
     except ValidationError as ve:
@@ -31,13 +35,17 @@ async def add_employee(data: EmployeeBase, db: AsyncSession = Depends(get_db)):
         )
 
 
-@employee.get('', description='List all employees', status_code=status.HTTP_200_OK)
+@employee.get(
+    '', description='List all employees', status_code=status.HTTP_200_OK
+)
 async def list_employees(
     pagination: PaginationParams = Depends(),
     db: AsyncSession = Depends(get_db),
 ):
     try:
-        employees, metadata = await EmployeeService(session=db).list_employee(pagination)
+        employees, metadata = await EmployeeService(
+            session=db
+        ).list_employee(pagination)
         return {'data': employees, 'metadata': metadata}
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
@@ -48,12 +56,18 @@ async def list_employees(
         )
 
 
-@employee.get('/{id}', response_model=EmployeeGetIdOut, status_code=status.HTTP_200_OK)
+@employee.get(
+    '/{id}',
+    response_model=EmployeeGetIdOut,
+    status_code=status.HTTP_200_OK,
+)
 async def get_employee(id: int, db: AsyncSession = Depends(get_db)):
     try:
         employee = await EmployeeService(session=db).get_employee(id)
         if not employee:
-            raise HTTPException(status_code=404, detail='Employee not found.')
+            raise HTTPException(
+                status_code=404, detail='Employee not found.'
+            )
         return employee
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
@@ -64,12 +78,22 @@ async def get_employee(id: int, db: AsyncSession = Depends(get_db)):
         )
 
 
-@employee.put('/{id}', response_model=EmployeeUpdateOut, status_code=status.HTTP_200_OK)
-async def update_employee(id: int, data: EmployeeUpdate, db: AsyncSession = Depends(get_db)):
+@employee.put(
+    '/{id}',
+    response_model=EmployeeUpdateOut,
+    status_code=status.HTTP_200_OK,
+)
+async def update_employee(
+    id: int, data: EmployeeUpdate, db: AsyncSession = Depends(get_db)
+):
     try:
-        updated_employee = await EmployeeService(session=db).update_employee(employee_id=id, data=data)
+        updated_employee = await EmployeeService(
+            session=db
+        ).update_employee(employee_id=id, data=data)
         if not updated_employee:
-            raise HTTPException(status_code=404, detail='Employee not found.')
+            raise HTTPException(
+                status_code=404, detail='Employee not found.'
+            )
         return updated_employee
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
@@ -80,13 +104,23 @@ async def update_employee(id: int, data: EmployeeUpdate, db: AsyncSession = Depe
         )
 
 
-@employee.delete('/{id}', response_model=EmployeeDeleteOut, status_code=status.HTTP_200_OK)
+@employee.delete(
+    '/{id}',
+    response_model=EmployeeDeleteOut,
+    status_code=status.HTTP_200_OK,
+)
 async def delete_employee(id: int, db: AsyncSession = Depends(get_db)):
     try:
-        deleted_employee = await EmployeeService(session=db).delete_employee(id)
+        deleted_employee = await EmployeeService(
+            session=db
+        ).delete_employee(id)
         if not deleted_employee:
-            raise HTTPException(status_code=404, detail='Employee not found.')
-        return EmployeeDeleteOut(message_id='employee_deleted_successfully')
+            raise HTTPException(
+                status_code=404, detail='Employee not found.'
+            )
+        return EmployeeDeleteOut(
+            message_id='employee_deleted_successfully'
+        )
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=ve.errors())
     except Exception:

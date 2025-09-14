@@ -17,7 +17,9 @@ class ScheduleService:
         self.session = session
         self.repo = ScheduleRepository(session)
 
-    async def register_schedule(self, data: ScheduleInSchema) -> ScheduleOutSchema:
+    async def register_schedule(
+        self, data: ScheduleInSchema
+    ) -> ScheduleOutSchema:
         return await self.repo.add_schedule(data)
 
     async def list_schedules(self, pagination_params: PaginationParams):
@@ -26,7 +28,9 @@ class ScheduleService:
     async def get_schedule(self, id: int) -> ScheduleService | None:
         return await self.repo.get_schedule(id)
 
-    async def update_schedule(self, id: int, data: ScheduleInSchema) -> ScheduleOutSchema:
+    async def update_schedule(
+        self, id: int, data: ScheduleInSchema
+    ) -> ScheduleOutSchema:
         return await self.repo.update_schedule(id, data)
 
     async def delete_schedule(self, id: int) -> ScheduleOutSchema:

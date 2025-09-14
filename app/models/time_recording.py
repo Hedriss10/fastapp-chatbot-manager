@@ -1,4 +1,5 @@
 # app/models/time_recording.py
+import uuid
 from datetime import datetime
 
 from sqlalchemy import (
@@ -11,6 +12,7 @@ from sqlalchemy import (
     Time,
     text,
 )
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -20,7 +22,17 @@ class ScheduleEmployee(Base):
     __tablename__ = 'schedule_employee'
     __table_args__ = (
         CheckConstraint(
-            "weekday IN ('segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo')",
+            (
+                'weekday IN ('
+                "'segunda', "
+                "'terça', "
+                "'quarta', "
+                "'quinta', "
+                "'sexta', "
+                "'sábado', "
+                "'domingo'"
+                ')'
+            ),
             name='schedule_employee_weekday_check',
         ),
         {
@@ -29,10 +41,13 @@ class ScheduleEmployee(Base):
         },
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-
-    employee_id: Mapped[int] = mapped_column(
-        Integer,
+    id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+        nullable=False,
+    )
+    employee_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey('employee.employees.id', ondelete='CASCADE'),
         nullable=False,
     )
@@ -44,11 +59,13 @@ class ScheduleEmployee(Base):
     lunch_end: Mapped[datetime.time] = mapped_column(Time)
     end_time: Mapped[datetime.time] = mapped_column(Time)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP'))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP')
+    )
 
-    updated_at: Mapped[datetime] = mapped_column(DateTime)
-    updated_by: Mapped[int] = mapped_column(Integer)
-    deleted_at: Mapped[datetime] = mapped_column(DateTime)
-    deleted_by: Mapped[int] = mapped_column(Integer)
+    deleted_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    deleted_by: Mapped[int] = mapped_column(Integer, nullable=True)
 
-    is_deleted: Mapped[bool] = mapped_column(Boolean, server_default=text('false'), nullable=False)
+    is_deleted: Mapped[bool] = mapped_column(
+        Boolean, server_default=text('false'), nullable=False
+    )

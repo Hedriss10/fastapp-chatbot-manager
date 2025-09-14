@@ -3,12 +3,13 @@
 from datetime import datetime
 
 from pydantic import BaseModel, field_validator
+from uuid import UUID
 
 
 class ScheduleInSchema(BaseModel):
-    product_id: int
-    employee_id: int
-    user_id: int
+    product_id: UUID
+    employee_id: UUID
+    user_id: UUID
     time_register: datetime
 
     @field_validator('time_register', mode='after')

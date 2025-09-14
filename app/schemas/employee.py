@@ -1,12 +1,14 @@
 from datetime import datetime
 from typing import Optional
-
+from uuid import UUID
 from pydantic import BaseModel, Field
 
 
 class EmployeeBase(BaseModel):
     username: str = Field(..., max_length=120)
-    date_of_birth: datetime = Field(..., description='Date of birth in DD/MM/YYYY format')
+    date_of_birth: datetime = Field(
+        ..., description='Date of birth in DD/MM/YYYY format'
+    )
     phone: str = Field(..., max_length=40)
     role: str = Field(
         default='Administrator',
@@ -36,7 +38,7 @@ class EmployeeDeleteOut(BaseModel):
 
 
 class EmployeeGetIdOut(BaseModel):
-    id: int
+    id: UUID
     username: str
     date_of_birth: datetime
     phone: str
