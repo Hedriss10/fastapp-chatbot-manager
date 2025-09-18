@@ -1,4 +1,5 @@
 from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import ValidationError

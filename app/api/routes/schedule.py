@@ -1,5 +1,6 @@
 # app/routes/schedule.py
 from uuid import UUID
+
 from fastapi import APIRouter, Depends, Header
 from fastapi.exceptions import HTTPException
 from pydantic import ValidationError

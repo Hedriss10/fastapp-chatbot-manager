@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Integer
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -24,16 +24,33 @@ class ScheduleService(Base):
     time_register: Mapped[datetime] = mapped_column(
         DateTime, nullable=False
     )
+
+    employee_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey('employee.employees.id'), nullable=False
+    )
+
+    product_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey('finance.products.id'), nullable=False
+    )
+
+    deleted_by: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey('employee.employees.id'), nullable=True
+    )
+
+    user_id: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True), nullable=True
+    )
+    updated_by: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True), nullable=True
+    )
+    deleted_by: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
-    updated_by: Mapped[int] = mapped_column(Integer, nullable=True)
     deleted_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
-    deleted_by: Mapped[int] = mapped_column(Integer, nullable=True)
-    product_id: Mapped[int] = mapped_column(Integer, nullable=False)
-    employee_id: Mapped[int] = mapped_column(Integer, nullable=False)
-    user_id: Mapped[int] = mapped_column(Integer, nullable=False)
-    is_check: Mapped[int] = mapped_column(Boolean, nullable=False)
-    is_awayalone: Mapped[int] = mapped_column(Boolean, nullable=False)
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False)
 
     def __repr__(self):

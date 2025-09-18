@@ -14,13 +14,21 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Importa Base e models
 from app.db.base import Base
-from app.models.users import User
-from app.models.employee import Employee
-from app.models.product import Products
-from app.models.messages import SummaryMessage, MessageFlow
-from app.models.block import ScheduleBlock
-from app.models.schedule import ScheduleService
-from app.models.time_recording import ScheduleEmployee
+from app.models import load_all_models
+
+
+EXCLUDED_TABLES = {
+    "campaign.summary_message",
+    "employee.employees",
+    "finance.products",
+    "campaign.message_flow",
+    "finance.products_employees",
+    "service.block",
+    "service.schedule",
+    "time_recording.schedule_employee",
+    "public.user",
+}
+
 
 # Config do Alembic
 config = context.config
@@ -32,28 +40,17 @@ if not database_url:
     raise RuntimeError("SQLALCHEMY_DATABASE_URI_MIGRATIONS não encontrada no .env")
 
 config.set_main_option("sqlalchemy.url", database_url)
+
 target_metadata = Base.metadata
+load_all_models()
 
-def include_object(object, name, type_, reflected, compare_to):
-    # if type_ == "table" and name in [
-    #     "summary_message", "employees", "products", "schedule", "message_flow",
-    #     "products_employees", "block", "schedule_employee"
-    # ]:
-    #     return False
-    return True
+# def include_object(obj, name, type_, reflected, compare_to):
+#     if type_ != "table":
+#         return True
 
-def run_migrations_offline():
-    """Rodar migrations em modo offline (gera SQL sem conectar)."""
-    url = config.get_main_option("sqlalchemy.url")
-    context.configure(
-        url=url,
-        target_metadata=target_metadata,
-        literal_binds=True,
-        dialect_opts={"paramstyle": "named"},
-    )
-    with context.begin_transaction():
-        context.run_migrations()
-
+#     schema = getattr(obj, "schema", None)
+#     full_name = f"{schema}.{name}" if schema else name
+#     return full_name not in EXCLUDED_TABLES
 
 def run_migrations_online():
     """Rodar migrations em modo sync (psycopg2)."""
@@ -67,18 +64,12 @@ def run_migrations_online():
         context.configure(
             connection=connection, 
             target_metadata=target_metadata,
-            include_object=include_object,
+            # include_object=include_object,
+            include_schemas=True,
             compare_type=True
         )
 
         with context.begin_transaction():
             context.run_migrations()
 
-def run_migrations():
-    if context.is_offline_mode():
-        run_migrations_offline()
-    else:
-        run_migrations_online()
-
-
-run_migrations()
+run_migrations_online()

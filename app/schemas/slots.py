@@ -1,8 +1,8 @@
 from datetime import date, datetime
 from typing import Optional
+from uuid import UUID
 
 from pydantic import BaseModel
-from uuid import UUID
 
 
 class SlotsInSchema(BaseModel):

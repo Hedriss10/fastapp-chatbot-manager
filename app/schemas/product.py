@@ -1,9 +1,9 @@
 from datetime import timedelta
 from typing import Optional
+from uuid import UUID
 
 from fastapi import File, Form
 from pydantic import BaseModel, Field
-from uuid import UUID
 
 
 class ProductArgumentSchemas:

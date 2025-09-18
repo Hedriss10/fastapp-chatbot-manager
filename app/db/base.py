@@ -19,12 +19,3 @@ class Base(DeclarativeBase):
 
 
 __all__ = ('Base',)
-
-# IMPORTANTE p/ autogenerate do Alembic:
-# from app.models.users import User
-# from app.models.employee import Employee
-# from app.models.product import Products
-# from app.models.messages import SummaryMessage, MessageFlow
-# from app.models.block import ScheduleBlock
-# from app.models.schedule import ScheduleService
-# from app.models.time_recording import ScheduleEmployee
