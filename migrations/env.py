@@ -44,16 +44,16 @@ config.set_main_option("sqlalchemy.url", database_url)
 target_metadata = Base.metadata
 load_all_models()
 
-# def include_object(obj, name, type_, reflected, compare_to):
-#     if type_ != "table":
-#         return True
+def include_object(obj, name, type_, reflected, compare_to):
+    if type_ != "table":
+        return True
 
-#     schema = getattr(obj, "schema", None)
-#     full_name = f"{schema}.{name}" if schema else name
-#     return full_name not in EXCLUDED_TABLES
+    schema = getattr(obj, "schema", None)
+    full_name = f"{schema}.{name}" if schema else name
+    return full_name not in EXCLUDED_TABLES
 
 def run_migrations_online():
-    """Rodar migrations em modo sync (psycopg2)."""
+    """Rodar migrations em modo sync"""
     connectable = engine_from_config(
         config.get_section(config.config_ini_section),
         prefix="sqlalchemy.",
@@ -64,7 +64,7 @@ def run_migrations_online():
         context.configure(
             connection=connection, 
             target_metadata=target_metadata,
-            # include_object=include_object,
+            include_object=include_object,
             include_schemas=True,
             compare_type=True
         )
